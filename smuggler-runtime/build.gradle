@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils
 
 buildscript {
   dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintrayVersion"
     classpath "com.android.tools.build:gradle:$androidToolsVersion"
     classpath "com.android.tools.build:transform-api:$androidToolsVersion"
@@ -17,6 +18,7 @@ buildscript {
 
 apply plugin: "com.jfrog.bintray"
 apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
 apply plugin: "maven-publish"
 apply plugin: ShrinkPlugin
 
@@ -47,10 +49,8 @@ publishing {
       artifactId POM_ARTIFACT_ID
       version POM_VERSION_NAME
 
-      artifact androidSourcesJar
-      artifact androidJavadocsJar
-
       artifact "$buildDir/outputs/aar/smuggler-runtime-release.aar"
+      artifact androidSourcesJar
     }
   }
 }
@@ -71,16 +71,6 @@ bintray {
   publications = ['mavenAndroid']
 }
 
-task androidJavadocs(type: Javadoc) {
-  source = android.sourceSets.main.java.source
-  classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-  classifier = 'javadoc'
-  from androidJavadocs.destinationDir
-}
-
 task androidSourcesJar(type: Jar) {
   classifier = 'sources'
   from android.sourceSets.main.java.source
@@ -98,7 +88,7 @@ public class ShrinkPlugin implements Plugin<Project> {
             final def input = it.file
 
             FileUtils.iterateFiles(input, ["class"] as String[], true).each {
-              if (!it.absolutePath.contains("CreatorFactory.class") && !it.absolutePath.contains("BuildConfig.class")) {
+              if (!it.absolutePath.contains("SmugglerFactory.class") && !it.absolutePath.contains("BuildConfig.class")) {
                 FileUtils.copyFile(it, new File(output, input.toURI().relativize(it.toURI()).path))
               }
             }
