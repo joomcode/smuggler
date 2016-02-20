@@ -32,6 +32,10 @@ android {
   }
 }
 
+dependencies {
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+}
+
 bintray {
   user = System.getenv("BINTRAY_USERNAME")
   key = System.getenv("BINTRAY_PASSWORD")
