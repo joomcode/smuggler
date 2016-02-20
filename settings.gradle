@@ -1,0 +1,3 @@
+include ':smuggler-runtime'
+include ':smuggler-compiler'
+include ':smuggler-plugin'

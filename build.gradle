@@ -1,0 +1,38 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    jcenter()
+  }
+}
+
+allprojects {
+  buildscript {
+    repositories {
+      mavenLocal()
+      jcenter()
+    }
+  }
+
+  repositories {
+    mavenLocal()
+    jcenter()
+  }
+}
+
+ext {
+  projectCompileSdkVersion = 23
+  projectBuildToolsVersion = "23.0.2"
+
+  projectMinSdkVersion = 14
+  projectTargetSdkVersion = 23
+
+  androidToolsVersion = "1.5.0"
+  kotlinVersion = "1.0.0"
+  bintrayVersion = "1.4"
+
+  guavaVersion = "18.0"
+  commonsIoVersion = "2.4"
+  asmVersion = "5.0.4"
+
+  slf4jVersion = "1.7.13"
+}

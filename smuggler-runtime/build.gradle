@@ -1,0 +1,130 @@
+import com.android.build.api.transform.Context
+import com.android.build.api.transform.Format
+import com.android.build.api.transform.QualifiedContent
+import com.android.build.api.transform.Transform
+import com.android.build.api.transform.TransformException
+import com.android.build.api.transform.TransformInput
+import com.android.build.api.transform.TransformOutputProvider
+import org.apache.commons.io.FileUtils
+
+buildscript {
+  dependencies {
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintrayVersion"
+    classpath "com.android.tools.build:gradle:$androidToolsVersion"
+    classpath "com.android.tools.build:transform-api:$androidToolsVersion"
+  }
+}
+
+apply plugin: "com.jfrog.bintray"
+apply plugin: "com.android.library"
+apply plugin: "maven-publish"
+apply plugin: ShrinkPlugin
+
+android {
+  compileSdkVersion projectCompileSdkVersion
+  buildToolsVersion projectBuildToolsVersion
+
+  defaultConfig {
+    targetSdkVersion projectTargetSdkVersion
+    minSdkVersion projectMinSdkVersion
+  }
+}
+
+bintray {
+  user = System.getenv("BINTRAY_USERNAME")
+  key = System.getenv("BINTRAY_PASSWORD")
+
+  pkg {
+    repo = BINTRAY_REPO
+    name = BINTRAY_PACKAGE
+  }
+}
+
+publishing {
+  publications {
+    mavenAndroid(MavenPublication) {
+      groupId POM_GROUP
+      artifactId POM_ARTIFACT_ID
+      version POM_VERSION_NAME
+
+      artifact androidSourcesJar
+      artifact androidJavadocsJar
+
+      artifact "$buildDir/outputs/aar/smuggler-runtime-release.aar"
+    }
+  }
+}
+
+bintray {
+  user = System.getenv("BINTRAY_USERNAME")
+  key = System.getenv("BINTRAY_PASSWORD")
+
+  pkg {
+    repo = BINTRAY_REPO
+    name = BINTRAY_PACKAGE
+
+    version {
+      name = POM_VERSION_NAME
+    }
+  }
+
+  publications = ['mavenAndroid']
+}
+
+task androidJavadocs(type: Javadoc) {
+  source = android.sourceSets.main.java.source
+  classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+  classifier = 'javadoc'
+  from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+  classifier = 'sources'
+  from android.sourceSets.main.java.source
+}
+
+public class ShrinkPlugin implements Plugin<Project> {
+  @Override
+  public void apply(final Project project) {
+    project.android.registerTransform(new Transform() {
+      @Override
+      public void transform(final Context context, final Collection<TransformInput> inputs, final Collection<TransformInput> references, final TransformOutputProvider provider, final boolean incremental) throws IOException, TransformException, InterruptedException {
+        inputs.each {
+          it.directoryInputs.each {
+            final def output = provider.getContentLocation(it.name, it.contentTypes, it.scopes, Format.DIRECTORY)
+            final def input = it.file
+
+            FileUtils.iterateFiles(input, ["class"] as String[], true).each {
+              if (!it.absolutePath.contains("CreatorFactory.class") && !it.absolutePath.contains("BuildConfig.class")) {
+                FileUtils.copyFile(it, new File(output, input.toURI().relativize(it.toURI()).path))
+              }
+            }
+          }
+        }
+      }
+
+      @Override
+      public Set<QualifiedContent.ContentType> getInputTypes() {
+        return EnumSet.of(QualifiedContent.DefaultContentType.CLASSES)
+      }
+
+      @Override
+      public Set<QualifiedContent.Scope> getScopes() {
+        return EnumSet.of(QualifiedContent.Scope.PROJECT)
+      }
+
+      @Override
+      public String getName() {
+        return "shrink"
+      }
+
+      @Override
+      public boolean isIncremental() {
+        return false
+      }
+    })
+  }
+}

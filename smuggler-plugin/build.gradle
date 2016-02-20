@@ -1,0 +1,118 @@
+buildscript {
+  dependencies {
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintrayVersion"
+  }
+}
+
+apply plugin: "groovy"
+apply plugin: "com.jfrog.bintray"
+apply plugin: "maven-publish"
+apply plugin: "idea"
+
+dependencies {
+  compile project(":smuggler-compiler")
+
+  compile localGroovy()
+  compile gradleApi()
+
+  compile "com.android.tools.build:gradle:$androidToolsVersion"
+  compile "com.android.tools.build:transform-api:$androidToolsVersion"
+}
+
+def GIT_HASH = "git rev-parse HEAD".execute([], project.rootDir).text.trim()
+def VERSION = POM_VERSION_NAME
+
+ext {
+  generatedDir = new File(projectDir, "generated")
+  generatedJavaSourcesDir = new File(generatedDir, "main/groovy")
+  buildClassFile = new File(generatedJavaSourcesDir, "io/smuggler/plugin/BuildConfig.groovy")
+}
+
+sourceSets {
+  main {
+    output.dir(generatedJavaSourcesDir, builtBy: 'generateBuildClass')
+    groovy.srcDir generatedJavaSourcesDir
+  }
+}
+
+task generateBuildClass {
+  inputs.property("location", buildClassFile.absolutePath)
+  inputs.property("version", VERSION)
+  inputs.property("hash", GIT_HASH)
+
+  outputs.dir generatedDir
+
+  doLast {
+    buildClassFile.parentFile.mkdirs()
+    buildClassFile.text = "" +
+        "package io.smuggler.plugin\n" +
+        "\n" +
+        "public class BuildConfig {\n" +
+        "  public static final String VERSION = \"$VERSION\"\n" +
+        "  public static final String GIT_HASH = \"$GIT_HASH\"\n" +
+        "}\n"
+  }
+}
+
+idea {
+  module {
+    generatedSourceDirs += generatedJavaSourcesDir
+  }
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      groupId POM_GROUP
+      artifactId POM_ARTIFACT_ID
+      version POM_VERSION_NAME
+
+      artifact sourceJar
+      artifact javadocJar
+
+      pom.withXml {
+        asNode().dependencies.'*'.findAll {
+          it.scope.text() == 'runtime' && project.configurations.compile.allDependencies.find { dep ->
+            dep.name == it.artifactId.text()
+          }
+        } each {
+          it.scope*.value = 'compile'
+        }
+
+        asNode().dependencies.'*'.findAll {
+          it.groupId.text() == "com.android.tools.build"
+        } each {
+          it.scope*.value = 'provided'
+        }
+      }
+
+      from components.java
+    }
+  }
+}
+
+bintray {
+  user = System.getenv("BINTRAY_USERNAME")
+  key = System.getenv("BINTRAY_PASSWORD")
+
+  pkg {
+    repo = BINTRAY_REPO
+    name = BINTRAY_PACKAGE
+
+    version {
+      name = POM_VERSION_NAME
+    }
+  }
+
+  publications = ['mavenJava']
+}
+
+task sourceJar(type: Jar) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
