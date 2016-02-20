@@ -1,4 +1,4 @@
-package io.smuggler
+package io.mironov.smuggler
 
 import android.os.Parcel
 import android.os.Parcelable

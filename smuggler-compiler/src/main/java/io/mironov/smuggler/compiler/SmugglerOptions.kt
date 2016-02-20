@@ -1,4 +1,4 @@
-package io.smuggler
+package io.mironov.smuggler.compiler
 
 import java.io.File
 import java.util.ArrayList

@@ -25,7 +25,7 @@ def VERSION = POM_VERSION_NAME
 ext {
   generatedDir = new File(projectDir, "generated")
   generatedJavaSourcesDir = new File(generatedDir, "main/groovy")
-  buildClassFile = new File(generatedJavaSourcesDir, "io/smuggler/plugin/BuildConfig.groovy")
+  buildClassFile = new File(generatedJavaSourcesDir, "io/mironov/smuggler/plugin/BuildConfig.groovy")
 }
 
 sourceSets {

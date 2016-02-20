@@ -1,4 +1,4 @@
-package io.smuggler
+package io.mironov.smuggler.plugin
 
 import com.android.build.gradle.AppExtension
 import com.android.build.api.transform.Context
@@ -9,6 +9,8 @@ import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformOutputProvider
 import com.google.common.collect.Iterables
+import io.mironov.smuggler.compiler.SmugglerCompiler
+import io.mironov.smuggler.compiler.SmugglerOptions
 import io.smuggler.plugin.BuildConfig
 import org.gradle.api.Project
 
