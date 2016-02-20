@@ -11,7 +11,6 @@ import com.android.build.api.transform.TransformOutputProvider
 import com.google.common.collect.Iterables
 import io.mironov.smuggler.compiler.SmugglerCompiler
 import io.mironov.smuggler.compiler.SmugglerOptions
-import io.smuggler.plugin.BuildConfig
 import org.gradle.api.Project
 
 public class SmugglerTransform extends Transform {

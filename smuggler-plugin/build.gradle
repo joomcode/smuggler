@@ -45,7 +45,7 @@ task generateBuildClass {
   doLast {
     buildClassFile.parentFile.mkdirs()
     buildClassFile.text = "" +
-        "package io.smuggler.plugin\n" +
+        "package io.mironov.smuggler.plugin\n" +
         "\n" +
         "public class BuildConfig {\n" +
         "  public static final String VERSION = \"$VERSION\"\n" +
