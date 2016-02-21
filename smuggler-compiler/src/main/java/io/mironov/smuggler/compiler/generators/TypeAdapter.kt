@@ -10,8 +10,26 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 
 internal interface TypeAdapter {
-  fun readValue(adapter: GeneratorAdapter)
-  fun writeValue(adapter: GeneratorAdapter)
+  fun readValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec)
+  fun writeValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec)
+}
+
+internal abstract class AbstractTypeAdapter : TypeAdapter {
+  final override fun readValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec) {
+    adapter.loadArg(0)
+    adapter.readProperty(owner, property)
+  }
+
+  final override fun writeValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec) {
+    adapter.loadArg(0)
+    adapter.loadThis()
+
+    adapter.invokeVirtual(owner.clazz, property.getter)
+    adapter.writeProperty(owner, property)
+  }
+
+  abstract fun GeneratorAdapter.readProperty(owner: DataClassSpec, property: DataPropertySpec)
+  abstract fun GeneratorAdapter.writeProperty(owner: DataClassSpec, property: DataPropertySpec)
 }
 
 internal object TypeAdapterFactory {
@@ -36,13 +54,13 @@ internal open class SimpleTypeAdapter(
     private val type: Type,
     private val reader: String,
     private val writer: String
-) : TypeAdapter {
-  override fun readValue(adapter: GeneratorAdapter) {
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get(reader, type))
+) : AbstractTypeAdapter() {
+  override fun GeneratorAdapter.readProperty(owner: DataClassSpec, property: DataPropertySpec) {
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get(reader, type))
   }
 
-  override fun writeValue(adapter: GeneratorAdapter) {
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get(writer, Types.VOID, type))
+  override fun GeneratorAdapter.writeProperty(owner: DataClassSpec, property: DataPropertySpec) {
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get(writer, Types.VOID, type))
   }
 }
 
@@ -54,45 +72,45 @@ internal object IntTypeAdapter : SimpleTypeAdapter(Types.INT, "readInt", "writeI
 internal object LongTypeAdapter : SimpleTypeAdapter(Types.LONG, "readLong", "writeLong")
 internal object StringTypeAdapter : SimpleTypeAdapter(Types.STRING, "readString", "writeString")
 
-internal object ShortTypeAdapter : TypeAdapter {
-  override fun readValue(adapter: GeneratorAdapter) {
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
-    adapter.cast(Types.INT, Types.SHORT)
+internal object ShortTypeAdapter : AbstractTypeAdapter() {
+  override fun GeneratorAdapter.readProperty(owner: DataClassSpec, property: DataPropertySpec) {
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    cast(Types.INT, Types.SHORT)
   }
 
-  override fun writeValue(adapter: GeneratorAdapter) {
-    adapter.cast(Types.SHORT, Types.INT)
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+  override fun GeneratorAdapter.writeProperty(owner: DataClassSpec, property: DataPropertySpec) {
+    cast(Types.SHORT, Types.INT)
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
   }
 }
 
-internal object BooleanTypeAdapter : TypeAdapter {
-  override fun readValue(adapter: GeneratorAdapter) {
-    val start = adapter.newLabel()
-    val end = adapter.newLabel()
+internal object BooleanTypeAdapter : AbstractTypeAdapter() {
+  override fun GeneratorAdapter.readProperty(owner: DataClassSpec, property: DataPropertySpec) {
+    val start = newLabel()
+    val end = newLabel()
 
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
-    adapter.ifZCmp(Opcodes.IFEQ, start)
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    ifZCmp(Opcodes.IFEQ, start)
 
-    adapter.push(true)
-    adapter.goTo(end)
-    adapter.mark(start)
-    adapter.push(false)
+    push(true)
+    goTo(end)
+    mark(start)
+    push(false)
 
-    adapter.mark(end)
+    mark(end)
   }
 
-  override fun writeValue(adapter: GeneratorAdapter) {
-    val start = adapter.newLabel()
-    val end = adapter.newLabel()
+  override fun GeneratorAdapter.writeProperty(owner: DataClassSpec, property: DataPropertySpec) {
+    val start = newLabel()
+    val end = newLabel()
 
-    adapter.ifZCmp(Opcodes.IFEQ, start)
-    adapter.push(1)
-    adapter.goTo(end)
-    adapter.mark(start)
-    adapter.push(0)
-    adapter.mark(end)
+    ifZCmp(Opcodes.IFEQ, start)
+    push(1)
+    goTo(end)
+    mark(start)
+    push(0)
+    mark(end)
 
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
   }
 }

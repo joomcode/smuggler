@@ -3,7 +3,6 @@ package io.mironov.smuggler.compiler.generators
 import io.mironov.smuggler.compiler.ContentGenerator
 import io.mironov.smuggler.compiler.GeneratedContent
 import io.mironov.smuggler.compiler.GenerationEnvironment
-import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.given
@@ -46,9 +45,8 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
         newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map(DataPropertySpec::type))) {
-          spec.properties.forEach { property ->
-            loadArg(0)
-            readValue(TypeAdapterFactory.from(spec, property))
+          spec.properties.forEach {
+            TypeAdapterFactory.from(spec, it).readValue(this, spec, it)
           }
         }
       }
@@ -85,12 +83,8 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
       }, ClassReader.SKIP_FRAMES)
 
       newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
-        spec.properties.forEach { property ->
-          loadArg(0)
-          loadThis()
-
-          invokeVirtual(spec.clazz, property.getter)
-          writeValue(TypeAdapterFactory.from(spec, property))
+        spec.properties.forEach {
+          TypeAdapterFactory.from(spec, it).writeValue(this, spec, it)
         }
       }
 
@@ -134,13 +128,5 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
 
   private fun shouldExcludeMethodFromParcelableClass(name: String, description: String, signature: String?): Boolean {
     return name == "describeContents" || name == "writeToParcel"
-  }
-
-  private fun GeneratorAdapter.writeValue(adapter: TypeAdapter) {
-    adapter.writeValue(this)
-  }
-
-  private fun GeneratorAdapter.readValue(adapter: TypeAdapter) {
-    adapter.readValue(this)
   }
 }
