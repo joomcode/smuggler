@@ -1,13 +1,32 @@
 package io.mironov.smuggler.compiler.generators
 
+import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.model.DataClassSpec
+import io.mironov.smuggler.compiler.model.DataPropertySpec
 import org.objectweb.asm.Type
 
 internal interface TypeAdapter {
   fun readValue(adapter: GeneratorAdapter)
   fun writeValue(adapter: GeneratorAdapter)
+}
+
+internal object TypeAdapterFactory {
+  fun from(spec: DataClassSpec, property: DataPropertySpec): TypeAdapter {
+    return when (property.type) {
+      Types.BYTE -> ByteTypeAdapter
+      Types.CHAR -> CharTypeAdapter
+      Types.DOUBLE -> DoubleTypeAdapter
+      Types.FLOAT -> FloatTypeAdapter
+      Types.INT -> IntTypeAdapter
+      Types.LONG -> LongTypeAdapter
+      Types.STRING -> StringTypeAdapter
+      else -> throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
+          spec.clazz.type.className, property.name, property.type)
+    }
+  }
 }
 
 internal open class SimpleTypeAdapter(

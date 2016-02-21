@@ -3,7 +3,6 @@ package io.mironov.smuggler.compiler.generators
 import io.mironov.smuggler.compiler.ContentGenerator
 import io.mironov.smuggler.compiler.GeneratedContent
 import io.mironov.smuggler.compiler.GenerationEnvironment
-import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
@@ -11,12 +10,15 @@ import io.mironov.smuggler.compiler.model.DataClassSpec
 import io.mironov.smuggler.compiler.model.DataPropertySpec
 import io.mironov.smuggler.compiler.reflect.MethodSpec
 import io.mironov.smuggler.compiler.reflect.Signature
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes.ACC_BRIDGE
 import org.objectweb.asm.Type
 import org.objectweb.asm.Opcodes.ACC_FINAL
 import org.objectweb.asm.Opcodes.ACC_PUBLIC
 import org.objectweb.asm.Opcodes.ACC_SUPER
 import org.objectweb.asm.Opcodes.ACC_SYNTHETIC
+import org.objectweb.asm.Opcodes.ASM5
 
 internal class ParcelableContentGenerator(private val spec: DataClassSpec) : ContentGenerator {
   private companion object {
@@ -25,7 +27,7 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
   }
 
   override fun generate(environment: GenerationEnvironment): Collection<GeneratedContent> {
-    return listOf(onCreateCreatorGeneratedContent(spec, environment))
+    return listOf(onCreatePatchedDataClass(spec, environment), onCreateCreatorGeneratedContent(spec, environment))
   }
 
   private fun onCreateCreatorGeneratedContent(spec: DataClassSpec, environment: GenerationEnvironment): GeneratedContent {
@@ -44,7 +46,7 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
         newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map(DataPropertySpec::type))) {
           spec.properties.forEach { property ->
             loadArg(0)
-            readValue(createAdapterFromProperty(spec, property))
+            readValue(TypeAdapterFactory.from(spec, property))
           }
         }
       }
@@ -65,6 +67,14 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
         loadArg(0)
         invokeVirtual(spec.clazz, createMethodSpecForNewArrayMethod(spec, false))
       }
+    })
+  }
+
+  private fun onCreatePatchedDataClass(spec: DataClassSpec, environment: GenerationEnvironment): GeneratedContent {
+    return GeneratedContent.from(spec.clazz.type, emptyMap(), environment.newClass {
+      ClassReader(spec.clazz.opener.open()).accept(object : ClassVisitor(ASM5, this) {
+
+      }, ClassReader.SKIP_FRAMES)
     })
   }
 
@@ -90,20 +100,6 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     val method = Type.getMethodType(returns, Types.ANDROID_PARCEL)
 
     return MethodSpec(flags, "createFromParcel", method)
-  }
-
-  private fun createAdapterFromProperty(spec: DataClassSpec, property: DataPropertySpec): TypeAdapter {
-    return when (property.type) {
-      Types.BYTE -> ByteTypeAdapter
-      Types.CHAR -> CharTypeAdapter
-      Types.DOUBLE -> DoubleTypeAdapter
-      Types.FLOAT -> FloatTypeAdapter
-      Types.INT -> IntTypeAdapter
-      Types.LONG -> LongTypeAdapter
-      Types.STRING -> StringTypeAdapter
-      else -> throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
-          spec.clazz.type.className, property.name, property.type)
-    }
   }
 
   private fun GeneratorAdapter.writeValue(adapter: TypeAdapter) {
