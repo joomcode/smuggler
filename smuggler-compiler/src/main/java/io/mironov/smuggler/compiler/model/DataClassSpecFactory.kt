@@ -1,11 +1,14 @@
 package io.mironov.smuggler.compiler.model
 
 import io.mironov.smuggler.compiler.ClassRegistry
+import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
+import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.reflect.ClassReference
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
+import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
 
 internal object DataClassSpecFactory {
@@ -22,9 +25,22 @@ internal object DataClassSpecFactory {
       return null
     }
 
-    val constructor = clazz.constructorList.first { !Flags.IS_SECONDARY.get(it.flags) }
-    val fields = constructor.valueParameterList.map { resolver.getName(it.name).identifier }
+    val constructor = clazz.constructorList.first {
+      !Flags.IS_SECONDARY.get(it.flags)
+    }
 
-    return DataClassSpec(spec, fields)
+    val properties = constructor.valueParameterList.map { parameter ->
+      val name = resolver.getName(parameter.name).identifier
+      val property = clazz.propertyList.first { resolver.getName(it.name).identifier == name }
+
+      if (Flags.VISIBILITY.get(property.flags) != ProtoBuf.Visibility.PUBLIC) {
+        throw SmugglerException("Invalid AutoParcelable class ''{0}'', only public properties are supported at the moment, but ''{1}'' has ''{2}'' visibility.",
+            spec.type.className, resolver.getName(property.name).identifier, Flags.VISIBILITY.get(property.flags))
+      }
+
+      DataPropertySpec(name, Types.OBJECT, null)
+    }
+
+    return DataClassSpec(spec, properties)
   }
 }
