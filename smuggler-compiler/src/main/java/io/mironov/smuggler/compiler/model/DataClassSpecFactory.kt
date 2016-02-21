@@ -5,6 +5,7 @@ import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
+import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.reflect.ClassReference
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
@@ -28,8 +29,13 @@ internal object DataClassSpecFactory {
       throw SmugglerException("Invalid AutoParcelable class ''{0}'', generic classes are not supported at the moment.", spec.type.className)
     }
 
+    val creator = spec.getDeclaredField("CREATOR")
     val constructor = clazz.constructorList.first {
       !Flags.IS_SECONDARY.get(it.flags)
+    }
+
+    if (creator != null && creator.isStatic) {
+      throw SmugglerException("Invalid AutoParcelable class ''{0}'', AutoParcelable classes shouldn''t declare CREATOR field.", spec.type.className)
     }
 
     val properties = constructor.valueParameterList.map { parameter ->
