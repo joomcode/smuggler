@@ -37,5 +37,9 @@ data class User(val firstName: String, val lastName: String) : AutoParcelable {
   }
 }
 
-data class Message(val text: String, val user: User) : AutoParcelable
-data class Chat(val title: String, val messages: List<Message>, val participants: List<User>) : AutoParcelable
+data class Message(
+    val id: Int,
+    val sender: String,
+    val text: String,
+    val timestamp: Long
+) : AutoParcelable

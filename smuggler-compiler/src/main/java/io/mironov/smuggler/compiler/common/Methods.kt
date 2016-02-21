@@ -18,6 +18,10 @@ internal object Methods {
     return Method("<init>", Type.VOID_TYPE, emptyArray())
   }
 
+  fun getConstructor(args: List<Type>): Method {
+    return Method("<init>", Type.VOID_TYPE, args.toTypedArray())
+  }
+
   fun getConstructor(first: Type, vararg args: Type): Method {
     return Method("<init>", Type.VOID_TYPE, arrayOf(first) + args)
   }

@@ -3,9 +3,12 @@ package io.mironov.smuggler.compiler.generators
 import io.mironov.smuggler.compiler.ContentGenerator
 import io.mironov.smuggler.compiler.GeneratedContent
 import io.mironov.smuggler.compiler.GenerationEnvironment
+import io.mironov.smuggler.compiler.SmugglerException
+import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.model.DataClassSpec
+import io.mironov.smuggler.compiler.model.DataPropertySpec
 import io.mironov.smuggler.compiler.reflect.MethodSpec
 import io.mironov.smuggler.compiler.reflect.Signature
 import org.objectweb.asm.Opcodes.ACC_BRIDGE
@@ -38,7 +41,12 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
       }
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
-        pushNull()
+        newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map(DataPropertySpec::type))) {
+          spec.properties.forEach { property ->
+            loadArg(0)
+            readValue(createAdapterFromProperty(spec, property))
+          }
+        }
       }
 
       newMethod(createMethodSpecForNewArrayMethod(spec, false)) {
@@ -82,5 +90,27 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     val method = Type.getMethodType(returns, Types.ANDROID_PARCEL)
 
     return MethodSpec(flags, "createFromParcel", method)
+  }
+
+  private fun createAdapterFromProperty(spec: DataClassSpec, property: DataPropertySpec): TypeAdapter {
+    return when (property.type) {
+      Types.BYTE -> ByteTypeAdapter
+      Types.CHAR -> CharTypeAdapter
+      Types.DOUBLE -> DoubleTypeAdapter
+      Types.FLOAT -> FloatTypeAdapter
+      Types.INT -> IntTypeAdapter
+      Types.LONG -> LongTypeAdapter
+      Types.STRING -> StringTypeAdapter
+      else -> throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
+          spec.clazz.type.className, property.name, property.type)
+    }
+  }
+
+  private fun GeneratorAdapter.writeValue(adapter: TypeAdapter) {
+    adapter.writeValue(this)
+  }
+
+  private fun GeneratorAdapter.readValue(adapter: TypeAdapter) {
+    adapter.readValue(this)
   }
 }
