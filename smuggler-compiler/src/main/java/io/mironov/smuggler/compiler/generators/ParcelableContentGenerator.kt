@@ -83,6 +83,20 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
           }
         }
       }, ClassReader.SKIP_FRAMES)
+
+      newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
+        spec.properties.forEach { property ->
+          loadArg(0)
+          loadThis()
+
+          invokeVirtual(spec.clazz, property.getter)
+          writeValue(TypeAdapterFactory.from(spec, property))
+        }
+      }
+
+      newMethod(createMethodSpecForDescribeContentsMethod(spec)) {
+        push(0)
+      }
     })
   }
 
@@ -108,6 +122,14 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     val method = Type.getMethodType(returns, Types.ANDROID_PARCEL)
 
     return MethodSpec(flags, "createFromParcel", method)
+  }
+
+  private fun createMethodSpecForDescribeContentsMethod(spec: DataClassSpec): MethodSpec {
+    return MethodSpec(ACC_METHOD_DEFAULT, "describeContents", Type.getMethodType(Types.INT))
+  }
+
+  private fun createMethodSpecForWriteToParcelMethod(spec: DataClassSpec): MethodSpec {
+    return MethodSpec(ACC_METHOD_DEFAULT, "writeToParcel", Type.getMethodType(Types.VOID, Types.ANDROID_PARCEL, Types.INT))
   }
 
   private fun shouldExcludeMethodFromParcelableClass(name: String, description: String, signature: String?): Boolean {
