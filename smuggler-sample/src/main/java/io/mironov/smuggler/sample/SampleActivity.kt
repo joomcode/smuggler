@@ -42,5 +42,6 @@ data class Message(
     val sender: String,
     val text: String,
     val timestamp: Long,
-    val magic: Short
+    val magic: Short,
+    val seen: Boolean
 ) : AutoParcelable

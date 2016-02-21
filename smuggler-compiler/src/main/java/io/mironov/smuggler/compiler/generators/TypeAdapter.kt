@@ -6,6 +6,7 @@ import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.model.DataClassSpec
 import io.mironov.smuggler.compiler.model.DataPropertySpec
+import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 
 internal interface TypeAdapter {
@@ -23,6 +24,7 @@ internal object TypeAdapterFactory {
       Types.INT -> IntTypeAdapter
       Types.LONG -> LongTypeAdapter
       Types.SHORT -> ShortTypeAdapter
+      Types.BOOLEAN -> BooleanTypeAdapter
       Types.STRING -> StringTypeAdapter
       else -> throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
           spec.clazz.type.className, property.name, property.type)
@@ -60,6 +62,37 @@ internal object ShortTypeAdapter : TypeAdapter {
 
   override fun writeValue(adapter: GeneratorAdapter) {
     adapter.cast(Types.SHORT, Types.INT)
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+  }
+}
+
+internal object BooleanTypeAdapter : TypeAdapter {
+  override fun readValue(adapter: GeneratorAdapter) {
+    val start = adapter.newLabel()
+    val end = adapter.newLabel()
+
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    adapter.ifZCmp(Opcodes.IFEQ, start)
+
+    adapter.push(true)
+    adapter.goTo(end)
+    adapter.mark(start)
+    adapter.push(false)
+
+    adapter.mark(end)
+  }
+
+  override fun writeValue(adapter: GeneratorAdapter) {
+    val start = adapter.newLabel()
+    val end = adapter.newLabel()
+
+    adapter.ifZCmp(Opcodes.IFEQ, start)
+    adapter.push(1)
+    adapter.goTo(end)
+    adapter.mark(start)
+    adapter.push(0)
+    adapter.mark(end)
+
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
   }
 }
