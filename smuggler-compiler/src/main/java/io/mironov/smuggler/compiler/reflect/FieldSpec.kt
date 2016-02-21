@@ -9,9 +9,10 @@ internal data class FieldSpec(
     val access: Int,
     val name: String,
     val type: Type,
+    val signature: String?,
     val annotations: Collection<AnnotationSpec> = emptyList()
 ) {
-  internal class Builder(val access: Int, val name: String, val type: Type) {
+  internal class Builder(val access: Int, val name: String, val type: Type, val signature: String?) {
     private val annotations = ArrayList<AnnotationSpec>()
 
     fun annotation(annotation: AnnotationSpec): FieldSpec.Builder = apply {
@@ -19,7 +20,7 @@ internal data class FieldSpec(
     }
 
     fun build(): FieldSpec {
-      return FieldSpec(access, name, type, annotations)
+      return FieldSpec(access, name, type, signature, annotations)
     }
   }
 

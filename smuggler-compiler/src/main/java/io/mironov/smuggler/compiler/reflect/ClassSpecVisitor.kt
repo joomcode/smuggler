@@ -38,7 +38,7 @@ internal class ClassSpecVisitor(
   }
 
   override fun visitField(access: Int, name: String, desc: String, signature: String?, value: Any?): FieldVisitor? {
-    return FieldSpecVisitor(access, name, Type.getType(desc)) {
+    return FieldSpecVisitor(access, name, Type.getType(desc), signature) {
       builder.field(it)
     }
   }
