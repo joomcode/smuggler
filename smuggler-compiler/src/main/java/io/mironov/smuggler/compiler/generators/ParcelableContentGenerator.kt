@@ -6,12 +6,14 @@ import io.mironov.smuggler.compiler.GenerationEnvironment
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.given
+import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.model.DataClassSpec
 import io.mironov.smuggler.compiler.model.DataPropertySpec
 import io.mironov.smuggler.compiler.reflect.MethodSpec
 import io.mironov.smuggler.compiler.reflect.Signature
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ACC_BRIDGE
 import org.objectweb.asm.Type
@@ -75,8 +77,14 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
   private fun onCreatePatchedDataClass(spec: DataClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(spec.clazz.type, emptyMap(), environment.newClass {
       ClassReader(spec.clazz.opener.open()).accept(object : ClassVisitor(ASM5, this) {
+        override fun visitField(access: Int, name: String, description: String, signature: String?, value: Any?): FieldVisitor? {
+          return given(!shouldExcludeFieldFromParcelableClass(access, name, description, signature)) {
+            super.visitField(access, name, description, signature, value)
+          }
+        }
+
         override fun visitMethod(access: Int, name: String, description: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
-          return given(!shouldExcludeMethodFromParcelableClass(name, description, signature)) {
+          return given(!shouldExcludeMethodFromParcelableClass(access, name, description, signature)) {
             super.visitMethod(access, name, description, signature, exceptions)
           }
         }
@@ -126,7 +134,11 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     return MethodSpec(ACC_METHOD_DEFAULT, "writeToParcel", Type.getMethodType(Types.VOID, Types.ANDROID_PARCEL, Types.INT))
   }
 
-  private fun shouldExcludeMethodFromParcelableClass(name: String, description: String, signature: String?): Boolean {
+  private fun shouldExcludeFieldFromParcelableClass(access: Int, name: String, description: String, signature: String?): Boolean {
+    return name == "CREATOR" && access.isStatic
+  }
+
+  private fun shouldExcludeMethodFromParcelableClass(access: Int, name: String, description: String, signature: String?): Boolean {
     return name == "describeContents" || name == "writeToParcel"
   }
 }
