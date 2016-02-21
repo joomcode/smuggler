@@ -25,6 +25,10 @@ internal object DataClassSpecFactory {
       return null
     }
 
+    if (!spec.signature.isNullOrBlank()) {
+      throw SmugglerException("Invalid AutoParcelable class ''{0}'', generic classes are not supported at the moment.", spec.type.className)
+    }
+
     val constructor = clazz.constructorList.first {
       !Flags.IS_SECONDARY.get(it.flags)
     }
