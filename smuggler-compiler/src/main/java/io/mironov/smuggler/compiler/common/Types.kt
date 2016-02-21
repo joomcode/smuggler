@@ -49,6 +49,10 @@ internal object Types {
   val IDENTITY_MAP = Type.getType(IdentityHashMap::class.java)
   val VIEW = Type.getObjectType("android/view/View")
 
+  val ANDROID_PARCEL = Type.getObjectType("android/os/Parcel")
+  val ANDROID_PARCELABLE = Type.getObjectType("android/os/Parcelable")
+  val ANDROID_CREATOR = Type.getObjectType("android/os/Parcelable\$Creator")
+
   val SMUGGLER_PARCELABLE = Type.getObjectType("io/mironov/smuggler/AutoParcelable")
   val SMUGGLER_FACTORY = Type.getObjectType("io/mironov/smuggler/SmugglerFactory")
 
