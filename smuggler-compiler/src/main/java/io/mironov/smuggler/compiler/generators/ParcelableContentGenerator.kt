@@ -78,7 +78,7 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     return GeneratedContent.from(spec.clazz.type, emptyMap(), environment.newClass {
       ClassReader(spec.clazz.opener.open()).accept(object : ClassVisitor(ASM5, this) {
         override fun visitMethod(access: Int, name: String, description: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
-          return given(!shouldExcludeMethodFromParcelableClass(name, description, signature))  {
+          return given(!shouldExcludeMethodFromParcelableClass(name, description, signature)) {
             super.visitMethod(access, name, description, signature, exceptions)
           }
         }

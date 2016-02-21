@@ -22,6 +22,7 @@ internal object TypeAdapterFactory {
       Types.FLOAT -> FloatTypeAdapter
       Types.INT -> IntTypeAdapter
       Types.LONG -> LongTypeAdapter
+      Types.SHORT -> ShortTypeAdapter
       Types.STRING -> StringTypeAdapter
       else -> throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
           spec.clazz.type.className, property.name, property.type)
@@ -50,3 +51,15 @@ internal object FloatTypeAdapter : SimpleTypeAdapter(Types.FLOAT, "readFloat", "
 internal object IntTypeAdapter : SimpleTypeAdapter(Types.INT, "readInt", "writeInt")
 internal object LongTypeAdapter : SimpleTypeAdapter(Types.LONG, "readLong", "writeLong")
 internal object StringTypeAdapter : SimpleTypeAdapter(Types.STRING, "readString", "writeString")
+
+internal object ShortTypeAdapter : TypeAdapter {
+  override fun readValue(adapter: GeneratorAdapter) {
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    adapter.cast(Types.INT, Types.SHORT)
+  }
+
+  override fun writeValue(adapter: GeneratorAdapter) {
+    adapter.cast(Types.SHORT, Types.INT)
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+  }
+}
