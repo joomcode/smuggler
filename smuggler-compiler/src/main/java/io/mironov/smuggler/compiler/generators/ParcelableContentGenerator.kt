@@ -60,12 +60,14 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
         loadThis()
         loadArg(0)
         invokeVirtual(spec.clazz, createMethodSpecForCreateFromParcelMethod(spec, false))
+        checkCast(Types.OBJECT)
       }
 
       newMethod(createMethodSpecForNewArrayMethod(spec, true)) {
         loadThis()
         loadArg(0)
         invokeVirtual(spec.clazz, createMethodSpecForNewArrayMethod(spec, false))
+        checkCast(Types.getArrayType(Types.OBJECT))
       }
     })
   }
