@@ -15,8 +15,8 @@ class SmugglerCompiler {
     }
 
     registry.inputs.forEach {
-      if (DataClassSpecFactory.from(it, registry) != null) {
-        logger.error("Class input ${it.type.className}")
+      DataClassSpecFactory.from(it, registry)?.let {
+        logger.error("Data class ${it.reference.type.className}, ${it.fields}")
       }
     }
   }
