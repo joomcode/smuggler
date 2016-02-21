@@ -11,6 +11,7 @@ internal data class ClassSpec(
     val access: Int,
     val type: Type,
     val parent: Type,
+    val signature: String?,
     val interfaces: Collection<Type>,
     val annotations: Collection<AnnotationSpec>,
     val fields: Collection<FieldSpec>,
@@ -22,6 +23,11 @@ internal data class ClassSpec(
     private val annotations = ArrayList<AnnotationSpec>()
     private val fields = ArrayList<FieldSpec>()
     private val methods = ArrayList<MethodSpec>()
+    private var signature: String? = null
+
+    fun signature(signature: String?): ClassSpec.Builder = apply {
+      this.signature = signature
+    }
 
     fun interfaces(values: Collection<Type>): ClassSpec.Builder = apply {
       interfaces.addAll(values)
@@ -40,7 +46,7 @@ internal data class ClassSpec(
     }
 
     fun build(): ClassSpec {
-      return ClassSpec(access, type, parent, interfaces, annotations, fields, methods, opener)
+      return ClassSpec(access, type, parent, signature, interfaces, annotations, fields, methods, opener)
     }
   }
 
