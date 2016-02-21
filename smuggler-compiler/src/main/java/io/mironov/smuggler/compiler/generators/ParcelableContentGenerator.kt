@@ -37,24 +37,25 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
         // nothing to do
       }
 
-      newMethod(createMethodSpecForNewArrayMethod(spec, false)) {
-        pushNull()
-      }
-
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
         pushNull()
       }
 
-      newMethod(createMethodSpecForNewArrayMethod(spec, true)) {
-        loadThis()
+      newMethod(createMethodSpecForNewArrayMethod(spec, false)) {
         loadArg(0)
-        invokeVirtual(spec.clazz, createMethodSpecForNewArrayMethod(spec, false))
+        newArray(spec.clazz.type)
       }
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, true)) {
         loadThis()
         loadArg(0)
         invokeVirtual(spec.clazz, createMethodSpecForCreateFromParcelMethod(spec, false))
+      }
+
+      newMethod(createMethodSpecForNewArrayMethod(spec, true)) {
+        loadThis()
+        loadArg(0)
+        invokeVirtual(spec.clazz, createMethodSpecForNewArrayMethod(spec, false))
       }
     })
   }
