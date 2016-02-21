@@ -3,13 +3,13 @@ package io.mironov.smuggler
 import android.os.Parcel
 import android.os.Parcelable
 
-interface Smuggled : Parcelable {
+interface AutoParcelable : Parcelable {
   companion object {
-    fun <S : Smuggled> creator(clazz: Class<S>): Parcelable.Creator<S> {
+    fun <S : AutoParcelable> creator(clazz: Class<S>): Parcelable.Creator<S> {
       return SmugglerFactory.creator(clazz)
     }
 
-    inline fun <reified S : Smuggled> creator(): Parcelable.Creator<S> {
+    inline fun <reified S : AutoParcelable> creator(): Parcelable.Creator<S> {
       return creator(S::class.java)
     }
   }
