@@ -6,12 +6,14 @@ import io.mironov.smuggler.compiler.GenerationEnvironment
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.common.given
 import io.mironov.smuggler.compiler.model.DataClassSpec
 import io.mironov.smuggler.compiler.model.DataPropertySpec
 import io.mironov.smuggler.compiler.reflect.MethodSpec
 import io.mironov.smuggler.compiler.reflect.Signature
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ACC_BRIDGE
 import org.objectweb.asm.Type
 import org.objectweb.asm.Opcodes.ACC_FINAL
@@ -75,7 +77,11 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
   private fun onCreatePatchedDataClass(spec: DataClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(spec.clazz.type, emptyMap(), environment.newClass {
       ClassReader(spec.clazz.opener.open()).accept(object : ClassVisitor(ASM5, this) {
-
+        override fun visitMethod(access: Int, name: String, description: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
+          return given(!shouldExcludeMethodFromParcelableClass(name, description, signature))  {
+            super.visitMethod(access, name, description, signature, exceptions)
+          }
+        }
       }, ClassReader.SKIP_FRAMES)
     })
   }
@@ -102,6 +108,10 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     val method = Type.getMethodType(returns, Types.ANDROID_PARCEL)
 
     return MethodSpec(flags, "createFromParcel", method)
+  }
+
+  private fun shouldExcludeMethodFromParcelableClass(name: String, description: String, signature: String?): Boolean {
+    return name == "describeContents" || name == "writeToParcel"
   }
 
   private fun GeneratorAdapter.writeValue(adapter: TypeAdapter) {
