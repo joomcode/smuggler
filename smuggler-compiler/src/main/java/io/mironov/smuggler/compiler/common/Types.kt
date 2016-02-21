@@ -74,6 +74,10 @@ internal object Types {
     } ?: Type.getType(clazz)
   }
 
+  fun getGeneratedType(type: Type, name: String): Type {
+    return Type.getObjectType("${type.internalName}\$\$$name")
+  }
+
   fun getClassFilePath(type: Type): String {
     return "${type.internalName}.class"
   }
