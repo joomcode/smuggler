@@ -49,6 +49,9 @@ internal object Types {
   val IDENTITY_MAP = Type.getType(IdentityHashMap::class.java)
   val VIEW = Type.getObjectType("android/view/View")
 
+  val SMUGGLER_PARCELABLE = Type.getObjectType("io/mironov/smuggler/AutoParcelable")
+  val SMUGGLER_FACTORY = Type.getObjectType("io/mironov/smuggler/SmugglerFactory")
+
   fun getClassType(name: String): Type {
     return if (!name.endsWith("[]")) {
       Type.getType("${Types.PRIMITIVES[name.replace('.', '/')] ?: "L${name.replace('.', '/')};"}")

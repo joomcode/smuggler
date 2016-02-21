@@ -1,6 +1,7 @@
 package io.mironov.smuggler.compiler
 
-import io.mironov.smuggler.compiler.model.DataClassSpecFactory
+import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.reflect.ClassReference
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 
@@ -14,10 +15,14 @@ class SmugglerCompiler {
       FileUtils.copyDirectory(it, options.output)
     }
 
-    registry.inputs.forEach {
-      DataClassSpecFactory.from(it, registry)?.let {
-        logger.error("Data class ${it.reference.type.className}, ${it.fields}")
-      }
+    findAutoParcelableClasses(registry).forEach {
+      logger.error("Data class ${it.type.className}")
+    }
+  }
+
+  private fun findAutoParcelableClasses(registry: ClassRegistry): Collection<ClassReference> {
+    return registry.inputs.filter {
+      registry.isSubclassOf(it.type, Types.SMUGGLER_PARCELABLE)
     }
   }
 }

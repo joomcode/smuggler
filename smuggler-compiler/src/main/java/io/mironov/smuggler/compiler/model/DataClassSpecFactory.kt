@@ -22,10 +22,7 @@ internal object DataClassSpecFactory {
       return null
     }
 
-    val constructor = clazz.constructorList.first {
-      !Flags.IS_SECONDARY.get(it.flags)
-    }
-
+    val constructor = clazz.constructorList.first { !Flags.IS_SECONDARY.get(it.flags) }
     val fields = constructor.valueParameterList.map { resolver.getName(it.name).identifier }
 
     return DataClassSpec(spec, fields)
