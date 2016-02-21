@@ -19,6 +19,7 @@ import org.objectweb.asm.Opcodes.ACC_BRIDGE
 import org.objectweb.asm.Type
 import org.objectweb.asm.Opcodes.ACC_FINAL
 import org.objectweb.asm.Opcodes.ACC_PUBLIC
+import org.objectweb.asm.Opcodes.ACC_STATIC
 import org.objectweb.asm.Opcodes.ACC_SUPER
 import org.objectweb.asm.Opcodes.ACC_SYNTHETIC
 import org.objectweb.asm.Opcodes.ASM5
@@ -36,7 +37,7 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
   private fun onCreateCreatorGeneratedContent(spec: DataClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(creatorTypeFrom(spec), emptyMap(), environment.newClass {
       val type = creatorTypeFrom(spec)
-      val signature = creatorSignatureFrom(spec).toString()
+      val signature = creatorTypeSignatureFrom(spec)
       val interfaces = arrayOf(Types.ANDROID_CREATOR)
 
       visit(ACC_PUBLIC + ACC_FINAL + ACC_SUPER, type, signature, Types.OBJECT, interfaces)
@@ -77,6 +78,11 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
   private fun onCreatePatchedDataClass(spec: DataClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(spec.clazz.type, emptyMap(), environment.newClass {
       ClassReader(spec.clazz.opener.open()).accept(object : ClassVisitor(ASM5, this) {
+        override fun visit(version: Int, access: Int, name: String, signature: String?, parent: String?, exceptions: Array<out String>?) {
+          super.visit(version, access, name, signature, parent, exceptions)
+          visitField(ACC_PUBLIC + ACC_STATIC + ACC_FINAL, "CREATOR", creatorTypeFrom(spec), creatorFieldSignatureFrom(spec))
+        }
+
         override fun visitField(access: Int, name: String, description: String, signature: String?, value: Any?): FieldVisitor? {
           return given(!shouldExcludeFieldFromParcelableClass(access, name, description, signature)) {
             super.visitField(access, name, description, signature, value)
@@ -106,8 +112,12 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     return Types.getGeneratedType(spec.clazz.type, "AutoCreator")
   }
 
-  private fun creatorSignatureFrom(spec: DataClassSpec): Signature {
-    return Signature.type(Signature.simple(Types.OBJECT), Signature.generic(Types.ANDROID_CREATOR, spec.clazz.type))
+  private fun creatorTypeSignatureFrom(spec: DataClassSpec): String {
+    return Signature.type(Signature.simple(Types.OBJECT), Signature.generic(Types.ANDROID_CREATOR, spec.clazz.type)).toString()
+  }
+
+  private fun creatorFieldSignatureFrom(spec: DataClassSpec): String {
+    return Signature.generic(Types.ANDROID_CREATOR, spec.clazz.type).toString()
   }
 
   private fun createMethodSpecForNewArrayMethod(spec: DataClassSpec, bridge: Boolean): MethodSpec {
