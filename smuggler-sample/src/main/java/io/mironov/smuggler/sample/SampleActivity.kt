@@ -39,7 +39,7 @@ data class User(val firstName: String, val lastName: String) : AutoParcelable {
 
 data class Message(
     val id: Int,
-    val sender: String,
+    val sender: User,
     val text: String,
     val timestamp: Long,
     val magic: Short,

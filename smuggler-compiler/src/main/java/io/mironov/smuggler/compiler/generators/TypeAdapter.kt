@@ -35,6 +35,10 @@ internal abstract class AbstractTypeAdapter : TypeAdapter {
 
 internal object TypeAdapterFactory {
   fun from(registry: ClassRegistry, spec: DataClassSpec, property: DataPropertySpec): TypeAdapter {
+    if (registry.isSubclassOf(property.type, Types.ANDROID_PARCELABLE)) {
+      return ParcelableTypeAdapter
+    }
+
     return when (property.type) {
       Types.BYTE -> ByteTypeAdapter
       Types.CHAR -> CharTypeAdapter
@@ -113,5 +117,27 @@ internal object BooleanTypeAdapter : AbstractTypeAdapter() {
     mark(end)
 
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+  }
+}
+
+internal object ParcelableTypeAdapter : TypeAdapter {
+  override fun readValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec) {
+    adapter.loadArg(0)
+    adapter.push(property.type)
+    adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
+
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readParcelable", Types.ANDROID_PARCELABLE, Types.CLASS_LOADER))
+    adapter.checkCast(property.type)
+  }
+
+  override fun writeValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec) {
+    adapter.loadArg(0)
+    adapter.loadThis()
+
+    adapter.invokeVirtual(owner.clazz, property.getter)
+    adapter.checkCast(Types.ANDROID_PARCELABLE)
+    adapter.loadArg(1)
+
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeParcelable", Types.VOID, Types.ANDROID_PARCELABLE, Types.INT))
   }
 }
