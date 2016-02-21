@@ -1,5 +1,6 @@
 package io.mironov.smuggler.compiler.generators
 
+import io.mironov.smuggler.compiler.ClassRegistry
 import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
@@ -33,7 +34,7 @@ internal abstract class AbstractTypeAdapter : TypeAdapter {
 }
 
 internal object TypeAdapterFactory {
-  fun from(spec: DataClassSpec, property: DataPropertySpec): TypeAdapter {
+  fun from(registry: ClassRegistry, spec: DataClassSpec, property: DataPropertySpec): TypeAdapter {
     return when (property.type) {
       Types.BYTE -> ByteTypeAdapter
       Types.CHAR -> CharTypeAdapter
