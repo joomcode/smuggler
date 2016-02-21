@@ -1,4 +1,23 @@
 # Smuggler
+Makes your data classes Parcelable. Just add `AutoParceable` to the class declaration. That's all. No methods need to be implemented.
+
+```kotlin
+data class User(
+  val firstName: String,
+  val userName: String
+) : AutoParcelable
+
+data class Message(
+  val text: String,
+  val user: User
+) : AutoParcelable
+
+data class Chat(
+  val title: String,
+  val messages: List<Message>,
+  val participants: List<User>
+) : AutoParcelable
+```
 
 # License
 
