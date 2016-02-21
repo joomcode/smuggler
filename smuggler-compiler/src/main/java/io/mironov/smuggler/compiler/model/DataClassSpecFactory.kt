@@ -5,7 +5,6 @@ import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
-import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.reflect.ClassReference
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
@@ -42,7 +41,10 @@ internal object DataClassSpecFactory {
             spec.type.className, resolver.getName(property.name).identifier, Flags.VISIBILITY.get(property.flags))
       }
 
-      DataPropertySpec(name, Types.OBJECT, null)
+      val getter = spec.getDeclaredMethod("get${name.capitalize()}")!!
+      val type = getter.returns
+
+      DataPropertySpec(name, null, type, getter)
     }
 
     return DataClassSpec(spec, properties)
