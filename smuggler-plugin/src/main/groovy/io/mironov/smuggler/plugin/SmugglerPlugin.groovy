@@ -1,6 +1,5 @@
 package io.mironov.smuggler.plugin
 
-import io.smuggler.plugin.BuildConfig
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
