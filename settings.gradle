@@ -1,3 +1,8 @@
 include ':smuggler-runtime'
 include ':smuggler-compiler'
 include ':smuggler-plugin'
+include ':smuggler-sample'
+
+if (!hasProperty("skipSample")) {
+  include ':sento-sample'
+}

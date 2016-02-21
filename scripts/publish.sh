@@ -1,1 +1,1 @@
-gradle :smuggler-runtime:assembleRelease bintrayUpload
+gradle :smuggler-runtime:assembleRelease bintrayUpload -PskipSample=true
