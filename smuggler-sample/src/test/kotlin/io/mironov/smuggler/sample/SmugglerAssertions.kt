@@ -7,7 +7,7 @@ import org.junit.Assert
 object SmugglerAssertions {
   fun <P : AutoParcelable> verify(parcelable: P) {
     val marshalled = marshall(parcelable)
-    val unmarshalled = unmarshall<User>(marshalled, parcelable.javaClass.classLoader)
+    val unmarshalled = unmarshall<P>(marshalled, parcelable.javaClass.classLoader)
 
     Assert.assertEquals(parcelable, unmarshalled)
   }
