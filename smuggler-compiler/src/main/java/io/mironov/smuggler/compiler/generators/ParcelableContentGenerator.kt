@@ -45,7 +45,8 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
       visit(ACC_PUBLIC + ACC_FINAL + ACC_SUPER, type, signature, Types.OBJECT, interfaces)
 
       newMethod(ACC_PUBLIC, Methods.getConstructor()) {
-        // nothing to do
+        loadThis()
+        invokeConstructor(Types.OBJECT, Methods.getConstructor())
       }
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
