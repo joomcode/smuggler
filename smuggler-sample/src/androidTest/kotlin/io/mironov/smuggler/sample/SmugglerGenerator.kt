@@ -45,6 +45,40 @@ class SmugglerGenerator(private val seed: Long) {
       builder.append(nextChar())
     }
 
+    String
+
     return builder.toString()
+  }
+
+  fun nextBooleanArray(): BooleanArray {
+    return BooleanArray(random.nextInt(25)) { nextBoolean() }
+  }
+
+  fun nextIntArray(): IntArray {
+    return IntArray(random.nextInt(25)) { nextInt() }
+  }
+
+  fun nextLongArray(): LongArray {
+    return LongArray(random.nextInt(25)) { nextLong() }
+  }
+
+  fun nextFloatArray(): FloatArray {
+    return FloatArray(random.nextInt(25)) { nextFloat() }
+  }
+
+  fun nextDoubleArray(): DoubleArray {
+    return DoubleArray(random.nextInt(25)) { nextDouble() }
+  }
+
+  fun nextShortArray(): ShortArray {
+    return ShortArray(random.nextInt(25)) { nextShort() }
+  }
+
+  fun nextByteArray(): ByteArray {
+    return ByteArray(random.nextInt(25)) { nextByte() }
+  }
+
+  fun nextCharArray(): CharArray {
+    return CharArray(random.nextInt(25)) { nextChar() }
   }
 }
