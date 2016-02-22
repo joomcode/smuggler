@@ -10,12 +10,12 @@ import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 
-internal interface TypeAdapter {
+internal interface PropertyAdapter {
   fun readValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec)
   fun writeValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec)
 }
 
-internal abstract class AbstractTypeAdapter : TypeAdapter {
+internal abstract class AbstractPropertyAdapter : PropertyAdapter {
   final override fun readValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     adapter.loadArg(0)
     adapter.readProperty(owner, property)
@@ -33,39 +33,39 @@ internal abstract class AbstractTypeAdapter : TypeAdapter {
   abstract fun GeneratorAdapter.writeProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec)
 }
 
-internal object TypeAdapterFactory {
-  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): TypeAdapter {
+internal object PropertyAdapterFactory {
+  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): PropertyAdapter {
     if (property.type == Types.ANDROID_BUNDLE) {
-      return BundleTypeAdapter
+      return BundlePropertyAdapter
     }
 
     if (registry.isSubclassOf(property.type, Types.ANDROID_PARCELABLE)) {
-      return ParcelableTypeAdapter
+      return ParcelablePropertyAdapter
     }
 
     if (registry.isSubclassOf(property.type, Types.ENUM)) {
-      return EnumTypeAdapter
+      return EnumPropertyAdapter
     }
 
     return when (property.type) {
-      Types.BOOLEAN -> BooleanTypeAdapter
-      Types.BYTE -> ByteTypeAdapter
-      Types.CHAR -> CharTypeAdapter
-      Types.DOUBLE -> DoubleTypeAdapter
-      Types.FLOAT -> FloatTypeAdapter
-      Types.INT -> IntTypeAdapter
-      Types.LONG -> LongTypeAdapter
-      Types.SHORT -> ShortTypeAdapter
-      Types.STRING -> StringTypeAdapter
+      Types.BOOLEAN -> BooleanPropertyAdapter
+      Types.BYTE -> BytePropertyAdapter
+      Types.CHAR -> CharPropertyAdapter
+      Types.DOUBLE -> DoublePropertyAdapter
+      Types.FLOAT -> FloatPropertyAdapter
+      Types.INT -> IntPropertyAdapter
+      Types.LONG -> LongPropertyAdapter
+      Types.SHORT -> ShortPropertyAdapter
+      Types.STRING -> StringPropertyAdapter
 
-      Types.getArrayType(Types.BOOLEAN) -> BooleanArrayTypeAdapter
-      Types.getArrayType(Types.BYTE) -> ByteArrayTypeAdapter
-      Types.getArrayType(Types.CHAR) -> CharArrayTypeAdapter
-      Types.getArrayType(Types.DOUBLE) -> DoubleArrayTypeAdapter
-      Types.getArrayType(Types.FLOAT) -> FloatArrayTypeAdapter
-      Types.getArrayType(Types.INT) -> IntArrayTypeAdapter
-      Types.getArrayType(Types.LONG) -> LongArrayTypeAdapter
-      Types.getArrayType(Types.STRING) -> StringArrayTypeAdapter
+      Types.getArrayType(Types.BOOLEAN) -> BooleanArrayPropertyAdapter
+      Types.getArrayType(Types.BYTE) -> ByteArrayPropertyAdapter
+      Types.getArrayType(Types.CHAR) -> CharArrayPropertyAdapter
+      Types.getArrayType(Types.DOUBLE) -> DoubleArrayPropertyAdapter
+      Types.getArrayType(Types.FLOAT) -> FloatArrayPropertyAdapter
+      Types.getArrayType(Types.INT) -> IntArrayPropertyAdapter
+      Types.getArrayType(Types.LONG) -> LongArrayPropertyAdapter
+      Types.getArrayType(Types.STRING) -> StringArrayPropertyAdapter
 
       else -> throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
           spec.clazz.type.className, property.name, property.type.className)
@@ -73,11 +73,11 @@ internal object TypeAdapterFactory {
   }
 }
 
-internal open class SimpleTypeAdapter(
+internal open class SimplePropertyAdapter(
     private val type: Type,
     private val reader: String,
     private val writer: String
-) : AbstractTypeAdapter() {
+) : AbstractPropertyAdapter() {
   override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get(reader, type))
   }
@@ -87,24 +87,24 @@ internal open class SimpleTypeAdapter(
   }
 }
 
-internal object ByteTypeAdapter : SimpleTypeAdapter(Types.BYTE, "readByte", "writeByte")
-internal object DoubleTypeAdapter : SimpleTypeAdapter(Types.DOUBLE, "readDouble", "writeDouble")
-internal object FloatTypeAdapter : SimpleTypeAdapter(Types.FLOAT, "readFloat", "writeFloat")
-internal object IntTypeAdapter : SimpleTypeAdapter(Types.INT, "readInt", "writeInt")
-internal object LongTypeAdapter : SimpleTypeAdapter(Types.LONG, "readLong", "writeLong")
-internal object StringTypeAdapter : SimpleTypeAdapter(Types.STRING, "readString", "writeString")
-internal object BundleTypeAdapter : SimpleTypeAdapter(Types.ANDROID_BUNDLE, "readBundle", "writeBundle")
+internal object BytePropertyAdapter : SimplePropertyAdapter(Types.BYTE, "readByte", "writeByte")
+internal object DoublePropertyAdapter : SimplePropertyAdapter(Types.DOUBLE, "readDouble", "writeDouble")
+internal object FloatPropertyAdapter : SimplePropertyAdapter(Types.FLOAT, "readFloat", "writeFloat")
+internal object IntPropertyAdapter : SimplePropertyAdapter(Types.INT, "readInt", "writeInt")
+internal object LongPropertyAdapter : SimplePropertyAdapter(Types.LONG, "readLong", "writeLong")
+internal object StringPropertyAdapter : SimplePropertyAdapter(Types.STRING, "readString", "writeString")
+internal object BundlePropertyAdapter : SimplePropertyAdapter(Types.ANDROID_BUNDLE, "readBundle", "writeBundle")
 
-internal object BooleanArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.BOOLEAN), "createBooleanArray", "writeBooleanArray")
-internal object ByteArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.BYTE), "createByteArray", "writeByteArray")
-internal object CharArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.CHAR), "createCharArray", "writeCharArray")
-internal object DoubleArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.DOUBLE), "createDoubleArray", "writeDoubleArray")
-internal object FloatArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.FLOAT), "createFloatArray", "writeFloatArray")
-internal object IntArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.INT), "createIntArray", "writeIntArray")
-internal object LongArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.LONG), "createLongArray", "writeLongArray")
-internal object StringArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.STRING), "createStringArray", "writeStringArray")
+internal object BooleanArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.BOOLEAN), "createBooleanArray", "writeBooleanArray")
+internal object ByteArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.BYTE), "createByteArray", "writeByteArray")
+internal object CharArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.CHAR), "createCharArray", "writeCharArray")
+internal object DoubleArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.DOUBLE), "createDoubleArray", "writeDoubleArray")
+internal object FloatArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.FLOAT), "createFloatArray", "writeFloatArray")
+internal object IntArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.INT), "createIntArray", "writeIntArray")
+internal object LongArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.LONG), "createLongArray", "writeLongArray")
+internal object StringArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.STRING), "createStringArray", "writeStringArray")
 
-internal object CharTypeAdapter : AbstractTypeAdapter() {
+internal object CharPropertyAdapter : AbstractPropertyAdapter() {
   override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     cast(Types.INT, Types.CHAR)
@@ -116,7 +116,7 @@ internal object CharTypeAdapter : AbstractTypeAdapter() {
   }
 }
 
-internal object ShortTypeAdapter : AbstractTypeAdapter() {
+internal object ShortPropertyAdapter : AbstractPropertyAdapter() {
   override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     cast(Types.INT, Types.SHORT)
@@ -128,7 +128,7 @@ internal object ShortTypeAdapter : AbstractTypeAdapter() {
   }
 }
 
-internal object BooleanTypeAdapter : AbstractTypeAdapter() {
+internal object BooleanPropertyAdapter : AbstractPropertyAdapter() {
   override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     val start = newLabel()
     val end = newLabel()
@@ -159,7 +159,7 @@ internal object BooleanTypeAdapter : AbstractTypeAdapter() {
   }
 }
 
-internal object ParcelableTypeAdapter : TypeAdapter {
+internal object ParcelablePropertyAdapter : PropertyAdapter {
   override fun readValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     adapter.loadArg(0)
     adapter.push(property.type)
@@ -181,7 +181,7 @@ internal object ParcelableTypeAdapter : TypeAdapter {
   }
 }
 
-internal object EnumTypeAdapter : AbstractTypeAdapter() {
+internal object EnumPropertyAdapter : AbstractPropertyAdapter() {
   override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     invokeStatic(property.type, Methods.get("values", Types.getArrayType(property.type)))
