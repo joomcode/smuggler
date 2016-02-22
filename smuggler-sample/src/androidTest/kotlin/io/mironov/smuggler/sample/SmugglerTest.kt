@@ -5,6 +5,7 @@ import io.mironov.smuggler.AutoParcelable
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.Arrays
 
 @RunWith(AndroidJUnit4::class)
 class SmugglerTest {
@@ -66,6 +67,44 @@ class SmugglerTest {
               firstName = generator.nextString(),
               lastName = generator.nextString()
           )
+      ))
+    }
+  }
+
+  @Test fun shouldWorkWithPrimitiveArrays() {
+    data class PrimitiveArrays(
+        val booleans: BooleanArray,
+        val bytes: ByteArray,
+        val chars: CharArray,
+        val ints: IntArray,
+        val longs: LongArray,
+        val floats: FloatArray,
+        val doubles: DoubleArray
+    ) : AutoParcelable {
+      override fun equals(other: Any?): Boolean {
+        if (other == null || other !is PrimitiveArrays) {
+          return false
+        }
+
+        return Arrays.equals(booleans, other.booleans) &&
+            Arrays.equals(bytes, other.bytes) &&
+            Arrays.equals(chars, other.chars) &&
+            Arrays.equals(ints, other.ints) &&
+            Arrays.equals(longs, other.longs) &&
+            Arrays.equals(floats, other.floats) &&
+            Arrays.equals(doubles, other.doubles)
+      }
+    }
+
+    times(100) {
+      SmugglerAssertions.verify(PrimitiveArrays(
+          booleans = generator.nextBooleanArray(),
+          bytes = generator.nextByteArray(),
+          chars = generator.nextCharArray(),
+          ints = generator.nextIntArray(),
+          longs = generator.nextLongArray(),
+          floats = generator.nextFloatArray(),
+          doubles = generator.nextDoubleArray()
       ))
     }
   }

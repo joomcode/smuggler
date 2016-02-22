@@ -23,7 +23,7 @@ class SmugglerGenerator(private val seed: Long) {
   fun nextShortArray() = ShortArray(random.nextInt(MAX_ARRAY_SIZE)) { nextShort() }
   fun nextByteArray() = ByteArray(random.nextInt(MAX_ARRAY_SIZE)) { nextByte() }
   fun nextCharArray() =  CharArray(random.nextInt(MAX_ARRAY_SIZE)) { nextChar() }
-  fun nextStringArrag() = Array(random.nextInt(MAX_ARRAY_SIZE)) { nextString() }
+  fun nextStringArray() = Array(random.nextInt(MAX_ARRAY_SIZE)) { nextString() }
 
   private companion object {
     private const val MAX_ARRAY_SIZE = 25
