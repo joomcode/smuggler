@@ -96,6 +96,13 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
         }
       }, ClassReader.SKIP_FRAMES)
 
+      if (spec.clazz.getDeclaredMethod("<clinit>", Type.VOID_TYPE) == null) {
+        newMethod(ACC_PUBLIC + ACC_STATIC, Methods.getStaticConstructor()) {
+          newInstance(creatorTypeFrom(spec), Methods.getConstructor())
+          putStatic(spec.clazz.type, "CREATOR", creatorTypeFrom(spec))
+        }
+      }
+
       newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
         spec.properties.forEach {
           TypeAdapterFactory.from(environment.registry, spec, it).writeValue(this, spec, it)
