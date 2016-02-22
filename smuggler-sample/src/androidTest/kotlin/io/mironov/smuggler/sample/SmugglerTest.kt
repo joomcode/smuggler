@@ -79,7 +79,8 @@ class SmugglerTest {
         val ints: IntArray,
         val longs: LongArray,
         val floats: FloatArray,
-        val doubles: DoubleArray
+        val doubles: DoubleArray,
+        val strings: Array<String>
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
         if (other == null || other !is PrimitiveArrays) {
@@ -92,7 +93,8 @@ class SmugglerTest {
             Arrays.equals(ints, other.ints) &&
             Arrays.equals(longs, other.longs) &&
             Arrays.equals(floats, other.floats) &&
-            Arrays.equals(doubles, other.doubles)
+            Arrays.equals(doubles, other.doubles) &&
+            Arrays.equals(strings, other.strings)
       }
     }
 
@@ -104,7 +106,8 @@ class SmugglerTest {
           ints = generator.nextIntArray(),
           longs = generator.nextLongArray(),
           floats = generator.nextFloatArray(),
-          doubles = generator.nextDoubleArray()
+          doubles = generator.nextDoubleArray(),
+          strings = generator.nextStringArray()
       ))
     }
   }
