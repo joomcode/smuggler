@@ -42,6 +42,34 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithNestedObjects() {
+    data class User(
+        val firstName: String,
+        val lastName: String
+    ) : AutoParcelable
+
+    data class Message(
+        val id: Long,
+        val timestamp: Long,
+        val text: String,
+        val sender: User,
+        val seen: Boolean
+    ) : AutoParcelable
+
+    times(100) {
+      SmugglerAssertions.verify(Message(
+          id = generator.nextLong(),
+          timestamp = generator.nextLong(),
+          text = generator.nextString(),
+          seen = generator.nextBoolean(),
+          sender = User(
+              firstName = generator.nextString(),
+              lastName = generator.nextString()
+          )
+      ))
+    }
+  }
+
   private inline fun times(count: Int, action: () -> Unit) {
     for (i in 0..count - 1) {
       action()
