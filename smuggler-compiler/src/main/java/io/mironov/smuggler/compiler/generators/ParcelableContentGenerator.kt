@@ -26,6 +26,7 @@ import org.objectweb.asm.Opcodes.ACC_SYNTHETIC
 import org.objectweb.asm.Opcodes.ASM5
 import org.objectweb.asm.commons.Method
 
+@Suppress("UNUSED_PARAMETER")
 internal class ParcelableContentGenerator(private val spec: AutoParcelableClassSpec) : ContentGenerator {
   private companion object {
     private const val ACC_METHOD_DEFAULT = ACC_PUBLIC + ACC_FINAL
