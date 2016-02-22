@@ -1,6 +1,7 @@
 package io.mironov.smuggler.compiler
 
 import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.common.isInterface
 import io.mironov.smuggler.compiler.generators.ParcelableContentGenerator
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpecFactory
 import io.mironov.smuggler.compiler.reflect.ClassReference
@@ -28,7 +29,7 @@ class SmugglerCompiler {
 
   private fun findAutoParcelableClasses(registry: ClassRegistry): Collection<ClassReference> {
     return registry.inputs.filter {
-      registry.isSubclassOf(it.type, Types.SMUGGLER_PARCELABLE)
+      !it.isInterface && registry.isSubclassOf(it.type, Types.SMUGGLER_PARCELABLE)
     }
   }
 }
