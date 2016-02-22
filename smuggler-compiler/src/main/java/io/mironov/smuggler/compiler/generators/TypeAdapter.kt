@@ -35,6 +35,10 @@ internal abstract class AbstractTypeAdapter : TypeAdapter {
 
 internal object TypeAdapterFactory {
   fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): TypeAdapter {
+    if (property.type == Types.ANDROID_BUNDLE) {
+      return BundleTypeAdapter
+    }
+
     if (registry.isSubclassOf(property.type, Types.ANDROID_PARCELABLE)) {
       return ParcelableTypeAdapter
     }
@@ -76,6 +80,7 @@ internal object FloatTypeAdapter : SimpleTypeAdapter(Types.FLOAT, "readFloat", "
 internal object IntTypeAdapter : SimpleTypeAdapter(Types.INT, "readInt", "writeInt")
 internal object LongTypeAdapter : SimpleTypeAdapter(Types.LONG, "readLong", "writeLong")
 internal object StringTypeAdapter : SimpleTypeAdapter(Types.STRING, "readString", "writeString")
+internal object BundleTypeAdapter : SimpleTypeAdapter(Types.ANDROID_BUNDLE, "readBundle", "writeBundle")
 
 internal object ShortTypeAdapter : AbstractTypeAdapter() {
   override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
