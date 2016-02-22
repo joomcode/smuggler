@@ -61,11 +61,12 @@ public class SmugglerTransform extends Transform {
   @Override
   public Set<QualifiedContent.Scope> getReferencedScopes() {
     return EnumSet.of(
+        QualifiedContent.Scope.TESTED_CODE,
         QualifiedContent.Scope.PROJECT_LOCAL_DEPS,
         QualifiedContent.Scope.SUB_PROJECTS,
         QualifiedContent.Scope.SUB_PROJECTS_LOCAL_DEPS,
         QualifiedContent.Scope.EXTERNAL_LIBRARIES,
-        QualifiedContent.Scope.PROVIDED_ONLY
+        QualifiedContent.Scope.PROVIDED_ONLY,
     )
   }
 
