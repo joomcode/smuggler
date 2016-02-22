@@ -14,8 +14,9 @@ import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
 internal object AutoParcelableClassSpecFactory {
   fun from(reference: ClassReference, registry: ClassRegistry): AutoParcelableClassSpec {
     val spec = registry.resolve(reference, false)
-    val metadata = spec.getAnnotation<Metadata>()
-        ?: throw SmugglerException("Invalid AutoParcelable class ''{0}'', only kotlin classes can implement AutoParcelable interface.", reference.type.className)
+    val metadata = spec.getAnnotation<Metadata>() ?: run {
+      throw SmugglerException("Invalid AutoParcelable class ''{0}'', only kotlin classes can implement AutoParcelable interface.", reference.type.className)
+    }
 
     val proto = JvmProtoBufUtil.readClassDataFrom(metadata.data, metadata.strings)
     val clazz = proto.classProto
