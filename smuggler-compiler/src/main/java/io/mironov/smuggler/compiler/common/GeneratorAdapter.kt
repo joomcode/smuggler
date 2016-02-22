@@ -4,11 +4,15 @@ import io.mironov.smuggler.compiler.reflect.ClassSpec
 import io.mironov.smuggler.compiler.reflect.FieldSpec
 import io.mironov.smuggler.compiler.reflect.MethodSpec
 import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.Method
 
-internal class GeneratorAdapter(visitor: ClassVisitor, access: Int, method: Method, signature: String?) : org.objectweb.asm.commons.GeneratorAdapter(Opcodes.ASM5, visitor.visitMethod(access, method.name, method.descriptor, signature, null), access, method.name, method.descriptor) {
+internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapter{
+  constructor(delegate: MethodVisitor?, access: Int, method: Method): super(Opcodes.ASM5, delegate, access, method.name, method.descriptor)
+  constructor(visitor: ClassVisitor, access: Int, method: Method, signature: String?): super(Opcodes.ASM5, visitor.visitMethod(access, method.name, method.descriptor, signature, null), access, method.name, method.descriptor)
+
   fun pushNull() {
     visitInsn(Opcodes.ACONST_NULL)
   }

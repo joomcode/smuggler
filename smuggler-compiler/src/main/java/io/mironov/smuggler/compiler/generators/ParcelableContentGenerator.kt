@@ -3,6 +3,7 @@ package io.mironov.smuggler.compiler.generators
 import io.mironov.smuggler.compiler.ContentGenerator
 import io.mironov.smuggler.compiler.GeneratedContent
 import io.mironov.smuggler.compiler.GenerationEnvironment
+import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.given
@@ -23,6 +24,7 @@ import org.objectweb.asm.Opcodes.ACC_STATIC
 import org.objectweb.asm.Opcodes.ACC_SUPER
 import org.objectweb.asm.Opcodes.ACC_SYNTHETIC
 import org.objectweb.asm.Opcodes.ASM5
+import org.objectweb.asm.commons.Method
 
 internal class ParcelableContentGenerator(private val spec: DataClassSpec) : ContentGenerator {
   private companion object {
@@ -85,13 +87,13 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
 
         override fun visitField(access: Int, name: String, description: String, signature: String?, value: Any?): FieldVisitor? {
           return given(!shouldExcludeFieldFromParcelableClass(access, name, description, signature)) {
-            super.visitField(access, name, description, signature, value)
+            createInterceptedFieldVisitor(super.visitField(access, name, description, signature, value), access, name, description, signature, value)
           }
         }
 
         override fun visitMethod(access: Int, name: String, description: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
           return given(!shouldExcludeMethodFromParcelableClass(access, name, description, signature)) {
-            super.visitMethod(access, name, description, signature, exceptions)
+            createInterceptedMethodVisitor(super.visitMethod(access, name, description, signature, exceptions), access, name, description, signature, exceptions)
           }
         }
       }, ClassReader.SKIP_FRAMES)
@@ -157,5 +159,30 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
 
   private fun shouldExcludeMethodFromParcelableClass(access: Int, name: String, description: String, signature: String?): Boolean {
     return name == "describeContents" || name == "writeToParcel"
+  }
+
+  private fun createInterceptedFieldVisitor(delegate: FieldVisitor?, access: Int, name: String, description: String, signature: String?, value: Any?): FieldVisitor? {
+    return delegate
+  }
+
+  private fun createInterceptedMethodVisitor(delegate: MethodVisitor?, access: Int, name: String, description: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
+    return given(name == "<clinit>" && access.isStatic) {
+      InitializerBlockInterceptor(delegate, access, Method(name, description)) {
+        newInstance(creatorTypeFrom(spec), Methods.getConstructor())
+        putStatic(spec.clazz.type, "CREATOR", creatorTypeFrom(spec))
+      }
+    } ?: delegate
+  }
+
+  private inner class InitializerBlockInterceptor(
+      private val delegate: MethodVisitor?,
+      private val access: Int,
+      private val method: Method,
+      private val interceptor: GeneratorAdapter.() -> Unit
+  ) : GeneratorAdapter(delegate, access, method) {
+    override fun visitCode() {
+      super.visitCode()
+      interceptor()
+    }
   }
 }
