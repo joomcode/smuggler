@@ -98,7 +98,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
         }
       }, ClassReader.SKIP_FRAMES)
 
-      if (spec.clazz.getDeclaredMethod("<clinit>", Type.VOID_TYPE) == null) {
+      if (spec.clazz.getDeclaredMethod("<clinit>", Types.VOID) == null) {
         newMethod(ACC_PUBLIC + ACC_STATIC, Methods.getStaticConstructor()) {
           newInstance(creatorTypeFrom(spec), Methods.getConstructor())
           putStatic(spec.clazz.type, "CREATOR", creatorTypeFrom(spec))
