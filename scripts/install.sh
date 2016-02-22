@@ -1,1 +1,1 @@
-gradle :smuggler-runtime:assembleRelease publishToMavenLocal -PskipSample=true
+gradle :smuggler-plugin:generateBuildClass :smuggler-runtime:assembleRelease publishToMavenLocal -PskipSample=true

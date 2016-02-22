@@ -1,1 +1,1 @@
-gradle :smuggler-runtime:assembleRelease bintrayUpload -PskipSample=true
+gradle :smuggler-plugin:generateBuildClass :smuggler-runtime:assembleRelease bintrayUpload -PskipSample=true

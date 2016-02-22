@@ -1,1 +1,1 @@
-./gradlew :smuggler-sample:clean :smuggler-sample:assembleDebug --stacktrace
+./gradlew :smuggler-plugin:generateBuildClass :smuggler-sample:clean :smuggler-sample:assembleDebug --stacktrace
