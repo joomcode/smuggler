@@ -6,7 +6,7 @@ import android.os.Parcelable
 interface AutoParcelable : Parcelable {
   companion object {
     fun <S : AutoParcelable> creator(clazz: Class<S>): Parcelable.Creator<S> {
-      return SmugglerFactory.creator(clazz)
+      throw UnsupportedOperationException()
     }
 
     inline fun <reified S : AutoParcelable> creator(): Parcelable.Creator<S> {

@@ -92,7 +92,7 @@ public class ShrinkPlugin implements Plugin<Project> {
             final def input = it.file
 
             FileUtils.iterateFiles(input, ["class"] as String[], true).each {
-              if (!it.absolutePath.contains("SmugglerFactory.class") && !it.absolutePath.contains("BuildConfig.class")) {
+              if (!it.absolutePath.contains("BuildConfig.class")) {
                 FileUtils.copyFile(it, new File(output, input.toURI().relativize(it.toURI()).path))
               }
             }
