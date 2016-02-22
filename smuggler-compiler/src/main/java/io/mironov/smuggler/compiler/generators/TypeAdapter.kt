@@ -44,6 +44,7 @@ internal object TypeAdapterFactory {
     }
 
     return when (property.type) {
+      Types.BOOLEAN -> BooleanTypeAdapter
       Types.BYTE -> ByteTypeAdapter
       Types.CHAR -> CharTypeAdapter
       Types.DOUBLE -> DoubleTypeAdapter
@@ -51,8 +52,17 @@ internal object TypeAdapterFactory {
       Types.INT -> IntTypeAdapter
       Types.LONG -> LongTypeAdapter
       Types.SHORT -> ShortTypeAdapter
-      Types.BOOLEAN -> BooleanTypeAdapter
       Types.STRING -> StringTypeAdapter
+
+      Types.getArrayType(Types.BOOLEAN) -> BooleanArrayTypeAdapter
+      Types.getArrayType(Types.BYTE) -> ByteArrayTypeAdapter
+      Types.getArrayType(Types.CHAR) -> CharArrayTypeAdapter
+      Types.getArrayType(Types.DOUBLE) -> DoubleArrayTypeAdapter
+      Types.getArrayType(Types.FLOAT) -> FloatArrayTypeAdapter
+      Types.getArrayType(Types.INT) -> IntArrayTypeAdapter
+      Types.getArrayType(Types.LONG) -> LongArrayTypeAdapter
+      Types.getArrayType(Types.STRING) -> StringArrayTypeAdapter
+
       else -> throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
           spec.clazz.type.className, property.name, property.type)
     }
@@ -81,6 +91,15 @@ internal object IntTypeAdapter : SimpleTypeAdapter(Types.INT, "readInt", "writeI
 internal object LongTypeAdapter : SimpleTypeAdapter(Types.LONG, "readLong", "writeLong")
 internal object StringTypeAdapter : SimpleTypeAdapter(Types.STRING, "readString", "writeString")
 internal object BundleTypeAdapter : SimpleTypeAdapter(Types.ANDROID_BUNDLE, "readBundle", "writeBundle")
+
+internal object BooleanArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.BOOLEAN), "createBooleanArray", "writeBooleanArray")
+internal object ByteArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.BYTE), "createByteArray", "writeByteArray")
+internal object CharArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.CHAR), "createCharArray", "writeCharArray")
+internal object DoubleArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.DOUBLE), "createDoubleArray", "writeDoubleArray")
+internal object FloatArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.FLOAT), "createFloatArray", "writeFloatArray")
+internal object IntArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.INT), "createIntArray", "writeIntArray")
+internal object LongArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.LONG), "createLongArray", "writeLongArray")
+internal object StringArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.STRING), "createStringArray", "writeStringArray")
 
 internal object ShortTypeAdapter : AbstractTypeAdapter() {
   override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {

@@ -30,5 +30,13 @@ data class Message(
     val timestamp: Long,
     val magic: Short,
     val seen: Boolean,
-    val extras: Bundle
+    val extras: Bundle,
+
+    val booleans: BooleanArray,
+    val chars: CharArray,
+    val doubles: DoubleArray,
+    val floats: FloatArray,
+    val ints: IntArray,
+    val logns: LongArray,
+    val strings: Array<String>
 ) : AutoParcelable
