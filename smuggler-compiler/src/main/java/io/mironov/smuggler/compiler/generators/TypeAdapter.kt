@@ -64,7 +64,7 @@ internal object TypeAdapterFactory {
       Types.getArrayType(Types.STRING) -> StringArrayTypeAdapter
 
       else -> throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
-          spec.clazz.type.className, property.name, property.type)
+          spec.clazz.type.className, property.name, property.type.className)
     }
   }
 }
