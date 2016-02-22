@@ -38,6 +38,13 @@ class SmugglerGenerator(private val seed: Long) {
   }
 
   fun nextString(): String {
-    return "so random, much string"
+    val length = random.nextInt(25)
+    val builder = StringBuilder(length)
+
+    for (i in 0..length - 1) {
+      builder.append(nextChar())
+    }
+
+    return builder.toString()
   }
 }
