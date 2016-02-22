@@ -43,6 +43,10 @@ internal object TypeAdapterFactory {
       return ParcelableTypeAdapter
     }
 
+    if (registry.isSubclassOf(property.type, Types.ENUM)) {
+      return EnumTypeAdapter
+    }
+
     return when (property.type) {
       Types.BOOLEAN -> BooleanTypeAdapter
       Types.BYTE -> ByteTypeAdapter
@@ -174,5 +178,19 @@ internal object ParcelableTypeAdapter : TypeAdapter {
     adapter.loadArg(1)
 
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeParcelable", Types.VOID, Types.ANDROID_PARCELABLE, Types.INT))
+  }
+}
+
+internal object EnumTypeAdapter : AbstractTypeAdapter() {
+  override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    invokeStatic(property.type, Methods.get("values", Types.getArrayType(property.type)))
+    swap(Types.INT, Types.getArrayType(property.type))
+    arrayLoad(property.type)
+  }
+
+  override fun GeneratorAdapter.writeProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    invokeVirtual(property.type, Methods.get("ordinal", Types.INT))
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
   }
 }

@@ -112,6 +112,28 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithEnums() {
+    data class Enums(
+        val magic: Magic,
+        val foo: Foo
+    ) : AutoParcelable
+
+    times(100) {
+      SmugglerAssertions.verify(Enums(
+          magic = generator.nextEnum(Magic::class.java),
+          foo = generator.nextEnum(Foo::class.java)
+      ))
+    }
+  }
+
+  private enum class Magic {
+    ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN
+  }
+
+  private enum class Foo {
+    FOO, BAR, FOO_FOO, BAR_BAR, FOO_BAR, BAR_FOO
+  }
+
   private inline fun times(count: Int, action: () -> Unit) {
     for (i in 0..count - 1) {
       action()

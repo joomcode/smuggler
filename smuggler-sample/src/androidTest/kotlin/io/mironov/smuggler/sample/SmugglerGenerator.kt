@@ -14,6 +14,7 @@ class SmugglerGenerator(private val seed: Long) {
   fun nextByte() = random.nextInt().toByte()
   fun nextChar() = random.nextInt().toChar()
   fun nextString() = String(nextCharArray())
+  fun <E : Enum<E>> nextEnum(clazz: Class<E>) = clazz.enumConstants[random.nextInt(clazz.enumConstants.size)]
 
   fun nextBooleanArray() = BooleanArray(random.nextInt(MAX_ARRAY_SIZE)) { nextBoolean() }
   fun nextIntArray() = IntArray(random.nextInt(MAX_ARRAY_SIZE)) { nextInt() }
