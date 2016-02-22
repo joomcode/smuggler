@@ -2,7 +2,6 @@ package io.mironov.smuggler.sample
 
 import android.app.Activity
 import android.os.Bundle
-import android.os.Parcel
 import io.mironov.smuggler.AutoParcelable
 
 class SampleActivity : Activity() {
@@ -12,16 +11,10 @@ class SampleActivity : Activity() {
   }
 }
 
-data class User(val firstName: String, val lastName: String) : AutoParcelable {
-  override fun writeToParcel(parcel: Parcel, flags: Int) {
-    parcel.writeString(firstName)
-    parcel.writeString(lastName)
-  }
-
-  override fun describeContents(): Int {
-    return 0
-  }
-}
+data class User(
+    val firstName: String,
+    val lastName: String
+) : AutoParcelable
 
 data class Message(
     val id: Int,
