@@ -11,18 +11,18 @@ import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
 
-internal object DataClassSpecFactory {
-  fun from(reference: ClassReference, registry: ClassRegistry): AutoParcelableClassSpec? {
+internal object AutoParcelableClassSpecFactory {
+  fun from(reference: ClassReference, registry: ClassRegistry): AutoParcelableClassSpec {
     val spec = registry.resolve(reference, false)
+    val metadata = spec.getAnnotation<Metadata>()
+        ?: throw SmugglerException("Invalid AutoParcelable class ''{0}'', only kotlin classes can implement AutoParcelable interface.", reference.type.className)
 
-    val metadata = spec.getAnnotation<Metadata>() ?: return null
     val proto = JvmProtoBufUtil.readClassDataFrom(metadata.data, metadata.strings)
-
     val clazz = proto.classProto
     val resolver = proto.nameResolver
 
     if (!Flags.IS_DATA.get(clazz.flags)) {
-      return null
+      throw SmugglerException("Invalid AutoParcelable class ''{0}'', only data classes can implement AutoParcelable interface.", reference.type.className)
     }
 
     if (!spec.signature.isNullOrBlank()) {

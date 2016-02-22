@@ -2,16 +2,12 @@ package io.mironov.smuggler.compiler
 
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.generators.ParcelableContentGenerator
-import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
-import io.mironov.smuggler.compiler.model.DataClassSpecFactory
+import io.mironov.smuggler.compiler.model.AutoParcelableClassSpecFactory
 import io.mironov.smuggler.compiler.reflect.ClassReference
 import org.apache.commons.io.FileUtils
-import org.slf4j.LoggerFactory
 import java.io.File
 
 class SmugglerCompiler {
-  private val logger = LoggerFactory.getLogger(SmugglerCompiler::class.java)
-
   fun compile(options: SmugglerOptions) {
     val registry = ClassRegistryFactory.create(options)
     val environment = GenerationEnvironment(registry)
@@ -21,8 +17,8 @@ class SmugglerCompiler {
     }
 
     findAutoParcelableClasses(registry).forEach {
-      val spec = findDataClassSpecFromAutoParcelable(it, registry)
-      val generator = createContentGeneratorFrom(spec)
+      val spec = AutoParcelableClassSpecFactory.from(it, registry)
+      val generator = ParcelableContentGenerator(spec)
 
       generator.generate(environment).forEach {
         FileUtils.writeByteArrayToFile(File(options.output, it.path), it.content)
@@ -34,14 +30,5 @@ class SmugglerCompiler {
     return registry.inputs.filter {
       registry.isSubclassOf(it.type, Types.SMUGGLER_PARCELABLE)
     }
-  }
-
-  private fun findDataClassSpecFromAutoParcelable(reference: ClassReference, registry: ClassRegistry): AutoParcelableClassSpec {
-    return DataClassSpecFactory.from(reference, registry)
-        ?: throw SmugglerException("Invalid AutoParcelable class ''{0}'', only data classes can implement AutoParcelable interface.", reference.type.className)
-  }
-
-  private fun createContentGeneratorFrom(spec: AutoParcelableClassSpec): ContentGenerator {
-    return ParcelableContentGenerator(spec)
   }
 }
