@@ -61,6 +61,10 @@ internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapte
     invokeVirtual(owner.type, Methods.get(method))
   }
 
+  fun invokeVirtual(owner: Type, method: MethodSpec) {
+    invokeVirtual(owner, Methods.get(method))
+  }
+
   fun newInstance(type: Type, method: Method, args: () -> Unit = {}) {
     newInstance(type)
     dup()
