@@ -2,7 +2,7 @@ package io.mironov.smuggler.compiler
 
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.generators.ParcelableContentGenerator
-import io.mironov.smuggler.compiler.model.DataClassSpec
+import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.DataClassSpecFactory
 import io.mironov.smuggler.compiler.reflect.ClassReference
 import org.apache.commons.io.FileUtils
@@ -36,12 +36,12 @@ class SmugglerCompiler {
     }
   }
 
-  private fun findDataClassSpecFromAutoParcelable(reference: ClassReference, registry: ClassRegistry): DataClassSpec {
+  private fun findDataClassSpecFromAutoParcelable(reference: ClassReference, registry: ClassRegistry): AutoParcelableClassSpec {
     return DataClassSpecFactory.from(reference, registry)
         ?: throw SmugglerException("Invalid AutoParcelable class ''{0}'', only data classes can implement AutoParcelable interface.", reference.type.className)
   }
 
-  private fun createContentGeneratorFrom(spec: DataClassSpec): ContentGenerator {
+  private fun createContentGeneratorFrom(spec: AutoParcelableClassSpec): ContentGenerator {
     return ParcelableContentGenerator(spec)
   }
 }

@@ -12,7 +12,7 @@ import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
 
 internal object DataClassSpecFactory {
-  fun from(reference: ClassReference, registry: ClassRegistry): DataClassSpec? {
+  fun from(reference: ClassReference, registry: ClassRegistry): AutoParcelableClassSpec? {
     val spec = registry.resolve(reference, false)
 
     val metadata = spec.getAnnotation<Metadata>() ?: return null
@@ -50,9 +50,9 @@ internal object DataClassSpecFactory {
       val getter = spec.getDeclaredMethod("get${name.capitalize()}")!!
       val type = getter.returns
 
-      DataPropertySpec(name, null, type, getter)
+      AutoParcelablePropertySpec(name, null, type, getter)
     }
 
-    return DataClassSpec(spec, properties)
+    return AutoParcelableClassSpec(spec, properties)
   }
 }

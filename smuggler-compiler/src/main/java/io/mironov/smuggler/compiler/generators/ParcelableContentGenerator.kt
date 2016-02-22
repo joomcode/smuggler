@@ -8,8 +8,8 @@ import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.given
 import io.mironov.smuggler.compiler.common.isStatic
-import io.mironov.smuggler.compiler.model.DataClassSpec
-import io.mironov.smuggler.compiler.model.DataPropertySpec
+import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
+import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import io.mironov.smuggler.compiler.reflect.MethodSpec
 import io.mironov.smuggler.compiler.reflect.Signature
 import org.objectweb.asm.ClassReader
@@ -26,7 +26,7 @@ import org.objectweb.asm.Opcodes.ACC_SYNTHETIC
 import org.objectweb.asm.Opcodes.ASM5
 import org.objectweb.asm.commons.Method
 
-internal class ParcelableContentGenerator(private val spec: DataClassSpec) : ContentGenerator {
+internal class ParcelableContentGenerator(private val spec: AutoParcelableClassSpec) : ContentGenerator {
   private companion object {
     private const val ACC_METHOD_DEFAULT = ACC_PUBLIC + ACC_FINAL
     private const val ACC_METHOD_BRIDGE = ACC_PUBLIC + ACC_FINAL + ACC_SYNTHETIC + ACC_BRIDGE
@@ -36,7 +36,7 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     return listOf(onCreatePatchedDataClass(spec, environment), onCreateCreatorGeneratedContent(spec, environment))
   }
 
-  private fun onCreateCreatorGeneratedContent(spec: DataClassSpec, environment: GenerationEnvironment): GeneratedContent {
+  private fun onCreateCreatorGeneratedContent(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(creatorTypeFrom(spec), emptyMap(), environment.newClass {
       val type = creatorTypeFrom(spec)
       val signature = creatorTypeSignatureFrom(spec)
@@ -49,7 +49,7 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
       }
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
-        newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map(DataPropertySpec::type))) {
+        newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map(AutoParcelablePropertySpec::type))) {
           spec.properties.forEach {
             TypeAdapterFactory.from(environment.registry, spec, it).readValue(this, spec, it)
           }
@@ -77,7 +77,7 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     })
   }
 
-  private fun onCreatePatchedDataClass(spec: DataClassSpec, environment: GenerationEnvironment): GeneratedContent {
+  private fun onCreatePatchedDataClass(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(spec.clazz.type, emptyMap(), environment.newClass {
       ClassReader(spec.clazz.opener.open()).accept(object : ClassVisitor(ASM5, this) {
         override fun visit(version: Int, access: Int, name: String, signature: String?, parent: String?, exceptions: Array<out String>?) {
@@ -117,19 +117,19 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     })
   }
 
-  private fun creatorTypeFrom(spec: DataClassSpec): Type {
+  private fun creatorTypeFrom(spec: AutoParcelableClassSpec): Type {
     return Types.getGeneratedType(spec.clazz.type, "AutoCreator")
   }
 
-  private fun creatorTypeSignatureFrom(spec: DataClassSpec): String {
+  private fun creatorTypeSignatureFrom(spec: AutoParcelableClassSpec): String {
     return Signature.type(Signature.simple(Types.OBJECT), Signature.generic(Types.ANDROID_CREATOR, spec.clazz.type)).toString()
   }
 
-  private fun creatorFieldSignatureFrom(spec: DataClassSpec): String {
+  private fun creatorFieldSignatureFrom(spec: AutoParcelableClassSpec): String {
     return Signature.generic(Types.ANDROID_CREATOR, spec.clazz.type).toString()
   }
 
-  private fun createMethodSpecForNewArrayMethod(spec: DataClassSpec, bridge: Boolean): MethodSpec {
+  private fun createMethodSpecForNewArrayMethod(spec: AutoParcelableClassSpec, bridge: Boolean): MethodSpec {
     val flags = if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT
     val returns = if (bridge) Types.OBJECT else spec.clazz.type
     val method = Type.getMethodType(Types.getArrayType(returns), Types.INT)
@@ -137,7 +137,7 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     return MethodSpec(flags, "newArray", method)
   }
 
-  private fun createMethodSpecForCreateFromParcelMethod(spec: DataClassSpec, bridge: Boolean): MethodSpec {
+  private fun createMethodSpecForCreateFromParcelMethod(spec: AutoParcelableClassSpec, bridge: Boolean): MethodSpec {
     val flags = if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT
     val returns = if (bridge) Types.OBJECT else spec.clazz.type
     val method = Type.getMethodType(returns, Types.ANDROID_PARCEL)
@@ -145,11 +145,11 @@ internal class ParcelableContentGenerator(private val spec: DataClassSpec) : Con
     return MethodSpec(flags, "createFromParcel", method)
   }
 
-  private fun createMethodSpecForDescribeContentsMethod(spec: DataClassSpec): MethodSpec {
+  private fun createMethodSpecForDescribeContentsMethod(spec: AutoParcelableClassSpec): MethodSpec {
     return MethodSpec(ACC_METHOD_DEFAULT, "describeContents", Type.getMethodType(Types.INT))
   }
 
-  private fun createMethodSpecForWriteToParcelMethod(spec: DataClassSpec): MethodSpec {
+  private fun createMethodSpecForWriteToParcelMethod(spec: AutoParcelableClassSpec): MethodSpec {
     return MethodSpec(ACC_METHOD_DEFAULT, "writeToParcel", Type.getMethodType(Types.VOID, Types.ANDROID_PARCEL, Types.INT))
   }
 

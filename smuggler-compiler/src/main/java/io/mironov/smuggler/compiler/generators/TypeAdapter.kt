@@ -5,23 +5,23 @@ import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
-import io.mironov.smuggler.compiler.model.DataClassSpec
-import io.mironov.smuggler.compiler.model.DataPropertySpec
+import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
+import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 
 internal interface TypeAdapter {
-  fun readValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec)
-  fun writeValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec)
+  fun readValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec)
+  fun writeValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec)
 }
 
 internal abstract class AbstractTypeAdapter : TypeAdapter {
-  final override fun readValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec) {
+  final override fun readValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     adapter.loadArg(0)
     adapter.readProperty(owner, property)
   }
 
-  final override fun writeValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec) {
+  final override fun writeValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     adapter.loadArg(0)
     adapter.loadThis()
 
@@ -29,12 +29,12 @@ internal abstract class AbstractTypeAdapter : TypeAdapter {
     adapter.writeProperty(owner, property)
   }
 
-  abstract fun GeneratorAdapter.readProperty(owner: DataClassSpec, property: DataPropertySpec)
-  abstract fun GeneratorAdapter.writeProperty(owner: DataClassSpec, property: DataPropertySpec)
+  abstract fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec)
+  abstract fun GeneratorAdapter.writeProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec)
 }
 
 internal object TypeAdapterFactory {
-  fun from(registry: ClassRegistry, spec: DataClassSpec, property: DataPropertySpec): TypeAdapter {
+  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): TypeAdapter {
     if (registry.isSubclassOf(property.type, Types.ANDROID_PARCELABLE)) {
       return ParcelableTypeAdapter
     }
@@ -60,11 +60,11 @@ internal open class SimpleTypeAdapter(
     private val reader: String,
     private val writer: String
 ) : AbstractTypeAdapter() {
-  override fun GeneratorAdapter.readProperty(owner: DataClassSpec, property: DataPropertySpec) {
+  override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get(reader, type))
   }
 
-  override fun GeneratorAdapter.writeProperty(owner: DataClassSpec, property: DataPropertySpec) {
+  override fun GeneratorAdapter.writeProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get(writer, Types.VOID, type))
   }
 }
@@ -78,19 +78,19 @@ internal object LongTypeAdapter : SimpleTypeAdapter(Types.LONG, "readLong", "wri
 internal object StringTypeAdapter : SimpleTypeAdapter(Types.STRING, "readString", "writeString")
 
 internal object ShortTypeAdapter : AbstractTypeAdapter() {
-  override fun GeneratorAdapter.readProperty(owner: DataClassSpec, property: DataPropertySpec) {
+  override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     cast(Types.INT, Types.SHORT)
   }
 
-  override fun GeneratorAdapter.writeProperty(owner: DataClassSpec, property: DataPropertySpec) {
+  override fun GeneratorAdapter.writeProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     cast(Types.SHORT, Types.INT)
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
   }
 }
 
 internal object BooleanTypeAdapter : AbstractTypeAdapter() {
-  override fun GeneratorAdapter.readProperty(owner: DataClassSpec, property: DataPropertySpec) {
+  override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     val start = newLabel()
     val end = newLabel()
 
@@ -105,7 +105,7 @@ internal object BooleanTypeAdapter : AbstractTypeAdapter() {
     mark(end)
   }
 
-  override fun GeneratorAdapter.writeProperty(owner: DataClassSpec, property: DataPropertySpec) {
+  override fun GeneratorAdapter.writeProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     val start = newLabel()
     val end = newLabel()
 
@@ -121,7 +121,7 @@ internal object BooleanTypeAdapter : AbstractTypeAdapter() {
 }
 
 internal object ParcelableTypeAdapter : TypeAdapter {
-  override fun readValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec) {
+  override fun readValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     adapter.loadArg(0)
     adapter.push(property.type)
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
@@ -130,7 +130,7 @@ internal object ParcelableTypeAdapter : TypeAdapter {
     adapter.checkCast(property.type)
   }
 
-  override fun writeValue(adapter: GeneratorAdapter, owner: DataClassSpec, property: DataPropertySpec) {
+  override fun writeValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     adapter.loadArg(0)
     adapter.loadThis()
 
