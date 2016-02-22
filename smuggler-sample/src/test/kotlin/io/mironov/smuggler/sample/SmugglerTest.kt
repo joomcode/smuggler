@@ -20,7 +20,7 @@ class SmugglerTest {
 
   private fun <P : AutoParcelable> verify(parcelable: P) {
     val marshalled = marshall(parcelable)
-    val unmarshalled = unmarshall<User>(marshalled)
+    val unmarshalled = unmarshall<User>(marshalled, parcelable.javaClass.classLoader)
 
     Assert.assertEquals(parcelable, unmarshalled)
   }
@@ -35,13 +35,13 @@ class SmugglerTest {
     }
   }
 
-  private fun <P : AutoParcelable> unmarshall(bytes: ByteArray): P {
+  private fun <P : AutoParcelable> unmarshall(bytes: ByteArray, loader: ClassLoader): P {
     val parcel = Parcel.obtain().apply {
       unmarshall(bytes, 0, bytes.size)
       setDataPosition(0)
     }
 
-    return parcel.readParcelable<P>(null).apply {
+    return parcel.readParcelable<P>(loader).apply {
       parcel.recycle()
     }
   }
