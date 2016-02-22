@@ -17,9 +17,22 @@ android {
   defaultConfig {
     targetSdkVersion projectTargetSdkVersion
     minSdkVersion 21
+
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  }
+
+  sourceSets {
+    androidTest.java.srcDirs += 'src/test/kotlin'
   }
 }
 
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
+  compile "com.android.support:support-v13:$supportVersion"
+  compile "com.android.support:appcompat-v7:$supportVersion"
+  compile "com.android.support:support-annotations:$supportVersion"
+
+  androidTestCompile "com.android.support.test:runner:$supportTestRunnerVersion"
+  androidTestCompile "com.android.support.test:rules:$supportTestRunnerVersion"
 }
