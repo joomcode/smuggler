@@ -50,7 +50,7 @@ internal class ClassRegistry(
   }
 
   fun reference(type: Type): ClassReference {
-    return refs[type] ?: throw SmugglerException("Unable to find a class \"${type.className}\". Make sure it is present in application classpath.")
+    return refs[type] ?: throw SmugglerException("Unable to find \"${type.className}\" class. Make sure it is present in application classpath.")
   }
 
   fun resolve(reference: ClassReference, cacheable: Boolean = true): ClassSpec {
