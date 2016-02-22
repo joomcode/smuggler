@@ -84,7 +84,6 @@ internal open class SimpleTypeAdapter(
 }
 
 internal object ByteTypeAdapter : SimpleTypeAdapter(Types.BYTE, "readByte", "writeByte")
-internal object CharTypeAdapter : SimpleTypeAdapter(Types.CHAR, "readChar", "writeChar")
 internal object DoubleTypeAdapter : SimpleTypeAdapter(Types.DOUBLE, "readDouble", "writeDouble")
 internal object FloatTypeAdapter : SimpleTypeAdapter(Types.FLOAT, "readFloat", "writeFloat")
 internal object IntTypeAdapter : SimpleTypeAdapter(Types.INT, "readInt", "writeInt")
@@ -100,6 +99,18 @@ internal object FloatArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Typ
 internal object IntArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.INT), "createIntArray", "writeIntArray")
 internal object LongArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.LONG), "createLongArray", "writeLongArray")
 internal object StringArrayTypeAdapter : SimpleTypeAdapter(Types.getArrayType(Types.STRING), "createStringArray", "writeStringArray")
+
+internal object CharTypeAdapter : AbstractTypeAdapter() {
+  override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    cast(Types.INT, Types.CHAR)
+  }
+
+  override fun GeneratorAdapter.writeProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    cast(Types.CHAR, Types.INT)
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+  }
+}
 
 internal object ShortTypeAdapter : AbstractTypeAdapter() {
   override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
