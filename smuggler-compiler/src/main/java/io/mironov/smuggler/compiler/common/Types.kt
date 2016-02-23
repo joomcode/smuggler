@@ -6,6 +6,7 @@ import java.util.HashMap
 import java.util.HashSet
 import java.util.IdentityHashMap
 
+@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 internal object Types {
   private val PRIMITIVE_TYPES = HashSet<Type>().apply {
     add(Type.BYTE_TYPE)
@@ -46,6 +47,15 @@ internal object Types {
   val BOOLEAN = Type.BOOLEAN_TYPE
   val STRING = Type.getType(String::class.java)
   val VOID = Type.VOID_TYPE
+
+  val BOXED_BYTE = Type.getType(java.lang.Byte::class.java)
+  val BOXED_CHAR = Type.getType(java.lang.Character::class.java)
+  val BOXED_DOUBLE = Type.getType(java.lang.Double::class.java)
+  val BOXED_FLOAT = Type.getType(java.lang.Float::class.java)
+  val BOXED_INT = Type.getType(java.lang.Integer::class.java)
+  val BOXED_LONG = Type.getType(java.lang.Long::class.java)
+  val BOXED_SHORT = Type.getType(java.lang.Short::class.java)
+  val BOXED_BOOLEAN = Type.getType(java.lang.Boolean::class.java)
 
   val MAP = Type.getType(Map::class.java)
   val IDENTITY_MAP = Type.getType(IdentityHashMap::class.java)
