@@ -3,9 +3,9 @@ package io.mironov.smuggler.compiler.generators
 import java.util.HashMap
 import java.util.NoSuchElementException
 
-internal class VariablesContext() {
-  private val names = HashMap<String, Int>()
-
+internal data class VariablesContext(
+    val names: MutableMap<String, Int> = HashMap()
+) {
   fun variable(name: String, index: Int) {
     names[name] = index
   }
