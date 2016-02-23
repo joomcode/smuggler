@@ -288,27 +288,12 @@ internal object ParcelablePropertyAdapter : PropertyAdapter {
 
 internal object ParcelableArrayPropertyAdapter : PropertyAdapter {
   override fun readValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
-    val start = adapter.newLabel()
-    val end = adapter.newLabel()
-
     adapter.loadArg(0)
     adapter.push(property.type.elementType)
 
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readParcelableArray", Types.getArrayType(Types.ANDROID_PARCELABLE), Types.CLASS_LOADER))
-
-    adapter.dup()
-    adapter.ifNull(start)
-
-    adapter.copyArray(Types.ANDROID_PARCELABLE, property.type.elementType)
-    adapter.goTo(end)
-
-    adapter.mark(start)
-    adapter.pop()
-    adapter.pushNull()
-
-    adapter.mark(end)
-    adapter.checkCast(property.type)
+    adapter.castArray(Types.ANDROID_PARCELABLE, property.type.elementType)
   }
 
   override fun writeValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
