@@ -51,9 +51,21 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
       }
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
+        val variables = VariablesContext()
+
+        variables.self(newLocal(type).apply {
+          loadThis()
+          storeLocal(this, type)
+        })
+
+        variables.parcel(newLocal(Types.ANDROID_PARCEL).apply {
+          loadArg(0)
+          storeLocal(this, Types.ANDROID_PARCEL)
+        })
+
         newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map(AutoParcelablePropertySpec::type))) {
           spec.properties.forEach {
-            PropertyAdapterFactory.from(environment.registry, spec, it).readValue(this, spec, it)
+            PropertyAdapterFactory.from(environment.registry, spec, it).readValue(this, variables, spec, it)
           }
         }
       }
@@ -108,8 +120,25 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
       }
 
       newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
+        val variables = VariablesContext()
+
+        variables.self(newLocal(spec.clazz.type).apply {
+          loadThis()
+          storeLocal(this, spec.clazz.type)
+        })
+
+        variables.parcel(newLocal(Types.ANDROID_PARCEL).apply {
+          loadArg(0)
+          storeLocal(this, Types.ANDROID_PARCEL)
+        })
+
+        variables.flags(newLocal(Types.INT).apply {
+          loadArg(1)
+          storeLocal(this, Types.INT)
+        })
+
         spec.properties.forEach {
-          PropertyAdapterFactory.from(environment.registry, spec, it).writeValue(this, spec, it)
+          PropertyAdapterFactory.from(environment.registry, spec, it).writeValue(this, variables, spec, it)
         }
       }
 
