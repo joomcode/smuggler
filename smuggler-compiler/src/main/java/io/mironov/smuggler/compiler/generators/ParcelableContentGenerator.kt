@@ -65,7 +65,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
 
         newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map(AutoParcelablePropertySpec::type))) {
           spec.properties.forEach {
-            PropertyAdapterFactory.from(environment.registry, spec, it).readValue(this, variables, spec, it)
+            PropertyAdapterFactory.from(environment.registry, spec, it).readValue(this, variables, it)
           }
         }
       }
@@ -153,7 +153,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
             storeLocal(this, it.type)
           })
 
-          property.writeValue(this, variables, spec, it)
+          property.writeValue(this, variables, it)
         }
       }
 
