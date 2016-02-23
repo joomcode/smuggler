@@ -17,6 +17,9 @@ internal class VariablesContext() {
   fun self(index: Int) = variable("__smuggler__self__", index)
   fun self() = variable("__smuggler__self__")
 
+  fun value(index: Int) = variable("__smuggler__value__", index)
+  fun value() = variable("__smuggler__value__")
+
   fun property(name: String, index: Int) = variable("__smuggler__property__${name}__", index)
   fun property(name: String) = variable("__smuggler__property__${name}__")
 
