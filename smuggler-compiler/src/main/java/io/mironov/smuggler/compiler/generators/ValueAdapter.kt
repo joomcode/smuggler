@@ -11,59 +11,59 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import java.util.HashMap
 
-internal interface PropertyAdapter {
+internal interface ValueAdapter {
   fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec)
   fun writeValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec)
 }
 
-internal object PropertyAdapterFactory {
-  private val ADAPTERS = HashMap<Type, PropertyAdapter>().apply {
-    put(Types.BOOLEAN, BooleanPropertyAdapter)
-    put(Types.BYTE, BytePropertyAdapter)
-    put(Types.CHAR, CharPropertyAdapter)
-    put(Types.DOUBLE, DoublePropertyAdapter)
-    put(Types.FLOAT, FloatPropertyAdapter)
-    put(Types.INT, IntPropertyAdapter)
-    put(Types.LONG, LongPropertyAdapter)
-    put(Types.SHORT, ShortPropertyAdapter)
-    put(Types.STRING, StringPropertyAdapter)
+internal object ValueAdapterFactory {
+  private val ADAPTERS = HashMap<Type, ValueAdapter>().apply {
+    put(Types.BOOLEAN, BooleanValueAdapter)
+    put(Types.BYTE, ByteValueAdapter)
+    put(Types.CHAR, CharValueAdapter)
+    put(Types.DOUBLE, DoubleValueAdapter)
+    put(Types.FLOAT, FloatValueAdapter)
+    put(Types.INT, IntValueAdapter)
+    put(Types.LONG, LongValueAdapter)
+    put(Types.SHORT, ShortValueAdapter)
+    put(Types.STRING, StringValueAdapter)
 
-    put(Types.BOXED_BOOLEAN, BoxedBooleanPropertyAdapter)
-    put(Types.BOXED_BYTE, BoxedBytePropertyAdapter)
-    put(Types.BOXED_CHAR, BoxedCharPropertyAdapter)
-    put(Types.BOXED_DOUBLE, BoxedDoublePropertyAdapter)
-    put(Types.BOXED_FLOAT, BoxedFloatPropertyAdapter)
-    put(Types.BOXED_INT, BoxedIntPropertyAdapter)
-    put(Types.BOXED_LONG, BoxedLongPropertyAdapter)
-    put(Types.BOXED_SHORT, BoxedShortPropertyAdapter)
+    put(Types.BOXED_BOOLEAN, BoxedBooleanValueAdapter)
+    put(Types.BOXED_BYTE, BoxedByteValueAdapter)
+    put(Types.BOXED_CHAR, BoxedCharValueAdapter)
+    put(Types.BOXED_DOUBLE, BoxedDoubleValueAdapter)
+    put(Types.BOXED_FLOAT, BoxedFloatValueAdapter)
+    put(Types.BOXED_INT, BoxedIntValueAdapter)
+    put(Types.BOXED_LONG, BoxedLongValueAdapter)
+    put(Types.BOXED_SHORT, BoxedShortValueAdapter)
 
-    put(Types.getArrayType(Types.BOOLEAN), BooleanArrayPropertyAdapter)
-    put(Types.getArrayType(Types.BYTE), ByteArrayPropertyAdapter)
-    put(Types.getArrayType(Types.CHAR), CharArrayPropertyAdapter)
-    put(Types.getArrayType(Types.DOUBLE), DoubleArrayPropertyAdapter)
-    put(Types.getArrayType(Types.FLOAT), FloatArrayPropertyAdapter)
-    put(Types.getArrayType(Types.INT), IntArrayPropertyAdapter)
-    put(Types.getArrayType(Types.LONG), LongArrayPropertyAdapter)
-    put(Types.getArrayType(Types.STRING), StringArrayPropertyAdapter)
+    put(Types.getArrayType(Types.BOOLEAN), BooleanArrayValueAdapter)
+    put(Types.getArrayType(Types.BYTE), ByteArrayValueAdapter)
+    put(Types.getArrayType(Types.CHAR), CharArrayValueAdapter)
+    put(Types.getArrayType(Types.DOUBLE), DoubleArrayValueAdapter)
+    put(Types.getArrayType(Types.FLOAT), FloatArrayValueAdapter)
+    put(Types.getArrayType(Types.INT), IntArrayValueAdapter)
+    put(Types.getArrayType(Types.LONG), LongArrayValueAdapter)
+    put(Types.getArrayType(Types.STRING), StringArrayValueAdapter)
   }
 
-  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): PropertyAdapter {
+  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
     if (property.type == Types.ANDROID_BUNDLE) {
-      return BundlePropertyAdapter
+      return BundleValueAdapter
     }
 
     if (registry.isSubclassOf(property.type, Types.ANDROID_PARCELABLE)) {
-      return ParcelablePropertyAdapter
+      return ParcelableValueAdapter
     }
 
     if (property.type.sort == Type.ARRAY && property.type.dimensions == 1) {
       if (registry.isSubclassOf(property.type.elementType, Types.ANDROID_PARCELABLE)) {
-        return ParcelableArrayPropertyAdapter
+        return ParcelableArrayValueAdapter
       }
     }
 
     if (registry.isSubclassOf(property.type, Types.ENUM)) {
-      return EnumPropertyAdapter
+      return EnumValueAdapter
     }
 
     return ADAPTERS.getOrElse(property.type) {
@@ -73,7 +73,7 @@ internal object PropertyAdapterFactory {
   }
 }
 
-internal abstract class OptionalPropertyAdapter() : PropertyAdapter {
+internal abstract class OptionalValueAdapter() : ValueAdapter {
   final override fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec) {
     val start = adapter.newLabel()
     val end = adapter.newLabel()
@@ -124,11 +124,11 @@ internal abstract class OptionalPropertyAdapter() : PropertyAdapter {
   abstract fun writeRequiredValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec)
 }
 
-internal open class SimplePropertyAdapter(
+internal open class SimpleValueAdapter(
     private val type: Type,
     private val reader: String,
     private val writer: String
-) : PropertyAdapter {
+) : ValueAdapter {
   override fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec) {
     adapter.loadLocal(variables.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get(reader, type))
@@ -141,13 +141,13 @@ internal open class SimplePropertyAdapter(
   }
 }
 
-internal open class SimpleBoxedPropertyAdapter(
-    private val delegate: PropertyAdapter,
+internal open class SimpleBoxedValueAdapter(
+    private val delegate: ValueAdapter,
     private val unboxed: Type,
     private val boxed: Type,
     private val unboxer: String,
     private val boxer: String
-) : OptionalPropertyAdapter() {
+) : OptionalValueAdapter() {
   override fun readRequiredValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec) {
     delegate.readValue(adapter, variables, property)
     adapter.invokeStatic(boxed, Methods.get(boxer, boxed, unboxed))
@@ -167,33 +167,33 @@ internal open class SimpleBoxedPropertyAdapter(
   }
 }
 
-internal object BytePropertyAdapter : SimplePropertyAdapter(Types.BYTE, "readByte", "writeByte")
-internal object DoublePropertyAdapter : SimplePropertyAdapter(Types.DOUBLE, "readDouble", "writeDouble")
-internal object FloatPropertyAdapter : SimplePropertyAdapter(Types.FLOAT, "readFloat", "writeFloat")
-internal object IntPropertyAdapter : SimplePropertyAdapter(Types.INT, "readInt", "writeInt")
-internal object LongPropertyAdapter : SimplePropertyAdapter(Types.LONG, "readLong", "writeLong")
-internal object StringPropertyAdapter : SimplePropertyAdapter(Types.STRING, "readString", "writeString")
-internal object BundlePropertyAdapter : SimplePropertyAdapter(Types.ANDROID_BUNDLE, "readBundle", "writeBundle")
+internal object ByteValueAdapter : SimpleValueAdapter(Types.BYTE, "readByte", "writeByte")
+internal object DoubleValueAdapter : SimpleValueAdapter(Types.DOUBLE, "readDouble", "writeDouble")
+internal object FloatValueAdapter : SimpleValueAdapter(Types.FLOAT, "readFloat", "writeFloat")
+internal object IntValueAdapter : SimpleValueAdapter(Types.INT, "readInt", "writeInt")
+internal object LongValueAdapter : SimpleValueAdapter(Types.LONG, "readLong", "writeLong")
+internal object StringValueAdapter : SimpleValueAdapter(Types.STRING, "readString", "writeString")
+internal object BundleValueAdapter : SimpleValueAdapter(Types.ANDROID_BUNDLE, "readBundle", "writeBundle")
 
-internal object BoxedBytePropertyAdapter : SimpleBoxedPropertyAdapter(BytePropertyAdapter, Types.BYTE, Types.BOXED_BYTE, "byteValue", "valueOf")
-internal object BoxedCharPropertyAdapter : SimpleBoxedPropertyAdapter(CharPropertyAdapter, Types.CHAR, Types.BOXED_CHAR, "charValue", "valueOf")
-internal object BoxedDoublePropertyAdapter : SimpleBoxedPropertyAdapter(DoublePropertyAdapter, Types.DOUBLE, Types.BOXED_DOUBLE, "doubleValue", "valueOf")
-internal object BoxedFloatPropertyAdapter : SimpleBoxedPropertyAdapter(FloatPropertyAdapter, Types.FLOAT, Types.BOXED_FLOAT, "floatValue", "valueOf")
-internal object BoxedIntPropertyAdapter : SimpleBoxedPropertyAdapter(IntPropertyAdapter, Types.INT, Types.BOXED_INT, "intValue", "valueOf")
-internal object BoxedLongPropertyAdapter : SimpleBoxedPropertyAdapter(LongPropertyAdapter, Types.LONG, Types.BOXED_LONG, "longValue", "valueOf")
-internal object BoxedShortPropertyAdapter : SimpleBoxedPropertyAdapter(ShortPropertyAdapter, Types.SHORT, Types.BOXED_SHORT, "shortValue", "valueOf")
-internal object BoxedBooleanPropertyAdapter : SimpleBoxedPropertyAdapter(BooleanPropertyAdapter, Types.BOOLEAN, Types.BOXED_BOOLEAN, "booleanValue", "valueOf")
+internal object BoxedByteValueAdapter : SimpleBoxedValueAdapter(ByteValueAdapter, Types.BYTE, Types.BOXED_BYTE, "byteValue", "valueOf")
+internal object BoxedCharValueAdapter : SimpleBoxedValueAdapter(CharValueAdapter, Types.CHAR, Types.BOXED_CHAR, "charValue", "valueOf")
+internal object BoxedDoubleValueAdapter : SimpleBoxedValueAdapter(DoubleValueAdapter, Types.DOUBLE, Types.BOXED_DOUBLE, "doubleValue", "valueOf")
+internal object BoxedFloatValueAdapter : SimpleBoxedValueAdapter(FloatValueAdapter, Types.FLOAT, Types.BOXED_FLOAT, "floatValue", "valueOf")
+internal object BoxedIntValueAdapter : SimpleBoxedValueAdapter(IntValueAdapter, Types.INT, Types.BOXED_INT, "intValue", "valueOf")
+internal object BoxedLongValueAdapter : SimpleBoxedValueAdapter(LongValueAdapter, Types.LONG, Types.BOXED_LONG, "longValue", "valueOf")
+internal object BoxedShortValueAdapter : SimpleBoxedValueAdapter(ShortValueAdapter, Types.SHORT, Types.BOXED_SHORT, "shortValue", "valueOf")
+internal object BoxedBooleanValueAdapter : SimpleBoxedValueAdapter(BooleanValueAdapter, Types.BOOLEAN, Types.BOXED_BOOLEAN, "booleanValue", "valueOf")
 
-internal object BooleanArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.BOOLEAN), "createBooleanArray", "writeBooleanArray")
-internal object ByteArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.BYTE), "createByteArray", "writeByteArray")
-internal object CharArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.CHAR), "createCharArray", "writeCharArray")
-internal object DoubleArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.DOUBLE), "createDoubleArray", "writeDoubleArray")
-internal object FloatArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.FLOAT), "createFloatArray", "writeFloatArray")
-internal object IntArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.INT), "createIntArray", "writeIntArray")
-internal object LongArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.LONG), "createLongArray", "writeLongArray")
-internal object StringArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.STRING), "createStringArray", "writeStringArray")
+internal object BooleanArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.BOOLEAN), "createBooleanArray", "writeBooleanArray")
+internal object ByteArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.BYTE), "createByteArray", "writeByteArray")
+internal object CharArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.CHAR), "createCharArray", "writeCharArray")
+internal object DoubleArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.DOUBLE), "createDoubleArray", "writeDoubleArray")
+internal object FloatArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.FLOAT), "createFloatArray", "writeFloatArray")
+internal object IntArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.INT), "createIntArray", "writeIntArray")
+internal object LongArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.LONG), "createLongArray", "writeLongArray")
+internal object StringArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.STRING), "createStringArray", "writeStringArray")
 
-internal object CharPropertyAdapter : PropertyAdapter {
+internal object CharValueAdapter : ValueAdapter {
   override fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec) {
     adapter.loadLocal(variables.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
@@ -208,7 +208,7 @@ internal object CharPropertyAdapter : PropertyAdapter {
   }
 }
 
-internal object ShortPropertyAdapter : PropertyAdapter {
+internal object ShortValueAdapter : ValueAdapter {
   override fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec) {
     adapter.loadLocal(variables.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
@@ -223,7 +223,7 @@ internal object ShortPropertyAdapter : PropertyAdapter {
   }
 }
 
-internal object BooleanPropertyAdapter : PropertyAdapter {
+internal object BooleanValueAdapter : ValueAdapter {
   override fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec) {
     val start = adapter.newLabel()
     val end = adapter.newLabel()
@@ -257,7 +257,7 @@ internal object BooleanPropertyAdapter : PropertyAdapter {
   }
 }
 
-internal object EnumPropertyAdapter : OptionalPropertyAdapter() {
+internal object EnumValueAdapter : OptionalValueAdapter() {
   override fun readRequiredValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec) {
     adapter.loadLocal(variables.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
@@ -274,7 +274,7 @@ internal object EnumPropertyAdapter : OptionalPropertyAdapter() {
   }
 }
 
-internal object ParcelablePropertyAdapter : PropertyAdapter {
+internal object ParcelableValueAdapter : ValueAdapter {
   override fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec) {
     adapter.loadLocal(variables.parcel())
     adapter.push(property.type)
@@ -292,7 +292,7 @@ internal object ParcelablePropertyAdapter : PropertyAdapter {
   }
 }
 
-internal object ParcelableArrayPropertyAdapter : PropertyAdapter {
+internal object ParcelableArrayValueAdapter : ValueAdapter {
   override fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, property: AutoParcelablePropertySpec) {
     adapter.loadLocal(variables.parcel())
     adapter.push(property.type.elementType)
