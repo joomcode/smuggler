@@ -75,12 +75,12 @@ internal object PropertyAdapterFactory {
 
 internal abstract class AbstractPropertyAdapter : PropertyAdapter {
   final override fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
-    adapter.loadArg(0)
+    adapter.loadLocal(variables.parcel())
     adapter.readProperty(variables, owner, property)
   }
 
   final override fun writeValue(adapter: GeneratorAdapter, variables: VariablesContext, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
-    adapter.loadArg(0)
+    adapter.loadLocal(variables.parcel())
     adapter.loadLocal(variables.property(property.name))
     adapter.writeProperty(variables, owner, property)
   }
@@ -264,40 +264,36 @@ internal object EnumPropertyAdapter : OptionalPropertyAdapter() {
 
 internal object ParcelablePropertyAdapter : PropertyAdapter {
   override fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
-    adapter.loadArg(0)
+    adapter.loadLocal(variables.parcel())
     adapter.push(property.type)
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
-
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readParcelable", Types.ANDROID_PARCELABLE, Types.CLASS_LOADER))
     adapter.checkCast(property.type)
   }
 
   override fun writeValue(adapter: GeneratorAdapter, variables: VariablesContext, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
-    adapter.loadArg(0)
-
+    adapter.loadLocal(variables.parcel())
     adapter.loadLocal(variables.property(property.name))
     adapter.checkCast(Types.ANDROID_PARCELABLE)
-    adapter.loadArg(1)
-
+    adapter.loadLocal(variables.flags())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeParcelable", Types.VOID, Types.ANDROID_PARCELABLE, Types.INT))
   }
 }
 
 internal object ParcelableArrayPropertyAdapter : PropertyAdapter {
   override fun readValue(adapter: GeneratorAdapter, variables: VariablesContext, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
-    adapter.loadArg(0)
+    adapter.loadLocal(variables.parcel())
     adapter.push(property.type.elementType)
-
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readParcelableArray", Types.getArrayType(Types.ANDROID_PARCELABLE), Types.CLASS_LOADER))
     adapter.castArray(Types.ANDROID_PARCELABLE, property.type.elementType)
   }
 
   override fun writeValue(adapter: GeneratorAdapter, variables: VariablesContext, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
-    adapter.loadArg(0)
+    adapter.loadLocal(variables.parcel())
     adapter.loadLocal(variables.property(property.name))
     adapter.checkCast(Types.getArrayType(Types.ANDROID_PARCELABLE))
-    adapter.loadArg(1)
+    adapter.loadLocal(variables.flags())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeParcelableArray", Types.VOID, Types.getArrayType(Types.ANDROID_PARCELABLE), Types.INT))
   }
 }
