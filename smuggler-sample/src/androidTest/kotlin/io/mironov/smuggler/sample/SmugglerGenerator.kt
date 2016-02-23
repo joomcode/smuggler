@@ -7,45 +7,62 @@ class SmugglerGenerator(private val seed: Long) {
 
   fun <T : Any> nextNullable(factory: () -> T): T? = if (random.nextInt(3) == 0) null else factory()
 
-  fun nextBoolean(): Boolean = random.nextBoolean()
-  fun nextNullableBoolean(): Boolean? = nextNullable { nextBoolean() }
+  fun nextBoolean() = random.nextBoolean()
+  fun nextNullableBoolean() = nextNullable { nextBoolean() }
 
-  fun nextInt(): Int = random.nextInt()
-  fun nextNullableInt(): Int? = nextNullable { nextInt() }
+  fun nextInt() = random.nextInt()
+  fun nextNullableInt() = nextNullable { nextInt() }
 
-  fun nextLong(): Long = random.nextLong()
-  fun nextNullableLong(): Long? = nextNullable { nextLong() }
+  fun nextLong() = random.nextLong()
+  fun nextNullableLong() = nextNullable { nextLong() }
 
-  fun nextFloat(): Float = random.nextFloat()
-  fun nextNullableFloat(): Float? = nextNullable { nextFloat() }
+  fun nextFloat() = random.nextFloat()
+  fun nextNullableFloat() = nextNullable { nextFloat() }
 
-  fun nextDouble(): Double = random.nextDouble()
-  fun nextNullableDouble(): Double? = nextNullable { nextDouble() }
+  fun nextDouble() = random.nextDouble()
+  fun nextNullableDouble() = nextNullable { nextDouble() }
 
-  fun nextShort(): Short = random.nextInt().toShort()
-  fun nextNullableShort(): Short? = nextNullable { nextShort() }
+  fun nextShort() = random.nextInt().toShort()
+  fun nextNullableShort() = nextNullable { nextShort() }
 
-  fun nextByte(): Byte = random.nextInt().toByte()
-  fun nextNullableByte(): Byte? = nextNullable { nextByte() }
+  fun nextByte() = random.nextInt().toByte()
+  fun nextNullableByte() = nextNullable { nextByte() }
 
-  fun nextChar(): Char = random.nextInt().toChar()
-  fun nextNullableChar(): Char? = nextNullable { nextChar() }
+  fun nextChar() = random.nextInt().toChar()
+  fun nextNullableChar() = nextNullable { nextChar() }
 
-  fun nextString(): String = String(nextCharArray())
-  fun nextNullableString(): String? = nextNullable { nextString() }
+  fun nextString() = String(nextCharArray())
+  fun nextNullableString() = nextNullable { nextString() }
 
-  fun <E : Enum<E>> nextEnum(clazz: Class<E>): E = clazz.enumConstants[random.nextInt(clazz.enumConstants.size)]
-  fun <E : Enum<E>> nextNullableEnum(clazz: Class<E>): E? = nextNullable { nextEnum(clazz) }
+  fun <E : Enum<E>> nextEnum(clazz: Class<E>) = clazz.enumConstants[random.nextInt(clazz.enumConstants.size)]
+  fun <E : Enum<E>> nextNullableEnum(clazz: Class<E>) = nextNullable { nextEnum(clazz) }
 
   fun nextBooleanArray() = BooleanArray(random.nextInt(MAX_ARRAY_SIZE)) { nextBoolean() }
+  fun nextNullableBooleanArray() = nextNullable { BooleanArray(random.nextInt(MAX_ARRAY_SIZE)) { nextBoolean() } }
+
   fun nextIntArray() = IntArray(random.nextInt(MAX_ARRAY_SIZE)) { nextInt() }
+  fun nextNullableIntArray() = nextNullable { IntArray(random.nextInt(MAX_ARRAY_SIZE)) { nextInt() } }
+
   fun nextLongArray() = LongArray(random.nextInt(MAX_ARRAY_SIZE)) { nextLong() }
+  fun nextNullableLongArray() = nextNullable { LongArray(random.nextInt(MAX_ARRAY_SIZE)) { nextLong() } }
+
   fun nextFloatArray() = FloatArray(random.nextInt(MAX_ARRAY_SIZE)) { nextFloat() }
+  fun nextNullableFloatArray() = nextNullable { FloatArray(random.nextInt(MAX_ARRAY_SIZE)) { nextFloat() } }
+
   fun nextDoubleArray() = DoubleArray(random.nextInt(MAX_ARRAY_SIZE)) { nextDouble() }
+  fun nextNullableDoubleArray() = nextNullable { DoubleArray(random.nextInt(MAX_ARRAY_SIZE)) { nextDouble() } }
+
   fun nextShortArray() = ShortArray(random.nextInt(MAX_ARRAY_SIZE)) { nextShort() }
+  fun nextNullableShortArray() = nextNullable { ShortArray(random.nextInt(MAX_ARRAY_SIZE)) { nextShort() } }
+
   fun nextByteArray() = ByteArray(random.nextInt(MAX_ARRAY_SIZE)) { nextByte() }
-  fun nextCharArray() =  CharArray(random.nextInt(MAX_ARRAY_SIZE)) { nextChar() }
+  fun nextNullableByteArray() = nextNullable { ByteArray(random.nextInt(MAX_ARRAY_SIZE)) { nextByte() } }
+
+  fun nextCharArray() = CharArray(random.nextInt(MAX_ARRAY_SIZE)) { nextChar() }
+  fun nextNullableCharArray() = nextNullable { CharArray(random.nextInt(MAX_ARRAY_SIZE)) { nextChar() } }
+
   fun nextStringArray() = Array(random.nextInt(MAX_ARRAY_SIZE)) { nextString() }
+  fun nextNullableStringArray() = nextNullable { Array(random.nextInt(MAX_ARRAY_SIZE)) { nextString() } }
 
   private companion object {
     private const val MAX_ARRAY_SIZE = 25
