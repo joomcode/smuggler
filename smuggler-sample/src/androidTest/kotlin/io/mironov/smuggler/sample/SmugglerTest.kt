@@ -128,12 +128,16 @@ class SmugglerTest {
 
   @Test fun shouldWorkWithOptionalPrimitives() {
     data class Optionals(
-        val boolean: Boolean?
+        val boolean: Boolean?,
+        val magic: Magic?,
+        val foo: Foo?
     ) : AutoParcelable
 
     times(100) {
       SmugglerAssertions.verify(Optionals(
-          boolean = generator.nextNullableBoolean()
+          boolean = generator.nextNullableBoolean(),
+          magic = generator.nextNullableEnum(Magic::class.java),
+          foo = generator.nextNullableEnum(Foo::class.java)
       ))
     }
   }
