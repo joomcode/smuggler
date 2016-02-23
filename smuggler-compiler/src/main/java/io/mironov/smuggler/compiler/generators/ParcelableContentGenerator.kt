@@ -51,21 +51,21 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
       }
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
-        val variables = VariablesContext()
+        val context = ValueContext()
 
-        variables.self(newLocal(type).apply {
+        context.self(newLocal(type).apply {
           loadThis()
           storeLocal(this, type)
         })
 
-        variables.parcel(newLocal(Types.ANDROID_PARCEL).apply {
+        context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
           loadArg(0)
           storeLocal(this, Types.ANDROID_PARCEL)
         })
 
         newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map(AutoParcelablePropertySpec::type))) {
           spec.properties.forEach {
-            ValueAdapterFactory.from(environment.registry, spec, it).read(this, variables, it)
+            ValueAdapterFactory.from(environment.registry, spec, it).read(this, context.typed(it.type, it.signature))
           }
         }
       }
@@ -120,25 +120,25 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
       }
 
       newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
-        val variables = VariablesContext()
+        val context = ValueContext()
 
-        variables.self(newLocal(spec.clazz.type).apply {
+        context.self(newLocal(spec.clazz.type).apply {
           loadThis()
           storeLocal(this, spec.clazz.type)
         })
 
-        variables.parcel(newLocal(Types.ANDROID_PARCEL).apply {
+        context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
           loadArg(0)
           storeLocal(this, Types.ANDROID_PARCEL)
         })
 
-        variables.flags(newLocal(Types.INT).apply {
+        context.flags(newLocal(Types.INT).apply {
           loadArg(1)
           storeLocal(this, Types.INT)
         })
 
         spec.properties.forEach {
-          variables.property(it.name, newLocal(it.type).apply {
+          context.property(it.name, newLocal(it.type).apply {
             loadThis()
             invokeVirtual(spec.clazz, it.getter)
             storeLocal(this, it.type)
@@ -148,12 +148,12 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
         spec.properties.forEach {
           val property = ValueAdapterFactory.from(environment.registry, spec, it)
 
-          variables.value(newLocal(it.type).apply {
-            loadLocal(variables.property(it.name))
+          context.value(newLocal(it.type).apply {
+            loadLocal(context.property(it.name))
             storeLocal(this, it.type)
           })
 
-          property.write(this, variables, it)
+          property.write(this, context.typed(it.type, it.signature))
         }
       }
 
