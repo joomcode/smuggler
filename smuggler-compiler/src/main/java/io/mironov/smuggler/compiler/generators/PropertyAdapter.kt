@@ -9,6 +9,7 @@ import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
+import java.util.HashMap
 
 internal interface PropertyAdapter {
   fun readValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec)
@@ -16,6 +17,36 @@ internal interface PropertyAdapter {
 }
 
 internal object PropertyAdapterFactory {
+  private val ADAPTERS = HashMap<Type, PropertyAdapter>().apply {
+    put(Types.BOOLEAN, BooleanPropertyAdapter)
+    put(Types.BYTE, BytePropertyAdapter)
+    put(Types.CHAR, CharPropertyAdapter)
+    put(Types.DOUBLE, DoublePropertyAdapter)
+    put(Types.FLOAT, FloatPropertyAdapter)
+    put(Types.INT, IntPropertyAdapter)
+    put(Types.LONG, LongPropertyAdapter)
+    put(Types.SHORT, ShortPropertyAdapter)
+    put(Types.STRING, StringPropertyAdapter)
+
+    put(Types.BOXED_BOOLEAN, BoxedBooleanPropertyAdapter)
+    put(Types.BOXED_BYTE, BoxedBytePropertyAdapter)
+    put(Types.BOXED_CHAR, BoxedCharPropertyAdapter)
+    put(Types.BOXED_DOUBLE, BoxedDoublePropertyAdapter)
+    put(Types.BOXED_FLOAT, BoxedFloatPropertyAdapter)
+    put(Types.BOXED_INT, BoxedIntPropertyAdapter)
+    put(Types.BOXED_LONG, BoxedLongPropertyAdapter)
+    put(Types.BOXED_SHORT, BoxedShortPropertyAdapter)
+
+    put(Types.getArrayType(Types.BOOLEAN), BooleanArrayPropertyAdapter)
+    put(Types.getArrayType(Types.BYTE), ByteArrayPropertyAdapter)
+    put(Types.getArrayType(Types.CHAR), CharArrayPropertyAdapter)
+    put(Types.getArrayType(Types.DOUBLE), DoubleArrayPropertyAdapter)
+    put(Types.getArrayType(Types.FLOAT), FloatArrayPropertyAdapter)
+    put(Types.getArrayType(Types.INT), IntArrayPropertyAdapter)
+    put(Types.getArrayType(Types.LONG), LongArrayPropertyAdapter)
+    put(Types.getArrayType(Types.STRING), StringArrayPropertyAdapter)
+  }
+
   fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): PropertyAdapter {
     if (property.type == Types.ANDROID_BUNDLE) {
       return BundlePropertyAdapter
@@ -29,36 +60,8 @@ internal object PropertyAdapterFactory {
       return EnumPropertyAdapter
     }
 
-    return when (property.type) {
-      Types.BOOLEAN -> BooleanPropertyAdapter
-      Types.BYTE -> BytePropertyAdapter
-      Types.CHAR -> CharPropertyAdapter
-      Types.DOUBLE -> DoublePropertyAdapter
-      Types.FLOAT -> FloatPropertyAdapter
-      Types.INT -> IntPropertyAdapter
-      Types.LONG -> LongPropertyAdapter
-      Types.SHORT -> ShortPropertyAdapter
-      Types.STRING -> StringPropertyAdapter
-
-      Types.BOXED_BOOLEAN -> BoxedBooleanPropertyAdapter
-      Types.BOXED_BYTE -> BoxedBytePropertyAdapter
-      Types.BOXED_CHAR -> BoxedCharPropertyAdapter
-      Types.BOXED_DOUBLE -> BoxedDoublePropertyAdapter
-      Types.BOXED_FLOAT -> BoxedFloatPropertyAdapter
-      Types.BOXED_INT -> BoxedIntPropertyAdapter
-      Types.BOXED_LONG -> BoxedLongPropertyAdapter
-      Types.BOXED_SHORT -> BoxedShortPropertyAdapter
-
-      Types.getArrayType(Types.BOOLEAN) -> BooleanArrayPropertyAdapter
-      Types.getArrayType(Types.BYTE) -> ByteArrayPropertyAdapter
-      Types.getArrayType(Types.CHAR) -> CharArrayPropertyAdapter
-      Types.getArrayType(Types.DOUBLE) -> DoubleArrayPropertyAdapter
-      Types.getArrayType(Types.FLOAT) -> FloatArrayPropertyAdapter
-      Types.getArrayType(Types.INT) -> IntArrayPropertyAdapter
-      Types.getArrayType(Types.LONG) -> LongArrayPropertyAdapter
-      Types.getArrayType(Types.STRING) -> StringArrayPropertyAdapter
-
-      else -> throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
+    return ADAPTERS.getOrElse(property.type) {
+      throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
           spec.clazz.type.className, property.name, property.type.className)
     }
   }
