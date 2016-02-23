@@ -53,11 +53,6 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
         val context = ValueContext()
 
-        context.self(newLocal(type).apply {
-          loadThis()
-          storeLocal(this, type)
-        })
-
         context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
           loadArg(0)
           storeLocal(this, Types.ANDROID_PARCEL)
@@ -121,11 +116,6 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
 
       newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
         val context = ValueContext()
-
-        context.self(newLocal(spec.clazz.type).apply {
-          loadThis()
-          storeLocal(this, spec.clazz.type)
-        })
 
         context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
           loadArg(0)

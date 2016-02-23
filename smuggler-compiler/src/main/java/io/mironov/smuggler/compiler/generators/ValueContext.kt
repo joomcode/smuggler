@@ -33,9 +33,6 @@ internal class ValueContext(
     return names[name] ?: throw NoSuchElementException("Unknown variable \"$name\"")
   }
 
-  fun self(index: Int) = variable("__smuggler__self__", index)
-  fun self() = variable("__smuggler__self__")
-
   fun value(index: Int) = variable("__smuggler__value__", index)
   fun value() = variable("__smuggler__value__")
 
