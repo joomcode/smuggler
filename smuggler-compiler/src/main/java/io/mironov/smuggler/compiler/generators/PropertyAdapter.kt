@@ -41,6 +41,13 @@ internal object PropertyAdapterFactory {
       Types.STRING -> StringPropertyAdapter
 
       Types.BOXED_BOOLEAN -> BoxedBooleanPropertyAdapter
+      Types.BOXED_BYTE -> BoxedBytePropertyAdapter
+      Types.BOXED_CHAR -> BoxedCharPropertyAdapter
+      Types.BOXED_DOUBLE -> BoxedDoublePropertyAdapter
+      Types.BOXED_FLOAT -> BoxedFloatPropertyAdapter
+      Types.BOXED_INT -> BoxedIntPropertyAdapter
+      Types.BOXED_LONG -> BoxedLongPropertyAdapter
+      Types.BOXED_SHORT -> BoxedShortPropertyAdapter
 
       Types.getArrayType(Types.BOOLEAN) -> BooleanArrayPropertyAdapter
       Types.getArrayType(Types.BYTE) -> ByteArrayPropertyAdapter
@@ -161,6 +168,13 @@ internal object LongPropertyAdapter : SimplePropertyAdapter(Types.LONG, "readLon
 internal object StringPropertyAdapter : SimplePropertyAdapter(Types.STRING, "readString", "writeString")
 internal object BundlePropertyAdapter : SimplePropertyAdapter(Types.ANDROID_BUNDLE, "readBundle", "writeBundle")
 
+internal object BoxedBytePropertyAdapter : SimpleBoxedPropertyAdapter(BytePropertyAdapter, Types.BYTE, Types.BOXED_BYTE, "byteValue", "valueOf")
+internal object BoxedCharPropertyAdapter : SimpleBoxedPropertyAdapter(CharPropertyAdapter, Types.CHAR, Types.BOXED_CHAR, "charValue", "valueOf")
+internal object BoxedDoublePropertyAdapter : SimpleBoxedPropertyAdapter(DoublePropertyAdapter, Types.DOUBLE, Types.BOXED_DOUBLE, "doubleValue", "valueOf")
+internal object BoxedFloatPropertyAdapter : SimpleBoxedPropertyAdapter(FloatPropertyAdapter, Types.FLOAT, Types.BOXED_FLOAT, "floatValue", "valueOf")
+internal object BoxedIntPropertyAdapter : SimpleBoxedPropertyAdapter(IntPropertyAdapter, Types.INT, Types.BOXED_INT, "intValue", "valueOf")
+internal object BoxedLongPropertyAdapter : SimpleBoxedPropertyAdapter(LongPropertyAdapter, Types.LONG, Types.BOXED_LONG, "longValue", "valueOf")
+internal object BoxedShortPropertyAdapter : SimpleBoxedPropertyAdapter(ShortPropertyAdapter, Types.SHORT, Types.BOXED_SHORT, "shortValue", "valueOf")
 internal object BoxedBooleanPropertyAdapter : SimpleBoxedPropertyAdapter(BooleanPropertyAdapter, Types.BOOLEAN, Types.BOXED_BOOLEAN, "booleanValue", "valueOf")
 
 internal object BooleanArrayPropertyAdapter : SimplePropertyAdapter(Types.getArrayType(Types.BOOLEAN), "createBooleanArray", "writeBooleanArray")

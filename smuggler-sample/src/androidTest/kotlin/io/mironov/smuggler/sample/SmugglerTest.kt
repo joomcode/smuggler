@@ -129,6 +129,14 @@ class SmugglerTest {
   @Test fun shouldWorkWithOptionalPrimitives() {
     data class Optionals(
         val boolean: Boolean?,
+        val byte: Byte?,
+        val char: Char?,
+        val short: Short?,
+        val int: Int?,
+        val long: Long?,
+        val float: Float?,
+        val double: Double?,
+        val string: String?,
         val magic: Magic?,
         val foo: Foo?
     ) : AutoParcelable
@@ -136,6 +144,14 @@ class SmugglerTest {
     times(100) {
       SmugglerAssertions.verify(Optionals(
           boolean = generator.nextNullableBoolean(),
+          byte = generator.nextNullableByte(),
+          char = generator.nextNullableChar(),
+          short = generator.nextNullableShort(),
+          int = generator.nextNullableInt(),
+          long = generator.nextNullableLong(),
+          float = generator.nextNullableFloat(),
+          double = generator.nextNullableDouble(),
+          string = generator.nextNullableString(),
           magic = generator.nextNullableEnum(Magic::class.java),
           foo = generator.nextNullableEnum(Foo::class.java)
       ))
