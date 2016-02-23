@@ -87,6 +87,52 @@ internal open class SimplePropertyAdapter(
   }
 }
 
+internal abstract class OptionalPropertyAdapter() : AbstractPropertyAdapter() {
+  final override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    val start = newLabel()
+    val end = newLabel()
+
+    dup()
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    ifZCmp(Opcodes.IFEQ, start)
+
+    readRequiredProperty(owner, property)
+    goTo(end)
+
+    mark(start)
+    pop()
+    pushNull()
+
+    mark(end)
+  }
+
+  final override fun GeneratorAdapter.writeProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    val start = newLabel()
+    val end = newLabel()
+
+    dup()
+    ifNull(start)
+
+    swap(Types.ANDROID_PARCEL, property.type)
+    dup()
+    push(1)
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+    swap(property.type, Types.ANDROID_PARCEL)
+    writeRequiredProperty(owner, property)
+    goTo(end)
+
+    mark(start)
+    pop()
+    push(0)
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+
+    mark(end)
+  }
+
+  abstract fun GeneratorAdapter.readRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec)
+  abstract fun GeneratorAdapter.writeRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec)
+}
+
 internal object BytePropertyAdapter : SimplePropertyAdapter(Types.BYTE, "readByte", "writeByte")
 internal object DoublePropertyAdapter : SimplePropertyAdapter(Types.DOUBLE, "readDouble", "writeDouble")
 internal object FloatPropertyAdapter : SimplePropertyAdapter(Types.FLOAT, "readFloat", "writeFloat")
@@ -181,15 +227,15 @@ internal object ParcelablePropertyAdapter : PropertyAdapter {
   }
 }
 
-internal object EnumPropertyAdapter : AbstractPropertyAdapter() {
-  override fun GeneratorAdapter.readProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+internal object EnumPropertyAdapter : OptionalPropertyAdapter() {
+  override fun GeneratorAdapter.readRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     invokeStatic(property.type, Methods.get("values", Types.getArrayType(property.type)))
     swap(Types.INT, Types.getArrayType(property.type))
     arrayLoad(property.type)
   }
 
-  override fun GeneratorAdapter.writeProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+  override fun GeneratorAdapter.writeRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     invokeVirtual(property.type, Methods.get("ordinal", Types.INT))
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
   }
