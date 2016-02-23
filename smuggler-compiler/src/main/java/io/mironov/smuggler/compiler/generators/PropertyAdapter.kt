@@ -58,6 +58,8 @@ internal object PropertyAdapterFactory {
       Types.SHORT -> ShortPropertyAdapter
       Types.STRING -> StringPropertyAdapter
 
+      Types.BOXED_BOOLEAN -> BoxedBooleanPropertyAdapter
+
       Types.getArrayType(Types.BOOLEAN) -> BooleanArrayPropertyAdapter
       Types.getArrayType(Types.BYTE) -> ByteArrayPropertyAdapter
       Types.getArrayType(Types.CHAR) -> CharArrayPropertyAdapter
@@ -238,5 +240,17 @@ internal object EnumPropertyAdapter : OptionalPropertyAdapter() {
   override fun GeneratorAdapter.writeRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     invokeVirtual(property.type, Methods.get("ordinal", Types.INT))
     invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+  }
+}
+
+internal object BoxedBooleanPropertyAdapter : OptionalPropertyAdapter() {
+  override fun GeneratorAdapter.readRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    BooleanPropertyAdapter.apply { readProperty(owner, property) }
+    invokeStatic(Types.BOXED_BOOLEAN, Methods.get("valueOf", Types.BOXED_BOOLEAN, Types.BOOLEAN))
+  }
+
+  override fun GeneratorAdapter.writeRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    invokeVirtual(Types.BOXED_BOOLEAN, Methods.get("booleanValue", Types.BOOLEAN))
+    BooleanPropertyAdapter.apply { writeProperty(owner, property) }
   }
 }

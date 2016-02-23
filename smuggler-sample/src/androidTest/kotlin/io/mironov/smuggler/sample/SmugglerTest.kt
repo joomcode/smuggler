@@ -126,6 +126,18 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithOptionalPrimitives() {
+    data class Optionals(
+        val boolean: Boolean?
+    ) : AutoParcelable
+
+    times(100) {
+      SmugglerAssertions.verify(Optionals(
+          boolean = generator.nextBoolean()
+      ))
+    }
+  }
+
   private enum class Magic {
     ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN
   }
