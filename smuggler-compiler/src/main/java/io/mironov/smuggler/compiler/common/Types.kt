@@ -2,9 +2,7 @@ package io.mironov.smuggler.compiler.common
 
 import io.mironov.smuggler.compiler.annotations.AnnotationDelegate
 import org.objectweb.asm.Type
-import java.util.HashMap
 import java.util.HashSet
-import java.util.IdentityHashMap
 
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 internal object Types {
@@ -18,18 +16,6 @@ internal object Types {
     add(Type.SHORT_TYPE)
     add(Type.BOOLEAN_TYPE)
     add(Type.VOID_TYPE)
-  }
-
-  private val PRIMITIVES = HashMap<String, String>().apply {
-    put("byte", "B")
-    put("char", "C")
-    put("double", "D")
-    put("float", "F")
-    put("int", "I")
-    put("long", "J")
-    put("short", "S")
-    put("boolean", "Z")
-    put("void", "V")
   }
 
   val OBJECT = Type.getType(Any::class.java)
@@ -58,9 +44,6 @@ internal object Types {
   val BOXED_SHORT = Type.getType(java.lang.Short::class.java)
   val BOXED_BOOLEAN = Type.getType(java.lang.Boolean::class.java)
 
-  val MAP = Type.getType(Map::class.java)
-  val IDENTITY_MAP = Type.getType(IdentityHashMap::class.java)
-
   val ANDROID_PARCEL = Type.getObjectType("android/os/Parcel")
   val ANDROID_PARCELABLE = Type.getObjectType("android/os/Parcelable")
   val ANDROID_CREATOR = Type.getObjectType("android/os/Parcelable\$Creator")
@@ -68,14 +51,6 @@ internal object Types {
 
   val SMUGGLER_PARCELABLE = Type.getObjectType("io/mironov/smuggler/AutoParcelable")
   val SMUGGLER_FACTORY = Type.getObjectType("io/mironov/smuggler/SmugglerFactory")
-
-  fun getClassType(name: String): Type {
-    return if (!name.endsWith("[]")) {
-      Type.getType("${Types.PRIMITIVES[name.replace('.', '/')] ?: "L${name.replace('.', '/')};"}")
-    } else {
-      Types.getArrayType(getClassType(name.substring(0, name.length - 2)))
-    }
-  }
 
   fun getArrayType(type: Type): Type {
     return Type.getType("[${type.descriptor}")
