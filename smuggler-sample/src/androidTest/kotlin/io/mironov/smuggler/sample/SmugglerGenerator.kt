@@ -5,7 +5,10 @@ import java.util.Random
 class SmugglerGenerator(private val seed: Long) {
   private val random = Random(seed)
 
-  fun <T : Any> nextNullable(factory: () -> T): T? = if (random.nextInt(3) == 0) null else factory()
+  inline fun <T : Any> nextNullable(factory: () -> T): T? = if (nextNullableProbability()) null else factory()
+
+  fun nextArraySize() = random.nextInt(MAX_ARRAY_SIZE)
+  fun nextNullableProbability() = random.nextInt(3) == 0
 
   fun nextBoolean() = random.nextBoolean()
   fun nextNullableBoolean() = nextNullable { nextBoolean() }
@@ -37,32 +40,35 @@ class SmugglerGenerator(private val seed: Long) {
   fun <E : Enum<E>> nextEnum(clazz: Class<E>) = clazz.enumConstants[random.nextInt(clazz.enumConstants.size)]
   fun <E : Enum<E>> nextNullableEnum(clazz: Class<E>) = nextNullable { nextEnum(clazz) }
 
-  fun nextBooleanArray() = BooleanArray(random.nextInt(MAX_ARRAY_SIZE)) { nextBoolean() }
-  fun nextNullableBooleanArray() = nextNullable { BooleanArray(random.nextInt(MAX_ARRAY_SIZE)) { nextBoolean() } }
+  fun nextBooleanArray() = BooleanArray(nextArraySize()) { nextBoolean() }
+  fun nextNullableBooleanArray() = nextNullable { BooleanArray(nextArraySize()) { nextBoolean() } }
 
-  fun nextIntArray() = IntArray(random.nextInt(MAX_ARRAY_SIZE)) { nextInt() }
-  fun nextNullableIntArray() = nextNullable { IntArray(random.nextInt(MAX_ARRAY_SIZE)) { nextInt() } }
+  fun nextIntArray() = IntArray(nextArraySize()) { nextInt() }
+  fun nextNullableIntArray() = nextNullable { IntArray(nextArraySize()) { nextInt() } }
 
-  fun nextLongArray() = LongArray(random.nextInt(MAX_ARRAY_SIZE)) { nextLong() }
-  fun nextNullableLongArray() = nextNullable { LongArray(random.nextInt(MAX_ARRAY_SIZE)) { nextLong() } }
+  fun nextLongArray() = LongArray(nextArraySize()) { nextLong() }
+  fun nextNullableLongArray() = nextNullable { LongArray(nextArraySize()) { nextLong() } }
 
-  fun nextFloatArray() = FloatArray(random.nextInt(MAX_ARRAY_SIZE)) { nextFloat() }
-  fun nextNullableFloatArray() = nextNullable { FloatArray(random.nextInt(MAX_ARRAY_SIZE)) { nextFloat() } }
+  fun nextFloatArray() = FloatArray(nextArraySize()) { nextFloat() }
+  fun nextNullableFloatArray() = nextNullable { FloatArray(nextArraySize()) { nextFloat() } }
 
-  fun nextDoubleArray() = DoubleArray(random.nextInt(MAX_ARRAY_SIZE)) { nextDouble() }
-  fun nextNullableDoubleArray() = nextNullable { DoubleArray(random.nextInt(MAX_ARRAY_SIZE)) { nextDouble() } }
+  fun nextDoubleArray() = DoubleArray(nextArraySize()) { nextDouble() }
+  fun nextNullableDoubleArray() = nextNullable { DoubleArray(nextArraySize()) { nextDouble() } }
 
-  fun nextShortArray() = ShortArray(random.nextInt(MAX_ARRAY_SIZE)) { nextShort() }
-  fun nextNullableShortArray() = nextNullable { ShortArray(random.nextInt(MAX_ARRAY_SIZE)) { nextShort() } }
+  fun nextShortArray() = ShortArray(nextArraySize()) { nextShort() }
+  fun nextNullableShortArray() = nextNullable { ShortArray(nextArraySize()) { nextShort() } }
 
-  fun nextByteArray() = ByteArray(random.nextInt(MAX_ARRAY_SIZE)) { nextByte() }
-  fun nextNullableByteArray() = nextNullable { ByteArray(random.nextInt(MAX_ARRAY_SIZE)) { nextByte() } }
+  fun nextByteArray() = ByteArray(nextArraySize()) { nextByte() }
+  fun nextNullableByteArray() = nextNullable { ByteArray(nextArraySize()) { nextByte() } }
 
-  fun nextCharArray() = CharArray(random.nextInt(MAX_ARRAY_SIZE)) { nextChar() }
-  fun nextNullableCharArray() = nextNullable { CharArray(random.nextInt(MAX_ARRAY_SIZE)) { nextChar() } }
+  fun nextCharArray() = CharArray(nextArraySize()) { nextChar() }
+  fun nextNullableCharArray() = nextNullable { CharArray(nextArraySize()) { nextChar() } }
 
-  fun nextStringArray() = Array(random.nextInt(MAX_ARRAY_SIZE)) { nextString() }
-  fun nextNullableStringArray() = nextNullable { Array(random.nextInt(MAX_ARRAY_SIZE)) { nextString() } }
+  fun nextStringArray() = Array(nextArraySize()) { nextString() }
+  fun nextNullableStringArray() = nextNullable { Array(nextArraySize()) { nextString() } }
+
+  inline fun <reified T : Any> nextArray(factory: (Int) -> T) = Array(nextArraySize()) { factory(it) }
+  inline fun <reified T : Any> nextNullableArray(factory: (Int) -> T) = nextNullable { Array(nextArraySize()) { factory(it) } }
 
   private companion object {
     private const val MAX_ARRAY_SIZE = 25

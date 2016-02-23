@@ -1,6 +1,7 @@
 package io.mironov.smuggler.sample
 
 import android.support.test.runner.AndroidJUnit4
+import android.text.TextUtils
 import io.mironov.smuggler.AutoParcelable
 import org.junit.Before
 import org.junit.Test
@@ -217,6 +218,52 @@ class SmugglerTest {
       WithStaticClassInitializer(
           payload = generator.nextString(),
           message = generator.nextString()
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithParcelableArrays() {
+    data class User(
+        val firstName: String,
+        val lastName: String
+    ) : AutoParcelable
+
+    data class Message(
+        val text: String,
+        val timestamp: Long
+    ) : AutoParcelable
+
+    data class Chat(
+        val title: String?,
+        val participants: Array<User>?,
+        val messages: Array<Message>?
+    ) : AutoParcelable {
+      override fun equals(other: Any?): Boolean {
+        if (other == null || other !is Chat) {
+          return false
+        }
+
+        return TextUtils.equals(title, other.title) &&
+            Arrays.equals(participants, other.participants) &&
+            Arrays.equals(messages, other.messages)
+      }
+    }
+
+    SmugglerAssertions.verify<Chat> {
+      Chat(
+          title = generator.nextNullableString(),
+          participants = generator.nextNullableArray {
+            User(
+                firstName = generator.nextString(),
+                lastName = generator.nextString()
+            )
+          },
+          messages = generator.nextNullableArray {
+            Message(
+                text = generator.nextString(),
+                timestamp = generator.nextLong()
+            )
+          }
       )
     }
   }

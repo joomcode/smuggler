@@ -56,6 +56,12 @@ internal object PropertyAdapterFactory {
       return ParcelablePropertyAdapter
     }
 
+    if (property.type.sort == Type.ARRAY && property.type.dimensions == 1) {
+      if (registry.isSubclassOf(property.type.elementType, Types.ANDROID_PARCELABLE)) {
+        return ParcelableArrayPropertyAdapter
+      }
+    }
+
     if (registry.isSubclassOf(property.type, Types.ENUM)) {
       return EnumPropertyAdapter
     }
@@ -244,6 +250,20 @@ internal object BooleanPropertyAdapter : AbstractPropertyAdapter() {
   }
 }
 
+internal object EnumPropertyAdapter : OptionalPropertyAdapter() {
+  override fun GeneratorAdapter.readRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    invokeStatic(property.type, Methods.get("values", Types.getArrayType(property.type)))
+    swap(Types.INT, Types.getArrayType(property.type))
+    arrayLoad(property.type)
+  }
+
+  override fun GeneratorAdapter.writeRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    invokeVirtual(property.type, Methods.get("ordinal", Types.INT))
+    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+  }
+}
+
 internal object ParcelablePropertyAdapter : PropertyAdapter {
   override fun readValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     adapter.loadArg(0)
@@ -266,16 +286,39 @@ internal object ParcelablePropertyAdapter : PropertyAdapter {
   }
 }
 
-internal object EnumPropertyAdapter : OptionalPropertyAdapter() {
-  override fun GeneratorAdapter.readRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
-    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
-    invokeStatic(property.type, Methods.get("values", Types.getArrayType(property.type)))
-    swap(Types.INT, Types.getArrayType(property.type))
-    arrayLoad(property.type)
+internal object ParcelableArrayPropertyAdapter : PropertyAdapter {
+  override fun readValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    val start = adapter.newLabel()
+    val end = adapter.newLabel()
+
+    adapter.loadArg(0)
+    adapter.push(property.type.elementType)
+
+    adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readParcelableArray", Types.getArrayType(Types.ANDROID_PARCELABLE), Types.CLASS_LOADER))
+
+    adapter.dup()
+    adapter.ifNull(start)
+
+    adapter.copyArray(Types.ANDROID_PARCELABLE, property.type.elementType)
+    adapter.goTo(end)
+
+    adapter.mark(start)
+    adapter.pop()
+    adapter.pushNull()
+
+    adapter.mark(end)
+    adapter.checkCast(property.type)
   }
 
-  override fun GeneratorAdapter.writeRequiredProperty(owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
-    invokeVirtual(property.type, Methods.get("ordinal", Types.INT))
-    invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+  override fun writeValue(adapter: GeneratorAdapter, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
+    adapter.loadArg(0)
+    adapter.loadThis()
+
+    adapter.invokeVirtual(owner.clazz, property.getter)
+    adapter.checkCast(Types.getArrayType(Types.ANDROID_PARCELABLE))
+    adapter.loadArg(1)
+
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeParcelableArray", Types.VOID, Types.getArrayType(Types.ANDROID_PARCELABLE), Types.INT))
   }
 }

@@ -33,6 +33,7 @@ internal object Types {
   }
 
   val OBJECT = Type.getType(Any::class.java)
+  val OBJECT_ARRAY = Types.getArrayType(Types.OBJECT)
   val CLASS = Type.getType(Class::class.java)
   val CLASS_LOADER = Type.getType(ClassLoader::class.java)
   val ENUM = Type.getType(Enum::class.java)

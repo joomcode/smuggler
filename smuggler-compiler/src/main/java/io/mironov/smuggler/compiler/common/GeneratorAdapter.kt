@@ -8,6 +8,7 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.Method
+import java.util.Arrays
 
 internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapter{
   constructor(delegate: MethodVisitor?, access: Int, method: Method): super(Opcodes.ASM5, delegate, access, method.name, method.descriptor)
@@ -70,5 +71,16 @@ internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapte
     dup()
     args()
     invokeConstructor(type, method)
+  }
+
+  fun copyArray(from: Type, to: Type) {
+    val arrays = Type.getType(Arrays::class.java)
+    val copyOf = Methods.get("copyOf", Types.OBJECT_ARRAY, Types.OBJECT_ARRAY, Types.INT, Types.CLASS)
+
+    dup()
+    arrayLength()
+    push(Types.getArrayType(to))
+    invokeStatic(arrays, copyOf)
+    checkCast(Types.getArrayType(to))
   }
 }
