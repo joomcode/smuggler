@@ -133,7 +133,7 @@ class SmugglerTest {
 
     times(100) {
       SmugglerAssertions.verify(Optionals(
-          boolean = generator.nextBoolean()
+          boolean = generator.nextNullableBoolean()
       ))
     }
   }
