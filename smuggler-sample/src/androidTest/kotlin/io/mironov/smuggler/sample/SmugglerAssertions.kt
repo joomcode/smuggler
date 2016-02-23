@@ -1,12 +1,16 @@
 package io.mironov.smuggler.sample
 
 import android.os.Parcel
+import android.os.Parcelable
 import io.mironov.smuggler.AutoParcelable
 import org.junit.Assert
+import java.lang.reflect.Modifier
 
 object SmugglerAssertions {
-  fun <P : AutoParcelable> verify(factory: () -> P) {
-    times(100) {
+  inline fun <reified P : AutoParcelable> verify(factory: () -> P) {
+    verify(P::class.java)
+
+    for (i in 0..100 - 1) {
       verify(factory())
     }
   }
@@ -16,6 +20,28 @@ object SmugglerAssertions {
     val unmarshalled = unmarshall<P>(marshalled, parcelable.javaClass.classLoader)
 
     Assert.assertEquals(parcelable, unmarshalled)
+  }
+
+  fun <P : AutoParcelable> verify(clazz: Class<P>) {
+    val creator = try {
+      clazz.getField("CREATOR")
+    } catch (exception: IllegalAccessException) {
+      throw AssertionError("IllegalAccessException when verifying class ${clazz.name}")
+    } catch (exception: NoSuchFieldException) {
+      throw AssertionError("Parcelable protocol requires a Parcelable.Creator object called CREATOR on class ${clazz.name}")
+    }
+
+    if (!Modifier.isStatic(creator.modifiers)) {
+      throw AssertionError("Parcelable protocol requires the CREATOR object to be static on class ${clazz.name}")
+    }
+
+    if (!Modifier.isPublic(creator.modifiers)) {
+      throw AssertionError("Parcelable protocol requires the CREATOR object to be public on class ${clazz.name}")
+    }
+
+    if (!Parcelable.Creator::class.java.isAssignableFrom(creator.type)) {
+      throw AssertionError("Parcelable protocol requires a Parcelable.Creator object called CREATOR on class ${clazz.name}")
+    }
   }
 
   private fun <P : AutoParcelable> marshall(parcelable: P): ByteArray {
@@ -36,12 +62,6 @@ object SmugglerAssertions {
 
     return parcel.readParcelable<P>(loader).apply {
       parcel.recycle()
-    }
-  }
-
-  private inline fun times(count: Int, action: () -> Unit) {
-    for (i in 0..count - 1) {
-      action()
     }
   }
 }
