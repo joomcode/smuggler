@@ -158,6 +158,52 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithOptionalNestedObjects() {
+    data class User(
+        val firstName: String,
+        val lastName: String
+    ) : AutoParcelable
+
+    data class Payload(
+        val text: String,
+        val timestamp: Long
+    ) : AutoParcelable
+
+    data class Status(
+        val seen: Boolean,
+        val delivered: Boolean
+    ) : AutoParcelable
+
+    data class Message(
+        val user: User?,
+        val payload: Payload?,
+        val status: Status?
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Message> {
+      Message(
+          user = generator.nextNullable {
+            User(
+                firstName = generator.nextString(),
+                lastName = generator.nextString()
+            )
+          },
+          payload = generator.nextNullable {
+            Payload(
+                text = generator.nextString(),
+                timestamp = generator.nextLong()
+            )
+          },
+          status = generator.nextNullable {
+            Status(
+                seen = generator.nextBoolean(),
+                delivered = generator.nextBoolean()
+            )
+          }
+      )
+    }
+  }
+
   private enum class Magic {
     ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN
   }
