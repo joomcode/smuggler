@@ -81,9 +81,7 @@ internal abstract class AbstractPropertyAdapter : PropertyAdapter {
 
   final override fun writeValue(adapter: GeneratorAdapter, variables: VariablesContext, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     adapter.loadArg(0)
-    adapter.loadThis()
-
-    adapter.invokeVirtual(owner.clazz, property.getter)
+    adapter.loadLocal(variables.property(property.name))
     adapter.writeProperty(variables, owner, property)
   }
 
@@ -276,9 +274,8 @@ internal object ParcelablePropertyAdapter : PropertyAdapter {
 
   override fun writeValue(adapter: GeneratorAdapter, variables: VariablesContext, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     adapter.loadArg(0)
-    adapter.loadThis()
 
-    adapter.invokeVirtual(owner.clazz, property.getter)
+    adapter.loadLocal(variables.property(property.name))
     adapter.checkCast(Types.ANDROID_PARCELABLE)
     adapter.loadArg(1)
 
@@ -298,12 +295,9 @@ internal object ParcelableArrayPropertyAdapter : PropertyAdapter {
 
   override fun writeValue(adapter: GeneratorAdapter, variables: VariablesContext, owner: AutoParcelableClassSpec, property: AutoParcelablePropertySpec) {
     adapter.loadArg(0)
-    adapter.loadThis()
-
-    adapter.invokeVirtual(owner.clazz, property.getter)
+    adapter.loadLocal(variables.property(property.name))
     adapter.checkCast(Types.getArrayType(Types.ANDROID_PARCELABLE))
     adapter.loadArg(1)
-
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeParcelableArray", Types.VOID, Types.getArrayType(Types.ANDROID_PARCELABLE), Types.INT))
   }
 }

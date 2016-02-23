@@ -14,15 +14,15 @@ internal class VariablesContext() {
     return names[name] ?: throw NoSuchElementException("Unknown variable \"$name\"")
   }
 
-  fun self(index: Int) = variable("self", index)
-  fun self() = variable("self")
+  fun self(index: Int) = variable("__smuggler__self__", index)
+  fun self() = variable("__smuggler__self__")
 
-  fun value(index: Int) = variable("value", index)
-  fun value(): Int = variable("value")
+  fun property(name: String, index: Int) = variable("__smuggler__property__${name}__", index)
+  fun property(name: String) = variable("__smuggler__property__${name}__")
 
-  fun parcel(index: Int) = variable("parcel", index)
-  fun parcel(): Int = variable("parcel")
+  fun parcel(index: Int) = variable("__smuggler__parcel__", index)
+  fun parcel(): Int = variable("__smuggler__parcel__")
 
-  fun flags(index: Int) = variable("flags", index)
-  fun flags(): Int = variable("flags")
+  fun flags(index: Int) = variable("__smuggler__flags__", index)
+  fun flags(): Int = variable("__smuggler__flags__")
 }
