@@ -204,6 +204,33 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithCustomStaticClassInitializer() {
+    SmugglerAssertions.consume(WithStaticClassInitializer.Companion)
+    SmugglerAssertions.consume(WithStaticClassInitializer.EXTRA_PAYLOAD)
+    SmugglerAssertions.consume(WithStaticClassInitializer.EXTRA_MESSAGE)
+
+    SmugglerAssertions.verify(WithStaticClassInitializer::class.java)
+    SmugglerAssertions.verify("payload", WithStaticClassInitializer.EXTRA_PAYLOAD)
+    SmugglerAssertions.verify("message", WithStaticClassInitializer.EXTRA_MESSAGE)
+
+    SmugglerAssertions.verify<WithStaticClassInitializer> {
+      WithStaticClassInitializer(
+          payload = generator.nextString(),
+          message = generator.nextString()
+      )
+    }
+  }
+
+  private data class WithStaticClassInitializer(
+      val payload: String,
+      val message: String
+  ) : AutoParcelable {
+    companion object {
+      const val EXTRA_PAYLOAD = "payload"
+      const val EXTRA_MESSAGE = "message"
+    }
+  }
+
   private enum class Magic {
     ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN
   }

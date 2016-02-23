@@ -44,6 +44,14 @@ object SmugglerAssertions {
     }
   }
 
+  fun verify(expected: Any?, actual: Any?) {
+    Assert.assertEquals(expected, actual)
+  }
+
+  fun consume(any: Any?) {
+    // nothing to do
+  }
+
   private fun <P : AutoParcelable> marshall(parcelable: P): ByteArray {
     val parcel = Parcel.obtain().apply {
       writeParcelable(parcelable, 0)
