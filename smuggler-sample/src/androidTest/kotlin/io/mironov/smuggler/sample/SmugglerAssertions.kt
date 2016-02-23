@@ -5,6 +5,12 @@ import io.mironov.smuggler.AutoParcelable
 import org.junit.Assert
 
 object SmugglerAssertions {
+  fun <P : AutoParcelable> verify(factory: () -> P) {
+    times(100) {
+      verify(factory())
+    }
+  }
+
   fun <P : AutoParcelable> verify(parcelable: P) {
     val marshalled = marshall(parcelable)
     val unmarshalled = unmarshall<P>(marshalled, parcelable.javaClass.classLoader)
@@ -30,6 +36,12 @@ object SmugglerAssertions {
 
     return parcel.readParcelable<P>(loader).apply {
       parcel.recycle()
+    }
+  }
+
+  private inline fun times(count: Int, action: () -> Unit) {
+    for (i in 0..count - 1) {
+      action()
     }
   }
 }

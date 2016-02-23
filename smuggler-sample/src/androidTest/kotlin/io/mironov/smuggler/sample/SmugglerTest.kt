@@ -28,8 +28,8 @@ class SmugglerTest {
         val string: String
     ) : AutoParcelable
 
-    times(100) {
-      SmugglerAssertions.verify(Primitives(
+    SmugglerAssertions.verify<Primitives> {
+      Primitives(
           boolean = generator.nextBoolean(),
           byte = generator.nextByte(),
           char = generator.nextChar(),
@@ -39,7 +39,7 @@ class SmugglerTest {
           float = generator.nextFloat(),
           double = generator.nextDouble(),
           string = generator.nextString()
-      ))
+      )
     }
   }
 
@@ -57,8 +57,8 @@ class SmugglerTest {
         val seen: Boolean
     ) : AutoParcelable
 
-    times(100) {
-      SmugglerAssertions.verify(Message(
+    SmugglerAssertions.verify<Message> {
+      Message(
           id = generator.nextLong(),
           timestamp = generator.nextLong(),
           text = generator.nextString(),
@@ -67,7 +67,7 @@ class SmugglerTest {
               firstName = generator.nextString(),
               lastName = generator.nextString()
           )
-      ))
+      )
     }
   }
 
@@ -98,8 +98,8 @@ class SmugglerTest {
       }
     }
 
-    times(100) {
-      SmugglerAssertions.verify(PrimitiveArrays(
+    SmugglerAssertions.verify<PrimitiveArrays> {
+      PrimitiveArrays(
           booleans = generator.nextBooleanArray(),
           bytes = generator.nextByteArray(),
           chars = generator.nextCharArray(),
@@ -108,7 +108,7 @@ class SmugglerTest {
           floats = generator.nextFloatArray(),
           doubles = generator.nextDoubleArray(),
           strings = generator.nextStringArray()
-      ))
+      )
     }
   }
 
@@ -118,11 +118,11 @@ class SmugglerTest {
         val foo: Foo
     ) : AutoParcelable
 
-    times(100) {
-      SmugglerAssertions.verify(Enums(
+    SmugglerAssertions.verify<Enums> {
+      Enums(
           magic = generator.nextEnum(Magic::class.java),
           foo = generator.nextEnum(Foo::class.java)
-      ))
+      )
     }
   }
 
@@ -141,8 +141,8 @@ class SmugglerTest {
         val foo: Foo?
     ) : AutoParcelable
 
-    times(100) {
-      SmugglerAssertions.verify(Optionals(
+    SmugglerAssertions.verify<Optionals> {
+      Optionals(
           boolean = generator.nextNullableBoolean(),
           byte = generator.nextNullableByte(),
           char = generator.nextNullableChar(),
@@ -154,7 +154,7 @@ class SmugglerTest {
           string = generator.nextNullableString(),
           magic = generator.nextNullableEnum(Magic::class.java),
           foo = generator.nextNullableEnum(Foo::class.java)
-      ))
+      )
     }
   }
 
@@ -164,11 +164,5 @@ class SmugglerTest {
 
   private enum class Foo {
     FOO, BAR, FOO_FOO, BAR_BAR, FOO_BAR, BAR_FOO
-  }
-
-  private inline fun times(count: Int, action: () -> Unit) {
-    for (i in 0..count - 1) {
-      action()
-    }
   }
 }
