@@ -11,8 +11,8 @@ internal class ValueContext(
 ) {
   private val names = HashMap<String, Int>()
 
-  fun typed(type: Type, signature: String?): ValueContext {
-    val context = ValueContext(type, signature)
+  fun typed(newType: Type, newSignature: String?): ValueContext {
+    val context = ValueContext(newType, newSignature)
     val variables = names
 
     return context.apply {
