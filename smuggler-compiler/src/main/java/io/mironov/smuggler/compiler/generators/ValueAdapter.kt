@@ -56,7 +56,7 @@ internal object ValueAdapterFactory {
     }
 
     if (type.sort == Type.ARRAY) {
-      return ArrayPropertyAdapter(from(registry, spec, type.elementType, property))
+      return ArrayPropertyAdapter(from(registry, spec, Types.getElementType(type), property))
     }
 
     return ADAPTERS.getOrElse(type) {
@@ -105,13 +105,8 @@ internal abstract class OptionalValueAdapter() : ValueAdapter {
     adapter.mark(end)
   }
 
-  private fun GeneratorAdapter.readNotNullValue(context: ValueContext) {
-    readNotNull(this, context)
-  }
-
-  private fun GeneratorAdapter.writeNotNullValue(context: ValueContext) {
-    writeNotNull(this, context)
-  }
+  private fun GeneratorAdapter.readNotNullValue(context: ValueContext) = readNotNull(this, context)
+  private fun GeneratorAdapter.writeNotNullValue(context: ValueContext) = writeNotNull(this, context)
 
   abstract fun readNotNull(adapter: GeneratorAdapter, context: ValueContext)
   abstract fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext)
@@ -291,7 +286,7 @@ internal class ArrayPropertyAdapter(
     adapter.storeLocal(length)
 
     adapter.loadLocal(length)
-    adapter.newArray(context.type.elementType)
+    adapter.newArray(Types.getElementType(context.type))
     adapter.storeLocal(elements)
 
     adapter.push(0)
@@ -307,8 +302,8 @@ internal class ArrayPropertyAdapter(
     adapter.mark(body)
     adapter.loadLocal(elements)
     adapter.loadLocal(index)
-    adapter.readElement(context.typed(context.type.elementType, null))
-    adapter.arrayStore(context.type.elementType)
+    adapter.readElement(context.typed(Types.getElementType(context.type), null))
+    adapter.arrayStore(Types.getElementType(context.type))
 
     adapter.iinc(index, 1)
     adapter.goTo(begin)
@@ -320,7 +315,7 @@ internal class ArrayPropertyAdapter(
   final override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
-    val element = adapter.newLocal(context.type.elementType)
+    val element = adapter.newLocal(Types.getElementType(context.type))
 
     val begin = adapter.newLabel()
     val body = adapter.newLabel()
@@ -347,10 +342,10 @@ internal class ArrayPropertyAdapter(
     adapter.mark(body)
     adapter.loadLocal(context.value())
     adapter.loadLocal(index)
-    adapter.arrayLoad(context.type.elementType)
+    adapter.arrayLoad(Types.getElementType(context.type))
     adapter.storeLocal(element)
 
-    adapter.writeElement(context.typed(context.type.elementType, null).apply {
+    adapter.writeElement(context.typed(Types.getElementType(context.type), null).apply {
       value(element)
     })
 

@@ -273,27 +273,27 @@ class SmugglerTest {
   }
 
   @Test fun shouldWorkWithMultiDimensionalArrays() {
-    data class MultiArrays(
+    data class MultiDimensionalPrimitiveArrays(
+        val longs: Array<LongArray>?,
         val booleans: Array<BooleanArray>?,
         val bytes: Array<ByteArray>?,
-        val chars: Array<CharArray>?,
-        val ints: Array<IntArray>?,
-        val longs: Array<LongArray>?,
-        val floats: Array<FloatArray>?,
+        val chars: Array<Array<CharArray>>?,
+        val ints: Array<Array<IntArray>>?,
+        val floats: Array<Array<FloatArray>>?,
         val doubles: Array<DoubleArray>?,
         val shorts: Array<ShortArray>?,
         val strings: Array<Array<String>>?
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
-        if (other == null || other !is MultiArrays) {
+        if (other == null || other !is MultiDimensionalPrimitiveArrays) {
           return false
         }
 
-        return Arrays.deepEquals(booleans, other.booleans) &&
+        return Arrays.deepEquals(longs, other.longs) &&
+            Arrays.deepEquals(booleans, other.booleans) &&
             Arrays.deepEquals(bytes, other.bytes) &&
             Arrays.deepEquals(chars, other.chars) &&
             Arrays.deepEquals(ints, other.ints) &&
-            Arrays.deepEquals(longs, other.longs) &&
             Arrays.deepEquals(floats, other.floats) &&
             Arrays.deepEquals(doubles, other.doubles) &&
             Arrays.deepEquals(shorts, other.shorts) &&
@@ -301,14 +301,14 @@ class SmugglerTest {
       }
     }
 
-    SmugglerAssertions.verify<MultiArrays> {
-      MultiArrays(
+    SmugglerAssertions.verify<MultiDimensionalPrimitiveArrays> {
+      MultiDimensionalPrimitiveArrays(
+          longs = generator.nextNullableArray { generator.nextLongArray() },
           booleans = generator.nextNullableArray { generator.nextBooleanArray() },
           bytes = generator.nextNullableArray { generator.nextByteArray() },
-          chars = generator.nextNullableArray { generator.nextCharArray() },
-          ints = generator.nextNullableArray { generator.nextIntArray() },
-          longs = generator.nextNullableArray { generator.nextLongArray() },
-          floats = generator.nextNullableArray { generator.nextFloatArray() },
+          chars = generator.nextNullableArray { generator.nextArray { generator.nextCharArray() } },
+          ints = generator.nextNullableArray { generator.nextArray { generator.nextIntArray() } },
+          floats = generator.nextNullableArray { generator.nextArray { generator.nextFloatArray() } },
           doubles = generator.nextNullableArray { generator.nextDoubleArray() },
           shorts = generator.nextNullableArray { generator.nextShortArray() },
           strings = generator.nextNullableArray { generator.nextStringArray() }
