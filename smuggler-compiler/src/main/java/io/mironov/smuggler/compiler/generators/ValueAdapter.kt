@@ -37,14 +37,14 @@ internal object ValueAdapterFactory {
     put(Types.BOXED_LONG, BoxedLongValueAdapter)
     put(Types.BOXED_SHORT, BoxedShortValueAdapter)
 
-    put(Types.getArrayType(Types.BOOLEAN), BooleanArrayValueAdapter)
-    put(Types.getArrayType(Types.BYTE), ByteArrayValueAdapter)
-    put(Types.getArrayType(Types.CHAR), CharArrayValueAdapter)
-    put(Types.getArrayType(Types.DOUBLE), DoubleArrayValueAdapter)
-    put(Types.getArrayType(Types.FLOAT), FloatArrayValueAdapter)
-    put(Types.getArrayType(Types.INT), IntArrayValueAdapter)
-    put(Types.getArrayType(Types.LONG), LongArrayValueAdapter)
-    put(Types.getArrayType(Types.STRING), StringArrayValueAdapter)
+    put(Types.getArrayType(Types.BOOLEAN), ArrayPropertyAdapter(BooleanValueAdapter))
+    put(Types.getArrayType(Types.BYTE), ArrayPropertyAdapter(ByteValueAdapter))
+    put(Types.getArrayType(Types.CHAR), ArrayPropertyAdapter(CharValueAdapter))
+    put(Types.getArrayType(Types.DOUBLE), ArrayPropertyAdapter(DoubleValueAdapter))
+    put(Types.getArrayType(Types.FLOAT), ArrayPropertyAdapter(FloatValueAdapter))
+    put(Types.getArrayType(Types.INT), ArrayPropertyAdapter(IntValueAdapter))
+    put(Types.getArrayType(Types.LONG), ArrayPropertyAdapter(LongValueAdapter))
+    put(Types.getArrayType(Types.STRING), ArrayPropertyAdapter(StringValueAdapter))
   }
 
   fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
@@ -58,7 +58,7 @@ internal object ValueAdapterFactory {
 
     if (property.type.sort == Type.ARRAY && property.type.dimensions == 1) {
       if (registry.isSubclassOf(property.type.elementType, Types.ANDROID_PARCELABLE)) {
-        return ParcelableArrayValueAdapter
+        return ArrayPropertyAdapter(ParcelableValueAdapter)
       }
     }
 
@@ -182,15 +182,6 @@ internal object BoxedLongValueAdapter : SimpleBoxedValueAdapter(LongValueAdapter
 internal object BoxedShortValueAdapter : SimpleBoxedValueAdapter(ShortValueAdapter, Types.SHORT, Types.BOXED_SHORT, "shortValue", "valueOf")
 internal object BoxedBooleanValueAdapter : SimpleBoxedValueAdapter(BooleanValueAdapter, Types.BOOLEAN, Types.BOXED_BOOLEAN, "booleanValue", "valueOf")
 
-internal object BooleanArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.BOOLEAN), "createBooleanArray", "writeBooleanArray")
-internal object ByteArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.BYTE), "createByteArray", "writeByteArray")
-internal object CharArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.CHAR), "createCharArray", "writeCharArray")
-internal object DoubleArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.DOUBLE), "createDoubleArray", "writeDoubleArray")
-internal object FloatArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.FLOAT), "createFloatArray", "writeFloatArray")
-internal object IntArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.INT), "createIntArray", "writeIntArray")
-internal object LongArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.LONG), "createLongArray", "writeLongArray")
-internal object StringArrayValueAdapter : SimpleValueAdapter(Types.getArrayType(Types.STRING), "createStringArray", "writeStringArray")
-
 internal object CharValueAdapter : ValueAdapter {
   override fun read(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
@@ -290,9 +281,7 @@ internal object ParcelableValueAdapter : ValueAdapter {
   }
 }
 
-internal object ParcelableArrayValueAdapter : ArrayPropertyAdapter(ParcelableValueAdapter)
-
-internal open class ArrayPropertyAdapter(
+internal class ArrayPropertyAdapter(
     private val delegate: ValueAdapter
 ) : OptionalValueAdapter() {
   final override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
