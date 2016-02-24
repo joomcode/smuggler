@@ -6,6 +6,7 @@ import io.mironov.smuggler.AutoParcelable
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.Serializable
 import java.util.Arrays
 
 @Suppress("EqualsOrHashCode")
@@ -356,6 +357,63 @@ class SmugglerTest {
           doubles = generator.nextNullableArray { generator.nextArray { generator.nextDouble() } },
           shorts = generator.nextNullableArray { generator.nextArray { generator.nextShort() } },
           strings = generator.nextNullableArray { generator.nextStringArray() }
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithSerializable() {
+    data class User(
+        val firstName: String,
+        val lastName: String
+    ) : Serializable
+
+    data class Payload(
+        val message: String,
+        val timestamp: Long
+    ) : Serializable
+
+    data class Message(
+        val sender: User,
+        val payload: Payload
+    ) : Serializable
+
+    data class Chat(
+        val title: String,
+        val participants: Array<User>,
+        val messages: Array<Message>
+    ) : AutoParcelable {
+      override fun equals(other: Any?): Boolean {
+        if (other == null || other !is Chat) {
+          return false
+        }
+
+        return TextUtils.equals(title, other.title) &&
+            Arrays.deepEquals(participants, other.participants) &&
+            Arrays.deepEquals(messages, other.messages)
+      }
+    }
+
+    SmugglerAssertions.verify<Chat>() {
+      Chat(
+          title = generator.nextString(),
+          participants = generator.nextArray {
+            User(
+                firstName = generator.nextString(),
+                lastName = generator.nextString()
+            )
+          },
+          messages = generator.nextArray {
+            Message(
+                sender = User(
+                    firstName = generator.nextString(),
+                    lastName = generator.nextString()
+                ),
+                payload = Payload(
+                    message = generator.nextString(),
+                    timestamp = generator.nextLong()
+                )
+            )
+          }
       )
     }
   }

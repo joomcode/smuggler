@@ -51,12 +51,16 @@ internal object ValueAdapterFactory {
       return adapter
     }
 
+    if (registry.isSubclassOf(type, Types.ENUM)) {
+      return EnumValueAdapter
+    }
+
     if (registry.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
       return ParcelableValueAdapter
     }
 
-    if (registry.isSubclassOf(type, Types.ENUM)) {
-      return EnumValueAdapter
+    if (registry.isSubclassOf(type, Types.SERIALIZABLE)) {
+      return SerializableValueAdapter
     }
 
     if (type.sort == Type.ARRAY) {
@@ -250,6 +254,21 @@ internal object EnumValueAdapter : OptionalValueAdapter() {
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(context.type, Methods.get("ordinal", Types.INT))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+  }
+}
+
+internal object SerializableValueAdapter : ValueAdapter {
+  override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.loadLocal(context.parcel())
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readSerializable", Types.SERIALIZABLE))
+    adapter.checkCast(context.type)
+  }
+
+  override fun write(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.loadLocal(context.parcel())
+    adapter.loadLocal(context.value())
+    adapter.checkCast(Types.SERIALIZABLE)
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeSerializable", Types.VOID, Types.SERIALIZABLE))
   }
 }
 

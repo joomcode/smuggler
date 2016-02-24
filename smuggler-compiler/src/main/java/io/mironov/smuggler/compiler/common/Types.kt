@@ -2,6 +2,7 @@ package io.mironov.smuggler.compiler.common
 
 import io.mironov.smuggler.compiler.annotations.AnnotationDelegate
 import org.objectweb.asm.Type
+import java.io.Serializable
 import java.util.HashSet
 
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
@@ -19,10 +20,10 @@ internal object Types {
   }
 
   val OBJECT = Type.getType(Any::class.java)
-  val OBJECT_ARRAY = Types.getArrayType(Types.OBJECT)
   val CLASS = Type.getType(Class::class.java)
   val CLASS_LOADER = Type.getType(ClassLoader::class.java)
   val ENUM = Type.getType(Enum::class.java)
+  val SERIALIZABLE = Type.getType(Serializable::class.java)
 
   val BYTE = Type.BYTE_TYPE
   val CHAR = Type.CHAR_TYPE
