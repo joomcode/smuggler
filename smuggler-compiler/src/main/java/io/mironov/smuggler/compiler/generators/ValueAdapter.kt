@@ -55,6 +55,10 @@ internal object ValueAdapterFactory {
       return EnumValueAdapter
     }
 
+    if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_BOOLEAN_ARRAY)) {
+      return SparseBooleanArrayValueAdapter
+    }
+
     if (registry.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
       return ParcelableValueAdapter
     }
@@ -166,6 +170,7 @@ internal object IntValueAdapter : SimpleValueAdapter(Types.INT, "readInt", "writ
 internal object LongValueAdapter : SimpleValueAdapter(Types.LONG, "readLong", "writeLong")
 internal object StringValueAdapter : SimpleValueAdapter(Types.STRING, "readString", "writeString")
 internal object BundleValueAdapter : SimpleValueAdapter(Types.ANDROID_BUNDLE, "readBundle", "writeBundle")
+internal object SparseBooleanArrayValueAdapter : SimpleValueAdapter(Types.ANDROID_SPARSE_BOOLEAN_ARRAY, "readSparseBooleanArray", "writeSparseBooleanArray")
 
 internal object BoxedByteValueAdapter : SimpleBoxedValueAdapter(ByteValueAdapter, Types.BYTE, Types.BOXED_BYTE, "byteValue", "valueOf")
 internal object BoxedCharValueAdapter : SimpleBoxedValueAdapter(CharValueAdapter, Types.CHAR, Types.BOXED_CHAR, "charValue", "valueOf")
