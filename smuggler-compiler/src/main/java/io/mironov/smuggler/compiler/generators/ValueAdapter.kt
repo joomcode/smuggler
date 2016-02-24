@@ -44,6 +44,7 @@ internal object ValueAdapterFactory {
     put(Types.getArrayType(Types.FLOAT), ArrayPropertyAdapter(FloatValueAdapter))
     put(Types.getArrayType(Types.INT), ArrayPropertyAdapter(IntValueAdapter))
     put(Types.getArrayType(Types.LONG), ArrayPropertyAdapter(LongValueAdapter))
+    put(Types.getArrayType(Types.SHORT), ArrayPropertyAdapter(ShortValueAdapter))
     put(Types.getArrayType(Types.STRING), ArrayPropertyAdapter(StringValueAdapter))
   }
 
