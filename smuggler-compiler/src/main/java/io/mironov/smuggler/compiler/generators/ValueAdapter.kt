@@ -290,20 +290,93 @@ internal object ParcelableValueAdapter : ValueAdapter {
   }
 }
 
-internal object ParcelableArrayValueAdapter : ValueAdapter {
-  override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+internal object ParcelableArrayValueAdapter : ArrayPropertyAdapter(ParcelableValueAdapter)
+
+internal open class ArrayPropertyAdapter(
+    private val delegate: ValueAdapter
+) : OptionalValueAdapter() {
+  final override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    val index = adapter.newLocal(Types.INT)
+    val length = adapter.newLocal(Types.INT)
+    val elements = adapter.newLocal(context.type)
+
+    val begin = adapter.newLabel()
+    val body = adapter.newLabel()
+    val end = adapter.newLabel()
+
     adapter.loadLocal(context.parcel())
-    adapter.push(context.type.elementType)
-    adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readParcelableArray", Types.getArrayType(Types.ANDROID_PARCELABLE), Types.CLASS_LOADER))
-    adapter.castArray(Types.ANDROID_PARCELABLE, context.type.elementType)
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    adapter.storeLocal(length)
+
+    adapter.loadLocal(length)
+    adapter.newArray(context.type.elementType)
+    adapter.storeLocal(elements)
+
+    adapter.push(0)
+    adapter.storeLocal(index)
+
+    adapter.mark(begin)
+    adapter.loadLocal(index)
+    adapter.loadLocal(length)
+
+    adapter.ifICmp(Opcodes.IFLT, body)
+    adapter.goTo(end)
+
+    adapter.mark(body)
+    adapter.loadLocal(elements)
+    adapter.loadLocal(index)
+    adapter.readElement(context.typed(context.type.elementType, null))
+    adapter.arrayStore(context.type.elementType)
+
+    adapter.iinc(index, 1)
+    adapter.goTo(begin)
+    adapter.mark(end)
+
+    adapter.loadLocal(elements)
   }
 
-  override fun write(adapter: GeneratorAdapter, context: ValueContext) {
-    adapter.loadLocal(context.parcel())
+  final override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    val index = adapter.newLocal(Types.INT)
+    val length = adapter.newLocal(Types.INT)
+    val element = adapter.newLocal(context.type.elementType)
+
+    val begin = adapter.newLabel()
+    val body = adapter.newLabel()
+    val end = adapter.newLabel()
+
+    adapter.push(0)
+    adapter.storeLocal(index)
+
     adapter.loadLocal(context.value())
-    adapter.checkCast(Types.getArrayType(Types.ANDROID_PARCELABLE))
-    adapter.loadLocal(context.flags())
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeParcelableArray", Types.VOID, Types.getArrayType(Types.ANDROID_PARCELABLE), Types.INT))
+    adapter.arrayLength()
+    adapter.storeLocal(length)
+
+    adapter.loadLocal(context.parcel())
+    adapter.loadLocal(length)
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+
+    adapter.mark(begin)
+    adapter.loadLocal(index)
+    adapter.loadLocal(length)
+
+    adapter.ifICmp(Opcodes.IFLT, body)
+    adapter.goTo(end)
+
+    adapter.mark(body)
+    adapter.loadLocal(context.value())
+    adapter.loadLocal(index)
+    adapter.arrayLoad(context.type.elementType)
+    adapter.storeLocal(element)
+
+    adapter.writeElement(context.typed(context.type.elementType, null).apply {
+      value(element)
+    })
+
+    adapter.iinc(index, 1)
+    adapter.goTo(begin)
+    adapter.mark(end)
   }
+
+  private fun GeneratorAdapter.readElement(context: ValueContext) = delegate.read(this, context)
+  private fun GeneratorAdapter.writeElement(context: ValueContext) = delegate.write(this, context)
 }
