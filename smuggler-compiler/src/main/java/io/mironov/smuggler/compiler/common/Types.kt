@@ -56,6 +56,19 @@ internal object Types {
     return Type.getType("[${type.descriptor}")
   }
 
+  fun getElementType(type: Type): Type {
+    if (type.sort != Type.ARRAY) {
+      throw IllegalArgumentException("Types.getElementType() can only be called for array types")
+    }
+
+    val element = type.elementType
+    val dimensions = type.dimensions
+
+    return 0.until(dimensions - 1).fold(element) { value, index ->
+      getArrayType(value)
+    }
+  }
+
   fun getAnnotationType(clazz: Class<*>): Type {
     return clazz.getAnnotation(AnnotationDelegate::class.java)?.run {
       Type.getObjectType(value.replace('.', '/'))
