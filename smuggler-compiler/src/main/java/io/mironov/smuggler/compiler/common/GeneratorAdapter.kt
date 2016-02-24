@@ -8,9 +8,8 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.Method
-import java.util.Arrays
 
-internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapter{
+internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapter {
   constructor(delegate: MethodVisitor?, access: Int, method: Method): super(Opcodes.ASM5, delegate, access, method.name, method.descriptor)
   constructor(visitor: ClassVisitor, access: Int, method: Method, signature: String?): super(Opcodes.ASM5, visitor.visitMethod(access, method.name, method.descriptor, signature, null), access, method.name, method.descriptor)
 
