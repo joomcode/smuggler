@@ -26,7 +26,6 @@ internal object ValueAdapterFactory {
     put(Types.INT, IntValueAdapter)
     put(Types.LONG, LongValueAdapter)
     put(Types.SHORT, ShortValueAdapter)
-    put(Types.STRING, StringValueAdapter)
 
     put(Types.BOXED_BOOLEAN, BoxedBooleanValueAdapter)
     put(Types.BOXED_BYTE, BoxedByteValueAdapter)
@@ -36,6 +35,9 @@ internal object ValueAdapterFactory {
     put(Types.BOXED_INT, BoxedIntValueAdapter)
     put(Types.BOXED_LONG, BoxedLongValueAdapter)
     put(Types.BOXED_SHORT, BoxedShortValueAdapter)
+
+    put(Types.STRING, StringValueAdapter)
+    put(Types.ANDROID_BUNDLE, BundleValueAdapter)
   }
 
   fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
@@ -43,8 +45,10 @@ internal object ValueAdapterFactory {
   }
   
   fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, type: Type, property: String): ValueAdapter {
-    if (type == Types.ANDROID_BUNDLE) {
-      return BundleValueAdapter
+    val adapter = ADAPTERS[type]
+
+    if (adapter != null) {
+      return adapter
     }
 
     if (registry.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
@@ -59,10 +63,8 @@ internal object ValueAdapterFactory {
       return ArrayPropertyAdapter(from(registry, spec, Types.getElementType(type), property))
     }
 
-    return ADAPTERS.getOrElse(type) {
-      throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
-          spec.clazz.type.className, property, type.className)
-    }
+    throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
+        spec.clazz.type.className, property, type.className)
   }
 }
 
