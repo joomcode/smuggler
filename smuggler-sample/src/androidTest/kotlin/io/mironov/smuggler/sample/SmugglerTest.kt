@@ -272,7 +272,7 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithMultiDimensionalArrays() {
+  @Test fun shouldWorkWithPrimitiveMultiDimensionalArrays() {
     data class MultiDimensionalPrimitiveArrays(
         val longs: Array<LongArray>?,
         val booleans: Array<BooleanArray>?,
@@ -311,6 +311,50 @@ class SmugglerTest {
           floats = generator.nextNullableArray { generator.nextArray { generator.nextFloatArray() } },
           doubles = generator.nextNullableArray { generator.nextDoubleArray() },
           shorts = generator.nextNullableArray { generator.nextShortArray() },
+          strings = generator.nextNullableArray { generator.nextStringArray() }
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithBoxedMultiDimensionalArrays() {
+    data class MultiDimensionalBoxedArrays(
+        val longs: Array<Array<Long>>?,
+        val booleans: Array<Array<Boolean>>?,
+        val bytes: Array<Array<Byte>>?,
+        val chars: Array<Array<Array<Char>>>?,
+        val ints: Array<Array<Array<Int>>>?,
+        val floats: Array<Array<Array<Float>>>?,
+        val doubles: Array<Array<Double>>?,
+        val shorts: Array<Array<Short>>?,
+        val strings: Array<Array<String>>?
+    ) : AutoParcelable {
+      override fun equals(other: Any?): Boolean {
+        if (other == null || other !is MultiDimensionalBoxedArrays) {
+          return false
+        }
+
+        return Arrays.deepEquals(longs, other.longs) &&
+            Arrays.deepEquals(booleans, other.booleans) &&
+            Arrays.deepEquals(bytes, other.bytes) &&
+            Arrays.deepEquals(chars, other.chars) &&
+            Arrays.deepEquals(ints, other.ints) &&
+            Arrays.deepEquals(floats, other.floats) &&
+            Arrays.deepEquals(doubles, other.doubles) &&
+            Arrays.deepEquals(shorts, other.shorts) &&
+            Arrays.deepEquals(strings, other.strings)
+      }
+    }
+
+    SmugglerAssertions.verify<MultiDimensionalBoxedArrays> {
+      MultiDimensionalBoxedArrays(
+          longs = generator.nextNullableArray { generator.nextArray { generator.nextLong() } },
+          booleans = generator.nextNullableArray { generator.nextArray { generator.nextBoolean() } },
+          bytes = generator.nextNullableArray { generator.nextArray { generator.nextByte() } },
+          chars = generator.nextNullableArray { generator.nextArray { generator.nextArray { generator.nextChar() } } },
+          ints = generator.nextNullableArray { generator.nextArray { generator.nextArray { generator.nextInt() } } },
+          floats = generator.nextNullableArray { generator.nextArray { generator.nextArray { generator.nextFloat() } } },
+          doubles = generator.nextNullableArray { generator.nextArray { generator.nextDouble() } },
+          shorts = generator.nextNullableArray { generator.nextArray { generator.nextShort() } },
           strings = generator.nextNullableArray { generator.nextStringArray() }
       )
     }
