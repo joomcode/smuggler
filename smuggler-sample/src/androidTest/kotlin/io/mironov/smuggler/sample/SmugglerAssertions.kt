@@ -25,8 +25,6 @@ object SmugglerAssertions {
   fun <P : AutoParcelable> verify(clazz: Class<P>) {
     val creator = try {
       clazz.getField("CREATOR")
-    } catch (exception: IllegalAccessException) {
-      throw AssertionError("IllegalAccessException when verifying class ${clazz.name}")
     } catch (exception: NoSuchFieldException) {
       throw AssertionError("Parcelable protocol requires a Parcelable.Creator object called CREATOR on class ${clazz.name}")
     }
