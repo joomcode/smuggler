@@ -41,34 +41,34 @@ class SmugglerGenerator(private val seed: Long) {
   fun <E : Enum<E>> nextNullableEnum(clazz: Class<E>) = nextNullable { nextEnum(clazz) }
 
   fun nextBooleanArray() = BooleanArray(nextArraySize()) { nextBoolean() }
-  fun nextNullableBooleanArray() = nextNullable { BooleanArray(nextArraySize()) { nextBoolean() } }
+  fun nextNullableBooleanArray() = nextNullable { nextBooleanArray() }
 
   fun nextIntArray() = IntArray(nextArraySize()) { nextInt() }
-  fun nextNullableIntArray() = nextNullable { IntArray(nextArraySize()) { nextInt() } }
+  fun nextNullableIntArray() = nextNullable { nextIntArray() }
 
   fun nextLongArray() = LongArray(nextArraySize()) { nextLong() }
-  fun nextNullableLongArray() = nextNullable { LongArray(nextArraySize()) { nextLong() } }
+  fun nextNullableLongArray() = nextNullable { nextLongArray() }
 
   fun nextFloatArray() = FloatArray(nextArraySize()) { nextFloat() }
-  fun nextNullableFloatArray() = nextNullable { FloatArray(nextArraySize()) { nextFloat() } }
+  fun nextNullableFloatArray() = nextNullable { nextFloatArray() }
 
   fun nextDoubleArray() = DoubleArray(nextArraySize()) { nextDouble() }
-  fun nextNullableDoubleArray() = nextNullable { DoubleArray(nextArraySize()) { nextDouble() } }
+  fun nextNullableDoubleArray() = nextNullable { nextDoubleArray() }
 
   fun nextShortArray() = ShortArray(nextArraySize()) { nextShort() }
-  fun nextNullableShortArray() = nextNullable { ShortArray(nextArraySize()) { nextShort() } }
+  fun nextNullableShortArray() = nextNullable { nextShortArray() }
 
   fun nextByteArray() = ByteArray(nextArraySize()) { nextByte() }
-  fun nextNullableByteArray() = nextNullable { ByteArray(nextArraySize()) { nextByte() } }
+  fun nextNullableByteArray() = nextNullable { nextByteArray() }
 
   fun nextCharArray() = CharArray(nextArraySize()) { nextChar() }
-  fun nextNullableCharArray() = nextNullable { CharArray(nextArraySize()) { nextChar() } }
+  fun nextNullableCharArray() = nextNullable { nextCharArray() }
 
   fun nextStringArray() = Array(nextArraySize()) { nextString() }
-  fun nextNullableStringArray() = nextNullable { Array(nextArraySize()) { nextString() } }
+  fun nextNullableStringArray() = nextNullable { nextStringArray() }
 
   inline fun <reified T : Any> nextArray(factory: (Int) -> T) = Array(nextArraySize()) { factory(it) }
-  inline fun <reified T : Any> nextNullableArray(factory: (Int) -> T) = nextNullable { Array(nextArraySize()) { factory(it) } }
+  inline fun <reified T : Any> nextNullableArray(factory: (Int) -> T) = nextNullable { nextArray(factory) }
 
   private companion object {
     private const val MAX_ARRAY_SIZE = 25
