@@ -36,40 +36,32 @@ internal object ValueAdapterFactory {
     put(Types.BOXED_INT, BoxedIntValueAdapter)
     put(Types.BOXED_LONG, BoxedLongValueAdapter)
     put(Types.BOXED_SHORT, BoxedShortValueAdapter)
-
-    put(Types.getArrayType(Types.BOOLEAN), ArrayPropertyAdapter(BooleanValueAdapter))
-    put(Types.getArrayType(Types.BYTE), ArrayPropertyAdapter(ByteValueAdapter))
-    put(Types.getArrayType(Types.CHAR), ArrayPropertyAdapter(CharValueAdapter))
-    put(Types.getArrayType(Types.DOUBLE), ArrayPropertyAdapter(DoubleValueAdapter))
-    put(Types.getArrayType(Types.FLOAT), ArrayPropertyAdapter(FloatValueAdapter))
-    put(Types.getArrayType(Types.INT), ArrayPropertyAdapter(IntValueAdapter))
-    put(Types.getArrayType(Types.LONG), ArrayPropertyAdapter(LongValueAdapter))
-    put(Types.getArrayType(Types.SHORT), ArrayPropertyAdapter(ShortValueAdapter))
-    put(Types.getArrayType(Types.STRING), ArrayPropertyAdapter(StringValueAdapter))
   }
 
   fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
-    if (property.type == Types.ANDROID_BUNDLE) {
+    return from(registry, spec, property.type, property.name)
+  }
+  
+  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, type: Type, property: String): ValueAdapter {
+    if (type == Types.ANDROID_BUNDLE) {
       return BundleValueAdapter
     }
 
-    if (registry.isSubclassOf(property.type, Types.ANDROID_PARCELABLE)) {
+    if (registry.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
       return ParcelableValueAdapter
     }
 
-    if (property.type.sort == Type.ARRAY && property.type.dimensions == 1) {
-      if (registry.isSubclassOf(property.type.elementType, Types.ANDROID_PARCELABLE)) {
-        return ArrayPropertyAdapter(ParcelableValueAdapter)
-      }
-    }
-
-    if (registry.isSubclassOf(property.type, Types.ENUM)) {
+    if (registry.isSubclassOf(type, Types.ENUM)) {
       return EnumValueAdapter
     }
 
-    return ADAPTERS.getOrElse(property.type) {
+    if (type.sort == Type.ARRAY) {
+      return ArrayPropertyAdapter(from(registry, spec, type.elementType, property))
+    }
+
+    return ADAPTERS.getOrElse(type) {
       throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
-          spec.clazz.type.className, property.name, property.type.className)
+          spec.clazz.type.className, property, type.className)
     }
   }
 }
