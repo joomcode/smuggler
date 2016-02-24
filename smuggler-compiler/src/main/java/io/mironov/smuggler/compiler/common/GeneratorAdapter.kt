@@ -72,28 +72,4 @@ internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapte
     args()
     invokeConstructor(type, method)
   }
-
-  fun castArray(from: Type, to: Type) {
-    val arrays = Type.getType(Arrays::class.java)
-    val copyOf = Methods.get("copyOf", Types.OBJECT_ARRAY, Types.OBJECT_ARRAY, Types.INT, Types.CLASS)
-
-    val start = newLabel()
-    val end = newLabel()
-
-    dup()
-    ifNull(start)
-
-    dup()
-    arrayLength()
-    push(Types.getArrayType(to))
-    invokeStatic(arrays, copyOf)
-    checkCast(Types.getArrayType(to))
-    goTo(end)
-
-    mark(start)
-    pop()
-    pushNull()
-
-    mark(end)
-  }
 }
