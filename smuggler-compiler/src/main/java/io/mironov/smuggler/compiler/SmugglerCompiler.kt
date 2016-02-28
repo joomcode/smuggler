@@ -5,7 +5,6 @@ import io.mironov.smuggler.compiler.common.isInterface
 import io.mironov.smuggler.compiler.generators.ParcelableContentGenerator
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpecFactory
 import io.mironov.smuggler.compiler.reflect.ClassReference
-import org.apache.commons.io.FileUtils
 import java.io.File
 
 class SmugglerCompiler {
@@ -14,7 +13,7 @@ class SmugglerCompiler {
     val environment = GenerationEnvironment(registry)
 
     options.inputs.forEach {
-      FileUtils.copyDirectory(it, options.output)
+      it.copyRecursively(options.output, true)
     }
 
     findAutoParcelableClasses(registry).forEach {
@@ -22,7 +21,7 @@ class SmugglerCompiler {
       val generator = ParcelableContentGenerator(spec)
 
       generator.generate(environment).forEach {
-        FileUtils.writeByteArrayToFile(File(options.output, it.path), it.content)
+        File(options.output, it.path).writeBytes(it.content)
       }
     }
   }

@@ -1,7 +1,5 @@
 package io.mironov.smuggler.compiler.common
 
-import org.apache.commons.io.FileUtils
-import org.apache.commons.io.IOUtils
 import java.io.File
 import java.util.zip.ZipFile
 
@@ -11,7 +9,7 @@ internal interface Opener {
 
 internal class FileOpener(private val file: File) : Opener {
   override fun open(): ByteArray {
-    return FileUtils.readFileToByteArray(file)
+    return file.readBytes()
   }
 }
 
@@ -19,7 +17,7 @@ internal class JarOpener(private val file: File, private val entry: String) : Op
   override fun open(): ByteArray {
     return ZipFile(file).use {
       it.getInputStream(it.getEntry(entry)).use {
-        IOUtils.toByteArray(it)
+        it.readBytes()
       }
     }
   }

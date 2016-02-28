@@ -5,9 +5,6 @@ import io.mironov.smuggler.compiler.common.JarOpener
 import io.mironov.smuggler.compiler.common.Opener
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.reflect.ClassReference
-import org.apache.commons.io.FileUtils
-import org.apache.commons.io.FilenameUtils
-import org.apache.commons.io.IOUtils
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Type
 import org.slf4j.LoggerFactory
@@ -33,7 +30,7 @@ internal object ClassRegistryFactory {
       for (file in files) {
         logger.info("Generating class references for {}", file.absolutePath)
 
-        if (file.isFile && FilenameUtils.getExtension(file.absolutePath) == EXTENSION_JAR) {
+        if (file.isFile && file.extension == EXTENSION_JAR) {
           addAll(createClassReferencesForJar(file))
         }
 
@@ -47,12 +44,10 @@ internal object ClassRegistryFactory {
   private fun createClassReferencesForJar(file: File): List<ClassReference> {
     return ArrayList<ClassReference>().apply {
       ZipFile(file).use {
-        for (entry in it.entries()) {
-          if (FilenameUtils.getExtension(entry.name) == EXTENSION_CLASS) {
-            add(createClassReference(JarOpener(file, entry.name), it.getInputStream(entry).use {
-              IOUtils.toByteArray(it)
-            }))
-          }
+        for (entry in it.entries().asSequence().filter { File(it.name).extension == EXTENSION_CLASS }) {
+          add(createClassReference(JarOpener(file, entry.name), it.getInputStream(entry).use {
+            it.readBytes()
+          }))
         }
       }
     }
@@ -60,8 +55,8 @@ internal object ClassRegistryFactory {
 
   private fun createClassReferencesForDirectory(file: File): List<ClassReference> {
     return ArrayList<ClassReference>().apply {
-      FileUtils.iterateFiles(file, arrayOf(EXTENSION_CLASS), true).forEach {
-        add(createClassReference(FileOpener(it), FileUtils.readFileToByteArray(it)))
+      file.walk().filter { it.extension == EXTENSION_CLASS }.forEach {
+        add(createClassReference(FileOpener(it), it.readBytes()))
       }
     }
   }
