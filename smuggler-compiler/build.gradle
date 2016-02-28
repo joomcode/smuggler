@@ -18,7 +18,6 @@ dependencies {
 
   compile "org.ow2.asm:asm:$asmVersion"
   compile "org.ow2.asm:asm-commons:$asmVersion"
-  compile "org.ow2.asm:asm-util:$asmVersion"
 
   compile "org.slf4j:slf4j-api:$slf4jVersion"
 }
