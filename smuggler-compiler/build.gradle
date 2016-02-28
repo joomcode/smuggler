@@ -14,7 +14,6 @@ dependencies {
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
   compile "commons-io:commons-io:$commonsIoVersion"
-  compile "com.google.guava:guava:$guavaVersion"
 
   compile "org.ow2.asm:asm:$asmVersion"
   compile "org.ow2.asm:asm-commons:$asmVersion"
