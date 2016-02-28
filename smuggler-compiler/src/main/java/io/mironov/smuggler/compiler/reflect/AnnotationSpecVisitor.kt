@@ -1,6 +1,5 @@
 package io.mironov.smuggler.compiler.reflect
 
-import io.mironov.smuggler.compiler.common.Types
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
@@ -17,10 +16,8 @@ internal class AnnotationSpecVisitor(
   }
 
   override fun visitAnnotation(name: String, desc: String): AnnotationVisitor? {
-    return if (Types.isSystemClass(Type.getType(desc))) null else {
-      AnnotationSpecVisitor(Type.getType(desc)) {
-        builder.value(name, it)
-      }
+    return AnnotationSpecVisitor(Type.getType(desc)) {
+      builder.value(name, it)
     }
   }
 
@@ -42,10 +39,8 @@ internal class AnnotationSpecVisitor(
     }
 
     override fun visitAnnotation(name: String?, desc: String): AnnotationVisitor? {
-      return if (Types.isSystemClass(Type.getType(desc))) null else {
-        AnnotationSpecVisitor(Type.getType(desc)) {
-          values.add(it)
-        }
+      return AnnotationSpecVisitor(Type.getType(desc)) {
+        values.add(it)
       }
     }
 

@@ -1,6 +1,5 @@
 package io.mironov.smuggler.compiler.reflect
 
-import io.mironov.smuggler.compiler.common.Types
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -16,10 +15,8 @@ internal class MethodSpecVisitor(
   private val builder = MethodSpec.Builder(access, name, type, signature)
 
   override fun visitAnnotation(desc: String, visible: Boolean): AnnotationVisitor? {
-    return if (Types.isSystemClass(Type.getType(desc))) null else {
-      AnnotationSpecVisitor(Type.getType(desc)) {
-        builder.annotation(it)
-      }
+    return AnnotationSpecVisitor(Type.getType(desc)) {
+      builder.annotation(it)
     }
   }
 

@@ -85,26 +85,6 @@ internal object Types {
     return "${type.internalName}.class"
   }
 
-  fun isSystemClass(type: Type): Boolean {
-    val name = type.className
-
-    if (name.endsWith(".Nullable")) {
-      return false
-    }
-
-    if (name.endsWith(".NotNull")) {
-      return false
-    }
-
-    if (name == "kotlin.Metadata") {
-      return false
-    }
-
-    return arrayOf("android.", "java.", "kotlin.", "dalvik.").any {
-      name.startsWith(it)
-    }
-  }
-
   fun isPrimitive(type: Type): Boolean {
     return type in Types.PRIMITIVE_TYPES
   }

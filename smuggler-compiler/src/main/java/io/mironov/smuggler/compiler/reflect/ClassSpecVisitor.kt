@@ -1,7 +1,6 @@
 package io.mironov.smuggler.compiler.reflect
 
 import io.mironov.smuggler.compiler.common.Opener
-import io.mironov.smuggler.compiler.common.Types
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
@@ -20,10 +19,8 @@ internal class ClassSpecVisitor(
   private val builder = ClassSpec.Builder(access, type, parent, opener).interfaces(interfaces)
 
   override fun visitAnnotation(desc: String, visible: Boolean): AnnotationVisitor? {
-    return if (Types.isSystemClass(Type.getType(desc))) null else {
-      AnnotationSpecVisitor(Type.getType(desc)) {
-        builder.annotation(it)
-      }
+    return AnnotationSpecVisitor(Type.getType(desc)) {
+      builder.annotation(it)
     }
   }
 
