@@ -33,7 +33,6 @@ ext {
   kotlinVersion = "1.0.0"
   bintrayVersion = "1.4"
 
-  commonsIoVersion = "2.4"
   asmVersion = "5.0.4"
   slf4jVersion = "1.7.13"
 }
