@@ -3,5 +3,5 @@ include ':smuggler-compiler'
 include ':smuggler-plugin'
 
 if (!hasProperty("skipSample")) {
-  include ':smuggler-sample'
+  include ':smuggler-tests'
 }
