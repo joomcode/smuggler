@@ -2,6 +2,7 @@ package io.mironov.smuggler.sample
 
 import android.support.test.runner.AndroidJUnit4
 import android.text.TextUtils
+import android.util.SparseBooleanArray
 import io.mironov.smuggler.AutoParcelable
 import org.junit.Before
 import org.junit.Test
@@ -87,11 +88,8 @@ class SmugglerTest {
         val strings: Array<String>
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
-        if (other == null || other !is PrimitiveArrays) {
-          return false
-        }
-
-        return Arrays.equals(booleans, other.booleans) &&
+        return other is PrimitiveArrays &&
+            Arrays.equals(booleans, other.booleans) &&
             Arrays.equals(bytes, other.bytes) &&
             Arrays.equals(chars, other.chars) &&
             Arrays.equals(ints, other.ints) &&
@@ -244,11 +242,8 @@ class SmugglerTest {
         val messages: Array<Message>?
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
-        if (other == null || other !is Chat) {
-          return false
-        }
-
-        return TextUtils.equals(title, other.title) &&
+        return other is Chat &&
+            TextUtils.equals(title, other.title) &&
             Arrays.equals(participants, other.participants) &&
             Arrays.equals(messages, other.messages)
       }
@@ -286,11 +281,8 @@ class SmugglerTest {
         val strings: Array<Array<String>>?
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
-        if (other == null || other !is MultiDimensionalPrimitiveArrays) {
-          return false
-        }
-
-        return Arrays.deepEquals(longs, other.longs) &&
+        return other is MultiDimensionalPrimitiveArrays &&
+            Arrays.deepEquals(longs, other.longs) &&
             Arrays.deepEquals(booleans, other.booleans) &&
             Arrays.deepEquals(bytes, other.bytes) &&
             Arrays.deepEquals(chars, other.chars) &&
@@ -330,11 +322,8 @@ class SmugglerTest {
         val strings: Array<Array<String>>?
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
-        if (other == null || other !is MultiDimensionalBoxedArrays) {
-          return false
-        }
-
-        return Arrays.deepEquals(longs, other.longs) &&
+        return other is MultiDimensionalBoxedArrays &&
+            Arrays.deepEquals(longs, other.longs) &&
             Arrays.deepEquals(booleans, other.booleans) &&
             Arrays.deepEquals(bytes, other.bytes) &&
             Arrays.deepEquals(chars, other.chars) &&
@@ -383,11 +372,8 @@ class SmugglerTest {
         val messages: Array<Message>
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
-        if (other == null || other !is Chat) {
-          return false
-        }
-
-        return TextUtils.equals(title, other.title) &&
+        return other is Chat &&
+            TextUtils.equals(title, other.title) &&
             Arrays.deepEquals(participants, other.participants) &&
             Arrays.deepEquals(messages, other.messages)
       }
@@ -418,6 +404,23 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithSparseArrays() {
+    data class Sparse(
+        val booleans: SparseBooleanArray
+    ) : AutoParcelable {
+      override fun equals(other: Any?): Boolean {
+        return other is Sparse &&
+            equals(booleans, other.booleans)
+      }
+    }
+
+    SmugglerAssertions.verify<Sparse>() {
+      Sparse(
+          booleans = generator.nextSparseBooleanArray()
+      )
+    }
+  }
+
   private data class WithStaticClassInitializer(
       val payload: String,
       val message: String
@@ -435,4 +438,18 @@ class SmugglerTest {
   private enum class Foo {
     FOO, BAR, FOO_FOO, BAR_BAR, FOO_BAR, BAR_FOO
   }
+}
+
+fun equals(left: SparseBooleanArray, right: SparseBooleanArray): Boolean {
+  if (left.size() != right.size()) {
+    return false
+  }
+
+  for (i in 0..left.size() - 1) {
+    if (left.keyAt(i) != right.keyAt(i) || left.valueAt(i) != right.valueAt(i)) {
+      return false
+    }
+  }
+
+  return true
 }
