@@ -1,11 +1,15 @@
 package io.mironov.smuggler.sample
 
+import android.util.SparseBooleanArray
 import java.util.Random
 
 class SmugglerGenerator(private val seed: Long) {
   private val random = Random(seed)
 
   inline fun <T : Any> nextNullable(factory: () -> T): T? = if (nextNullableProbability()) null else factory()
+
+  inline fun <reified T : Any> nextArray(factory: (Int) -> T) = Array(nextArraySize()) { factory(it) }
+  inline fun <reified T : Any> nextNullableArray(factory: (Int) -> T) = nextNullable { nextArray(factory) }
 
   fun nextArraySize() = random.nextInt(MAX_ARRAY_SIZE)
   fun nextNullableProbability() = random.nextInt(3) == 0
@@ -67,8 +71,19 @@ class SmugglerGenerator(private val seed: Long) {
   fun nextStringArray() = Array(nextArraySize()) { nextString() }
   fun nextNullableStringArray() = nextNullable { nextStringArray() }
 
-  inline fun <reified T : Any> nextArray(factory: (Int) -> T) = Array(nextArraySize()) { factory(it) }
-  inline fun <reified T : Any> nextNullableArray(factory: (Int) -> T) = nextNullable { nextArray(factory) }
+  fun nextSparseBooleanArray() = createSparseBooleanArray()
+  fun nextNullableSparseBooleanArray() = nextNullable { nextSparseBooleanArray() }
+
+  fun nextSparseBooleanArrayArray() = nextArray { nextSparseBooleanArray() }
+  fun nextNullableSparseBooleanArrayArray() = nextNullable { nextSparseBooleanArrayArray() }
+
+  private fun createSparseBooleanArray(): SparseBooleanArray {
+    return SparseBooleanArray().apply {
+      for (index in 0..nextArraySize() - 1) {
+        put(nextInt(), nextBoolean())
+      }
+    }
+  }
 
   private companion object {
     private const val MAX_ARRAY_SIZE = 25
