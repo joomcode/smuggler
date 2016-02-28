@@ -202,12 +202,10 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
   }
 
   private fun createInterceptedMethodVisitor(delegate: MethodVisitor?, access: Int, name: String, description: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
-    return given(name == "<clinit>" && access.isStatic) {
-      InitializerBlockInterceptor(delegate, access, Method(name, description)) {
-        newInstance(creatorTypeFrom(spec), Methods.getConstructor())
-        putStatic(spec.clazz.type, "CREATOR", creatorTypeFrom(spec))
-      }
-    } ?: delegate
+    return InitializerBlockInterceptor(delegate, access, Method(name, description)) {
+      newInstance(creatorTypeFrom(spec), Methods.getConstructor())
+      putStatic(spec.clazz.type, "CREATOR", creatorTypeFrom(spec))
+    }
   }
 
   private inner class InitializerBlockInterceptor(
@@ -218,7 +216,10 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
   ) : GeneratorAdapter(delegate, access, method) {
     override fun visitCode() {
       super.visitCode()
-      interceptor()
+
+      if (method.name == "<clinit>" && access.isStatic) {
+        interceptor()
+      }
     }
   }
 }
