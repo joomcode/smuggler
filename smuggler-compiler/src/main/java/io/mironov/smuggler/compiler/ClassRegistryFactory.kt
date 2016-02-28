@@ -4,17 +4,14 @@ import io.mironov.smuggler.compiler.common.FileOpener
 import io.mironov.smuggler.compiler.common.JarOpener
 import io.mironov.smuggler.compiler.common.Opener
 import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.common.collect
 import io.mironov.smuggler.compiler.reflect.ClassReference
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Type
-import org.slf4j.LoggerFactory
 import java.io.File
-import java.util.ArrayList
 import java.util.zip.ZipFile
 
 internal object ClassRegistryFactory {
-  private val logger = LoggerFactory.getLogger(ClassRegistryFactory::class.java)
-
   private const val EXTENSION_CLASS = "class"
   private const val EXTENSION_JAR = "jar"
 
@@ -26,39 +23,35 @@ internal object ClassRegistryFactory {
   }
 
   private fun createClassReferences(files: Collection<File>): Collection<ClassReference> {
-    return ArrayList<ClassReference>().apply {
-      for (file in files) {
-        logger.info("Generating class references for {}", file.absolutePath)
+    return files.collect(mutableListOf()) { result, file ->
+      if (file.isFile && file.extension == EXTENSION_JAR) {
+        result.addAll(createClassReferencesForJar(file))
+      }
 
-        if (file.isFile && file.extension == EXTENSION_JAR) {
-          addAll(createClassReferencesForJar(file))
-        }
-
-        if (file.isDirectory) {
-          addAll(createClassReferencesForDirectory(file))
-        }
+      if (file.isDirectory) {
+        result.addAll(createClassReferencesForDirectory(file))
       }
     }
   }
 
   private fun createClassReferencesForJar(file: File): List<ClassReference> {
-    return ArrayList<ClassReference>().apply {
-      ZipFile(file).use {
-        for (entry in it.entries().asSequence().filter { File(it.name).extension == EXTENSION_CLASS }) {
-          add(createClassReference(JarOpener(file, entry.name), it.getInputStream(entry).use {
-            it.readBytes()
-          }))
-        }
-      }
+    return ZipFile(file).use {
+      it.entries().asSequence()
+          .filter { File(it.name).extension == EXTENSION_CLASS }
+          .collect(mutableListOf()) { result, entry ->
+            result.add(createClassReference(JarOpener(file, entry.name), it.getInputStream(entry).use {
+              it.readBytes()
+            }))
+          }
     }
   }
 
   private fun createClassReferencesForDirectory(file: File): List<ClassReference> {
-    return ArrayList<ClassReference>().apply {
-      file.walk().filter { it.extension == EXTENSION_CLASS }.forEach {
-        add(createClassReference(FileOpener(it), it.readBytes()))
-      }
-    }
+    return file.walk()
+        .filter { it.extension == EXTENSION_CLASS }
+        .collect(mutableListOf()) { result, file ->
+          result.add(createClassReference(FileOpener(file), file.readBytes()))
+        }
   }
 
   private fun createClassReference(opener: Opener, bytes: ByteArray): ClassReference {
