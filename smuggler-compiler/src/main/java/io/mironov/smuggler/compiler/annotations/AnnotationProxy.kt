@@ -1,7 +1,8 @@
 package io.mironov.smuggler.compiler.annotations
 
-import com.google.common.reflect.AbstractInvocationHandler
+import io.mironov.smuggler.compiler.common.cast
 import io.mironov.smuggler.compiler.reflect.AnnotationSpec
+import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.util.ArrayList
@@ -9,7 +10,7 @@ import java.util.HashMap
 
 internal object AnnotationProxy {
   fun <A> create(clazz: Class<A>, spec: AnnotationSpec): A {
-    return clazz.cast(Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), object : AbstractInvocationHandler() {
+    return clazz.cast(Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), object : InvocationHandler {
       private val cache = HashMap<String, Any?>()
 
       private val string by lazy(LazyThreadSafetyMode.NONE) {
@@ -28,7 +29,19 @@ internal object AnnotationProxy {
         }
       }
 
-      override fun handleInvocation(proxy: Any, method: Method, args: Array<out Any>): Any? {
+      override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
+        if (method.name == "toString" && args.orEmpty().size == 0) {
+          return toString()
+        }
+
+        if (method.name == "hashCode" && args.orEmpty().size == 0) {
+          return hashCode()
+        }
+
+        if (method.name == "equals" && args.orEmpty().size == 1) {
+          return equals(args.orEmpty()[0])
+        }
+
         return cache[method.name]
       }
 
@@ -70,9 +83,5 @@ internal object AnnotationProxy {
 
   private fun isAnnotation(type: Class<*>): Boolean {
     return type.isAnnotation || type.getAnnotation(AnnotationDelegate::class.java) != null
-  }
-
-  private inline fun <reified T : Any> Any?.cast(): T {
-    return this as T
   }
 }
