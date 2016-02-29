@@ -490,7 +490,10 @@ class SmugglerTest {
 
     data class Lists(
         val users: List<User>,
-        val messages: List<Message>
+        val messages: List<Message>,
+        val booleans: List<Boolean>,
+        val strings: List<String>,
+        val longs: List<Long>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Lists>() {
@@ -506,7 +509,10 @@ class SmugglerTest {
                 message = generator.nextString(),
                 timestamp = generator.nextLong()
             )
-          }
+          },
+          booleans = generator.nextList { generator.nextBoolean() },
+          strings = generator.nextList { generator.nextString() },
+          longs = generator.nextList { generator.nextLong() }
       )
     }
   }
