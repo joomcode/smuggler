@@ -6,16 +6,7 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.signature.SignatureVisitor
 import java.util.ArrayList
 
-fun GenericTypeReader(callback: (GenericType) -> Unit): GenericTypeReader {
-  return object : GenericTypeReader() {
-    override fun visitEnd() {
-      super.visitEnd()
-      callback(toGenericType())
-    }
-  }
-}
-
-open class GenericTypeReader : SignatureVisitor(Opcodes.ASM5) {
+class GenericTypeReader(private val callback: (GenericType) -> Unit) : SignatureVisitor(Opcodes.ASM5) {
   private var genericType: GenericType? = null
   private var classType: Type? = null
   private var typeArguments = ArrayList<GenericType>()
@@ -61,16 +52,16 @@ open class GenericTypeReader : SignatureVisitor(Opcodes.ASM5) {
   }
 
   override fun visitEnd() {
-    buildGenericType()
+    callback(buildGenericType())
   }
 
-  private fun buildGenericType() {
+  private fun buildGenericType(): GenericType {
     if (typeArguments.isEmpty()) {
       genericType = GenericType.RawType(classType!!)
     } else {
       genericType = GenericType.ParameterizedType(classType!!, genericType, typeArguments.toList())
     }
-  }
 
-  fun toGenericType(): GenericType = genericType!!
+    return genericType!!
+  }
 }

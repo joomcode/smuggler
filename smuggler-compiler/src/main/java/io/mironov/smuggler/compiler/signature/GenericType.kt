@@ -3,14 +3,18 @@ package io.mironov.smuggler.compiler.signature
 import io.mironov.smuggler.compiler.common.Types
 import org.objectweb.asm.Type
 import org.objectweb.asm.signature.SignatureReader
+import java.util.concurrent.atomic.AtomicReference
 
 sealed class GenericType {
   companion object {
     fun read(signature: String): GenericType {
-      return GenericTypeReader().run {
-        SignatureReader(signature).acceptType(this)
-        toGenericType()
-      }
+      val result = AtomicReference<GenericType>()
+
+      SignatureReader(signature).accept(GenericTypeReader {
+        result.set(it)
+      })
+
+      return result.get()
     }
   }
 
