@@ -1,22 +1,14 @@
 package io.mironov.smuggler.compiler.signature
 
-import io.mironov.smuggler.compiler.common.Types
 import org.objectweb.asm.Type
-import org.objectweb.asm.signature.SignatureReader
-import java.util.concurrent.atomic.AtomicReference
 
-internal sealed class GenericType {
-  companion object {
-    fun read(signature: String): GenericType {
-      val result = AtomicReference<GenericType>()
-
-      SignatureReader(signature).accept(GenericTypeReader {
-        result.set(it)
-      })
-
-      return result.get()
+internal sealed class GenericType() {
+  val raw: Type
+    get() = when (this) {
+      is RawType -> type
+      is ParameterizedType -> type
+      else -> throw UnsupportedOperationException()
     }
-  }
 
   class RawType(val type: Type) : GenericType() {
     override fun toString(): String = "RawType($type)"

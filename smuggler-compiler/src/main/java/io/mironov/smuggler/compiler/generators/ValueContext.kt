@@ -7,13 +7,16 @@ import java.util.HashMap
 import java.util.NoSuchElementException
 
 internal class ValueContext(
-    val type: Type = Types.OBJECT,
-    val generic: GenericType? = null
+    val type: GenericType = GenericType.RawType(Types.OBJECT)
 ) {
   private val names = HashMap<String, Int>()
 
-  fun typed(newType: Type, newGeneric: GenericType?): ValueContext {
-    val context = ValueContext(newType, newGeneric)
+  fun typed(newType: Type): ValueContext {
+    return typed(GenericType.RawType(newType))
+  }
+
+  fun typed(newType: GenericType): ValueContext {
+    val context = ValueContext(newType)
     val variables = names
 
     return context.apply {

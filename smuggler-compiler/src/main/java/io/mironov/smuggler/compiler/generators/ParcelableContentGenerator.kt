@@ -9,7 +9,6 @@ import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.given
 import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
-import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import io.mironov.smuggler.compiler.reflect.MethodSpec
 import io.mironov.smuggler.compiler.reflect.Signature
 import org.objectweb.asm.ClassReader
@@ -58,9 +57,9 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
           storeLocal(this, Types.ANDROID_PARCEL)
         })
 
-        newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map(AutoParcelablePropertySpec::type))) {
+        newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map { it.type.raw })) {
           spec.properties.forEach {
-            ValueAdapterFactory.from(environment.registry, spec, it).read(this, context.typed(it.type, it.generic))
+            ValueAdapterFactory.from(environment.registry, spec, it).read(this, context.typed(it.type))
           }
         }
       }
@@ -128,22 +127,22 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
         })
 
         spec.properties.forEach {
-          context.property(it.name, newLocal(it.type).apply {
+          context.property(it.name, newLocal(it.type.raw).apply {
             loadThis()
             invokeVirtual(spec.clazz, it.getter)
-            storeLocal(this, it.type)
+            storeLocal(this, it.type.raw)
           })
         }
 
         spec.properties.forEach {
           val property = ValueAdapterFactory.from(environment.registry, spec, it)
 
-          context.value(newLocal(it.type).apply {
+          context.value(newLocal(it.type.raw).apply {
             loadLocal(context.property(it.name))
-            storeLocal(this, it.type)
+            storeLocal(this, it.type.raw)
           })
 
-          property.write(this, context.typed(it.type, it.generic))
+          property.write(this, context.typed(it.type))
         }
       }
 

@@ -14,8 +14,8 @@ internal interface ClassSignatureMirror {
     }
   }
 
-  val typeParameters: List<TypeParameter>
   val superType: GenericType
+  val typeParameters: List<TypeParameter>
   val interfaces: List<GenericType>
 
   class Builder() {

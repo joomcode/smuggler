@@ -7,6 +7,7 @@ import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
 import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.reflect.ClassReference
+import io.mironov.smuggler.compiler.signature.GenericType
 import io.mironov.smuggler.compiler.signature.MethodSignatureMirror
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
@@ -55,7 +56,7 @@ internal object AutoParcelableClassSpecFactory {
       val generic = if (signature != null) MethodSignatureMirror.read(signature) else null
       val type = getter.returns
 
-      AutoParcelablePropertySpec(name, type, generic?.returnType, getter)
+      AutoParcelablePropertySpec(name, generic?.returnType ?: GenericType.RawType(type), getter)
     }
 
     return AutoParcelableClassSpec(spec, properties)

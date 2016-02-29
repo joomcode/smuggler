@@ -46,8 +46,10 @@ internal object ValueAdapterFactory {
     return from(registry, spec, property, property.type)
   }
   
-  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, type: Type): ValueAdapter {
-    return ADAPTERS[type] ?: run {
+  private fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+    return ADAPTERS[generic.raw] ?: run {
+      val type = generic.raw
+
       if (registry.isSubclassOf(type, Types.ENUM)) {
         return EnumValueAdapter
       }
@@ -69,7 +71,7 @@ internal object ValueAdapterFactory {
       }
 
       if (type.sort == Type.ARRAY) {
-        return ArrayPropertyAdapter(from(registry, spec, property, Types.getElementType(type)))
+        return ArrayPropertyAdapter(from(registry, spec, property, GenericType.RawType(Types.getElementType(type))))
       }
 
       if (registry.isSubclassOf(type, Types.SERIALIZABLE)) {
@@ -160,7 +162,7 @@ internal open class SimpleBoxedValueAdapter(
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(boxed, Methods.get(unboxer, unboxed))
 
-    delegate.write(adapter, context.typed(unboxed, null).apply {
+    delegate.write(adapter, context.typed(unboxed).apply {
       value(adapter.newLocal(unboxed).apply {
         adapter.storeLocal(this)
       })
@@ -254,15 +256,15 @@ internal object EnumValueAdapter : OptionalValueAdapter() {
   override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
-    adapter.invokeStatic(context.type, Methods.get("values", Types.getArrayType(context.type)))
-    adapter.swap(Types.INT, Types.getArrayType(context.type))
-    adapter.arrayLoad(context.type)
+    adapter.invokeStatic(context.type.raw, Methods.get("values", Types.getArrayType(context.type.raw)))
+    adapter.swap(Types.INT, Types.getArrayType(context.type.raw))
+    adapter.arrayLoad(context.type.raw)
   }
 
   override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
-    adapter.invokeVirtual(context.type, Methods.get("ordinal", Types.INT))
+    adapter.invokeVirtual(context.type.raw, Methods.get("ordinal", Types.INT))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
   }
 }
@@ -271,7 +273,7 @@ internal object SerializableValueAdapter : ValueAdapter {
   override fun read(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readSerializable", Types.SERIALIZABLE))
-    adapter.checkCast(context.type)
+    adapter.checkCast(context.type.raw)
   }
 
   override fun write(adapter: GeneratorAdapter, context: ValueContext) {
@@ -285,10 +287,10 @@ internal object SerializableValueAdapter : ValueAdapter {
 internal object ParcelableValueAdapter : ValueAdapter {
   override fun read(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
-    adapter.push(context.type)
+    adapter.push(context.type.raw)
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readParcelable", Types.ANDROID_PARCELABLE, Types.CLASS_LOADER))
-    adapter.checkCast(context.type)
+    adapter.checkCast(context.type.raw)
   }
 
   override fun write(adapter: GeneratorAdapter, context: ValueContext) {
@@ -306,7 +308,9 @@ internal class ArrayPropertyAdapter(
   final override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
-    val elements = adapter.newLocal(context.type)
+
+    val elementType = Types.getElementType(context.type.raw)
+    val elements = adapter.newLocal(context.type.raw)
 
     val begin = adapter.newLabel()
     val body = adapter.newLabel()
@@ -317,7 +321,7 @@ internal class ArrayPropertyAdapter(
     adapter.storeLocal(length)
 
     adapter.loadLocal(length)
-    adapter.newArray(Types.getElementType(context.type))
+    adapter.newArray(elementType)
     adapter.storeLocal(elements)
 
     adapter.push(0)
@@ -333,8 +337,8 @@ internal class ArrayPropertyAdapter(
     adapter.mark(body)
     adapter.loadLocal(elements)
     adapter.loadLocal(index)
-    adapter.readElement(context.typed(Types.getElementType(context.type), null))
-    adapter.arrayStore(Types.getElementType(context.type))
+    adapter.readElement(context.typed(elementType))
+    adapter.arrayStore(elementType)
 
     adapter.iinc(index, 1)
     adapter.goTo(begin)
@@ -346,7 +350,9 @@ internal class ArrayPropertyAdapter(
   final override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
-    val element = adapter.newLocal(Types.getElementType(context.type))
+
+    val elementType = Types.getElementType(context.type.raw)
+    val element = adapter.newLocal(elementType)
 
     val begin = adapter.newLabel()
     val body = adapter.newLabel()
@@ -373,9 +379,9 @@ internal class ArrayPropertyAdapter(
     adapter.mark(body)
     adapter.loadLocal(context.value())
     adapter.loadLocal(index)
-    adapter.arrayLoad(Types.getElementType(context.type))
+    adapter.arrayLoad(elementType)
     adapter.storeLocal(element)
-    adapter.writeElement(context.typed(Types.getElementType(context.type), null).apply {
+    adapter.writeElement(context.typed(GenericType.RawType(elementType)).apply {
       value(element)
     })
 
@@ -393,19 +399,19 @@ internal class SparseArrayValueAdapter(
 ) : ValueAdapter {
   companion object {
     fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
-      if (property.generic !is GenericType.ParameterizedType) {
+      if (property.type !is GenericType.ParameterizedType) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
       }
 
-      if (property.generic.typeArguments.size != 1) {
+      if (property.type.typeArguments.size != 1) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
       }
 
-      if (property.generic.typeArguments[0] !is GenericType.RawType) {
+      if (property.type.typeArguments[0] !is GenericType.RawType) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a raw type", property.name)
       }
 
-      return SparseArrayValueAdapter(property.generic.typeArguments[0].cast<GenericType.RawType>().type)
+      return SparseArrayValueAdapter(property.type.typeArguments[0].cast<GenericType.RawType>().type)
     }
   }
 
@@ -414,7 +420,7 @@ internal class SparseArrayValueAdapter(
     adapter.push(element)
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readSparseArray", Types.ANDROID_SPARSE_ARRAY, Types.CLASS_LOADER))
-    adapter.checkCast(context.type)
+    adapter.checkCast(context.type.raw)
   }
 
   override fun write(adapter: GeneratorAdapter, context: ValueContext) {
@@ -430,19 +436,19 @@ internal class ListValueAdapter(
 ) : OptionalValueAdapter() {
   companion object {
     fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
-      if (property.generic !is GenericType.ParameterizedType) {
+      if (property.type !is GenericType.ParameterizedType) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
       }
 
-      if (property.generic.typeArguments.size != 1) {
+      if (property.type.typeArguments.size != 1) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
       }
 
-      if (property.generic.typeArguments[0] !is GenericType.RawType) {
+      if (property.type.typeArguments[0] !is GenericType.RawType) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a raw type", property.name)
       }
 
-      val first = property.generic.typeArguments[0]
+      val first = property.type.typeArguments[0]
       val element = first.cast<GenericType.RawType>().type
 
       if (!registry.isSubclassOf(element, Types.ANDROID_PARCELABLE)) {
@@ -457,7 +463,7 @@ internal class ListValueAdapter(
     adapter.loadLocal(context.parcel())
     adapter.getStatic(element, "CREATOR", Types.ANDROID_CREATOR)
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("createTypedArrayList", Types.ARRAY_LIST, Types.ANDROID_CREATOR))
-    adapter.checkCast(context.type)
+    adapter.checkCast(context.type.raw)
   }
 
   override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
