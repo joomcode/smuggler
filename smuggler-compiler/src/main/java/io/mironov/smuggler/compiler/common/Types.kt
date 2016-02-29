@@ -50,6 +50,7 @@ internal object Types {
   val ANDROID_CREATOR = Type.getObjectType("android/os/Parcelable\$Creator")
   val ANDROID_BUNDLE = Type.getObjectType("android/os/Bundle")
   val ANDROID_SPARSE_BOOLEAN_ARRAY = Type.getObjectType("android/util/SparseBooleanArray")
+  val ANDROID_SPARSE_ARRAY = Type.getObjectType("android/util/SparseArray")
 
   val SMUGGLER_PARCELABLE = Type.getObjectType("io/mironov/smuggler/AutoParcelable")
   val SMUGGLER_FACTORY = Type.getObjectType("io/mironov/smuggler/SmugglerFactory")

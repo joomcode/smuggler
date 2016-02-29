@@ -50,6 +50,10 @@ internal object ValueAdapterFactory {
         return EnumValueAdapter
       }
 
+      if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
+        return SparseArrayValueAdapter
+      }
+
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_BOOLEAN_ARRAY)) {
         return SparseBooleanArrayValueAdapter
       }
@@ -366,7 +370,6 @@ internal class ArrayPropertyAdapter(
     adapter.loadLocal(index)
     adapter.arrayLoad(Types.getElementType(context.type))
     adapter.storeLocal(element)
-
     adapter.writeElement(context.typed(Types.getElementType(context.type), null).apply {
       value(element)
     })
@@ -378,4 +381,20 @@ internal class ArrayPropertyAdapter(
 
   private fun GeneratorAdapter.readElement(context: ValueContext) = delegate.read(this, context)
   private fun GeneratorAdapter.writeElement(context: ValueContext) = delegate.write(this, context)
+}
+
+internal object SparseArrayValueAdapter : ValueAdapter {
+  override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.loadLocal(context.parcel())
+    adapter.pushNull()
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readSparseArray", Types.ANDROID_SPARSE_ARRAY, Types.CLASS_LOADER))
+    adapter.checkCast(context.type)
+  }
+
+  override fun write(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.loadLocal(context.parcel())
+    adapter.loadLocal(context.value())
+    adapter.checkCast(Types.ANDROID_SPARSE_ARRAY)
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeSparseArray", Types.VOID, Types.ANDROID_SPARSE_ARRAY))
+  }
 }
