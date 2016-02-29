@@ -24,6 +24,7 @@ internal object Types {
   val CLASS_LOADER = Type.getType(ClassLoader::class.java)
   val ENUM = Type.getType(Enum::class.java)
   val SERIALIZABLE = Type.getType(Serializable::class.java)
+  val ITERATOR = Type.getType(java.util.Iterator::class.java)
 
   val LIST = Type.getType(java.util.List::class.java)
   val ARRAY_LIST = Type.getType(java.util.ArrayList::class.java)
