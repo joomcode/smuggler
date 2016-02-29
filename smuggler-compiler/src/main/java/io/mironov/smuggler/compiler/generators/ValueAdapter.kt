@@ -54,7 +54,7 @@ internal object ValueAdapterFactory {
       }
 
       if (type == Types.LIST) {
-        return ListValueAdapter.from(registry, spec, property)
+        return ListValueAdapter.from(registry, spec, property, generic)
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
@@ -434,23 +434,22 @@ internal class ListValueAdapter(
     private val delegate: ValueAdapter
 ) : OptionalValueAdapter() {
   companion object {
-    fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
-      if (property.type !is GenericType.ParameterizedType) {
+    fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+      if (generic !is GenericType.ParameterizedType) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
       }
 
-      if (property.type.typeArguments.size != 1) {
+      if (generic.typeArguments.size != 1) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
       }
 
-      if (property.type.typeArguments[0] !is GenericType.RawType) {
-        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a raw type", property.name)
+      val first = generic.typeArguments[0]
+
+      if (first !is GenericType.RawType && first !is GenericType.ParameterizedType) {
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
       }
 
-      val first = property.type.typeArguments[0]
-      val delegate = ValueAdapterFactory.from(registry, spec, property, first)
-
-      return ListValueAdapter(delegate)
+      return ListValueAdapter(ValueAdapterFactory.from(registry, spec, property, first))
     }
   }
 
