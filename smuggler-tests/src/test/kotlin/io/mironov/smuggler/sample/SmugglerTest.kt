@@ -410,14 +410,16 @@ class SmugglerTest {
         val booleans: SparseBooleanArray,
         val strings: SparseArray<String>,
         val longs: SparseArray<Long>,
-        val doubles: SparseArray<Double>
+        val doubles: SparseArray<Double>,
+        val floats: SparseArray<Float>
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
         return other is Sparse &&
             equals(booleans, other.booleans) &&
             equals(strings, other.strings) &&
             equals(longs, other.longs) &&
-            equals(doubles, other.doubles)
+            equals(doubles, other.doubles) &&
+            equals(floats, other.floats)
       }
     }
 
@@ -426,7 +428,8 @@ class SmugglerTest {
           booleans = generator.nextSparseBooleanArray(),
           strings = generator.nextSparseArray { generator.nextString() },
           longs = generator.nextSparseArray { generator.nextLong() },
-          doubles = generator.nextSparseArray { generator.nextDouble() }
+          doubles = generator.nextSparseArray { generator.nextDouble() },
+          floats = generator.nextSparseArray { generator.nextFloat() }
       )
     }
   }
@@ -465,6 +468,40 @@ class SmugglerTest {
             )
           },
           messages = generator.nextSparseArray {
+            Message(
+                message = generator.nextString(),
+                timestamp = generator.nextLong()
+            )
+          }
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithLists() {
+    data class User(
+        val firstName: String,
+        val lastName: String
+    ) : AutoParcelable
+
+    data class Message(
+        val message: String,
+        val timestamp: Long
+    ) : AutoParcelable
+
+    data class Lists(
+        val users: List<User>,
+        val messages: List<Message>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Lists>() {
+      Lists(
+          users = generator.nextList {
+            User(
+                firstName = generator.nextString(),
+                lastName = generator.nextString()
+            )
+          },
+          messages = generator.nextList {
             Message(
                 message = generator.nextString(),
                 timestamp = generator.nextLong()

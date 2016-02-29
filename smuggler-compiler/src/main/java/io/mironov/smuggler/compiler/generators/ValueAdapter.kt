@@ -72,7 +72,7 @@ internal object ValueAdapterFactory {
         return ArrayPropertyAdapter(from(registry, spec, property, Types.getElementType(type)))
       }
 
-      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property, type.className)
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property.name, type.className)
     }
   }
 }
