@@ -406,6 +406,32 @@ class SmugglerTest {
   }
 
   @Test fun shouldWorkWithSparseArrays() {
+    data class Sparse(
+        val booleans: SparseBooleanArray,
+        val strings: SparseArray<String>,
+        val longs: SparseArray<Long>,
+        val doubles: SparseArray<Double>
+    ) : AutoParcelable {
+      override fun equals(other: Any?): Boolean {
+        return other is Sparse &&
+            equals(booleans, other.booleans) &&
+            equals(strings, other.strings) &&
+            equals(longs, other.longs) &&
+            equals(doubles, other.doubles)
+      }
+    }
+
+    SmugglerAssertions.verify<Sparse>() {
+      Sparse(
+          booleans = generator.nextSparseBooleanArray(),
+          strings = generator.nextSparseArray { generator.nextString() },
+          longs = generator.nextSparseArray { generator.nextLong() },
+          doubles = generator.nextSparseArray { generator.nextDouble() }
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithComplexSparseArrays() {
     data class User(
         val firstName: String,
         val lastName: String
