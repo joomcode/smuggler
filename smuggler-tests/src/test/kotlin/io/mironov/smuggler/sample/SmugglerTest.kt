@@ -494,7 +494,9 @@ class SmugglerTest {
         val booleans: List<Boolean>,
         val strings: List<String>,
         val longs: List<Long>,
-        val multi: List<List<Long>>
+        val multi: List<List<Long>>,
+        val lists: List<Array<List<Boolean>>>,
+        val arrays: Array<List<Array<Boolean>>>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Lists>() {
@@ -514,7 +516,9 @@ class SmugglerTest {
           booleans = generator.nextList { generator.nextBoolean() },
           strings = generator.nextList { generator.nextString() },
           longs = generator.nextList { generator.nextLong() },
-          multi = generator.nextList { generator.nextList { generator.nextLong() } }
+          multi = generator.nextList { generator.nextList { generator.nextLong() } },
+          lists = generator.nextList { generator.nextArray { generator.nextList { generator.nextBoolean() } } },
+          arrays = generator.nextArray { generator.nextList { generator.nextArray { generator.nextBoolean() } } }
       )
     }
   }
