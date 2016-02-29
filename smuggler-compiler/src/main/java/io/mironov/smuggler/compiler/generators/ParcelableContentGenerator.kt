@@ -91,7 +91,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
       ClassReader(spec.clazz.opener.open()).accept(object : ClassVisitor(ASM5, this) {
         override fun visit(version: Int, access: Int, name: String, signature: String?, parent: String?, exceptions: Array<out String>?) {
           super.visit(version, access, name, signature, parent, exceptions)
-          visitField(ACC_PUBLIC + ACC_STATIC + ACC_FINAL, "CREATOR", creatorTypeFrom(spec), creatorFieldSignatureFrom(spec))
+          visitField(ACC_PUBLIC + ACC_STATIC + ACC_FINAL, "CREATOR", Types.ANDROID_CREATOR, creatorFieldSignatureFrom(spec))
         }
 
         override fun visitField(access: Int, name: String, description: String, signature: String?, value: Any?): FieldVisitor? {
@@ -110,7 +110,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
       if (spec.clazz.getDeclaredMethod("<clinit>", Types.VOID) == null) {
         newMethod(ACC_PUBLIC + ACC_STATIC, Methods.getStaticConstructor()) {
           newInstance(creatorTypeFrom(spec), Methods.getConstructor())
-          putStatic(spec.clazz.type, "CREATOR", creatorTypeFrom(spec))
+          putStatic(spec.clazz.type, "CREATOR", Types.ANDROID_CREATOR)
         }
       }
 
@@ -204,7 +204,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
   private fun createInterceptedMethodVisitor(delegate: MethodVisitor?, access: Int, name: String, description: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
     return InitializerBlockInterceptor(delegate, access, Method(name, description)) {
       newInstance(creatorTypeFrom(spec), Methods.getConstructor())
-      putStatic(spec.clazz.type, "CREATOR", creatorTypeFrom(spec))
+      putStatic(spec.clazz.type, "CREATOR", Types.ANDROID_CREATOR)
     }
   }
 

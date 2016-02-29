@@ -25,6 +25,18 @@ internal object Types {
   val ENUM = Type.getType(Enum::class.java)
   val SERIALIZABLE = Type.getType(Serializable::class.java)
 
+  val LIST = Type.getType(java.util.List::class.java)
+  val ARRAY_LIST = Type.getType(java.util.ArrayList::class.java)
+  val LINKED_LIST = Type.getType(java.util.LinkedList::class.java)
+
+  val SET = Type.getType(java.util.Set::class.java)
+  val HASH_SET = Type.getType(java.util.HashSet::class.java)
+  val TREE_SET = Type.getType(java.util.TreeSet::class.java)
+
+  val MAP = Type.getType(java.util.Map::class.java)
+  val HASH_MAP = Type.getType(java.util.HashMap::class.java)
+  val TREE_MAP = Type.getType(java.util.TreeMap::class.java)
+
   val BYTE = Type.BYTE_TYPE
   val CHAR = Type.CHAR_TYPE
   val DOUBLE = Type.DOUBLE_TYPE

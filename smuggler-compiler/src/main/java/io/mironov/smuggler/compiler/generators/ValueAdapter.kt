@@ -64,15 +64,19 @@ internal object ValueAdapterFactory {
         return ParcelableValueAdapter
       }
 
-      if (registry.isSubclassOf(type, Types.SERIALIZABLE)) {
-        return SerializableValueAdapter
+      if (type == Types.LIST) {
+        return ListValueAdapter.from(registry, spec, property)
       }
 
       if (type.sort == Type.ARRAY) {
         return ArrayPropertyAdapter(from(registry, spec, property, Types.getElementType(type)))
       }
 
-      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property.name, type.className)
+      if (registry.isSubclassOf(type, Types.SERIALIZABLE)) {
+        return SerializableValueAdapter
+      }
+
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property, type.className)
     }
   }
 }
@@ -418,5 +422,48 @@ internal class SparseArrayValueAdapter(
     adapter.loadLocal(context.value())
     adapter.checkCast(Types.ANDROID_SPARSE_ARRAY)
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeSparseArray", Types.VOID, Types.ANDROID_SPARSE_ARRAY))
+  }
+}
+
+internal class ListValueAdapter(
+    private val element: Type
+) : OptionalValueAdapter() {
+  companion object {
+    fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
+      if (property.generic !is GenericType.ParameterizedType) {
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
+      }
+
+      if (property.generic.typeArguments.size != 1) {
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
+      }
+
+      if (property.generic.typeArguments[0] !is GenericType.RawType) {
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a raw type", property.name)
+      }
+
+      val first = property.generic.typeArguments[0]
+      val element = first.cast<GenericType.RawType>().type
+
+      if (!registry.isSubclassOf(element, Types.ANDROID_PARCELABLE)) {
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a type that implements Parcelable", property.name)
+      }
+
+      return ListValueAdapter(element)
+    }
+  }
+
+  override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.loadLocal(context.parcel())
+    adapter.getStatic(element, "CREATOR", Types.ANDROID_CREATOR)
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("createTypedArrayList", Types.ARRAY_LIST, Types.ANDROID_CREATOR))
+    adapter.checkCast(context.type)
+  }
+
+  override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.loadLocal(context.parcel())
+    adapter.loadLocal(context.value())
+    adapter.checkCast(Types.LIST)
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeTypedList", Types.VOID, Types.LIST))
   }
 }
