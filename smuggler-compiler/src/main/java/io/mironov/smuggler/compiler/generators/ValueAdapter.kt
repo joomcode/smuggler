@@ -5,7 +5,6 @@ import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
-import io.mironov.smuggler.compiler.common.cast
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import io.mironov.smuggler.compiler.signature.GenericType
@@ -46,12 +45,16 @@ internal object ValueAdapterFactory {
     return from(registry, spec, property, property.type)
   }
   
-  private fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
     return ADAPTERS[generic.raw] ?: run {
       val type = generic.raw
 
       if (registry.isSubclassOf(type, Types.ENUM)) {
         return EnumValueAdapter
+      }
+
+      if (type == Types.LIST) {
+        return ListValueAdapter.from(registry, spec, property)
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
@@ -64,10 +67,6 @@ internal object ValueAdapterFactory {
 
       if (registry.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
         return ParcelableValueAdapter
-      }
-
-      if (type == Types.LIST) {
-        return ListValueAdapter.from(registry, spec, property)
       }
 
       if (type.sort == Type.ARRAY) {
@@ -411,7 +410,7 @@ internal class SparseArrayValueAdapter(
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a raw type", property.name)
       }
 
-      return SparseArrayValueAdapter(property.type.typeArguments[0].cast<GenericType.RawType>().type)
+      return SparseArrayValueAdapter(property.type.typeArguments[0].asRawType().type)
     }
   }
 
@@ -432,7 +431,7 @@ internal class SparseArrayValueAdapter(
 }
 
 internal class ListValueAdapter(
-    private val element: Type
+    private val delegate: ValueAdapter
 ) : OptionalValueAdapter() {
   companion object {
     fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
@@ -449,27 +448,91 @@ internal class ListValueAdapter(
       }
 
       val first = property.type.typeArguments[0]
-      val element = first.cast<GenericType.RawType>().type
+      val delegate = ValueAdapterFactory.from(registry, spec, property, first)
 
-      if (!registry.isSubclassOf(element, Types.ANDROID_PARCELABLE)) {
-        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a type that implements Parcelable", property.name)
-      }
-
-      return ListValueAdapter(element)
+      return ListValueAdapter(delegate)
     }
   }
 
   override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    val parameterizedType = context.type.asParameterizedType()
+    val elementType = parameterizedType.typeArguments[0].raw
+
+    val index = adapter.newLocal(Types.INT)
+    val length = adapter.newLocal(Types.INT)
+    val elements = adapter.newLocal(Types.LIST)
+
+    val begin = adapter.newLabel()
+    val body = adapter.newLabel()
+    val end = adapter.newLabel()
+
     adapter.loadLocal(context.parcel())
-    adapter.getStatic(element, "CREATOR", Types.ANDROID_CREATOR)
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("createTypedArrayList", Types.ARRAY_LIST, Types.ANDROID_CREATOR))
-    adapter.checkCast(context.type.raw)
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    adapter.storeLocal(length)
+
+    adapter.newInstance(Types.ARRAY_LIST, Methods.getConstructor())
+    adapter.storeLocal(elements)
+
+    adapter.push(0)
+    adapter.storeLocal(index)
+
+    adapter.mark(begin)
+    adapter.loadLocal(index)
+    adapter.loadLocal(length)
+
+    adapter.ifICmp(Opcodes.IFLT, body)
+    adapter.goTo(end)
+
+    adapter.mark(body)
+    adapter.loadLocal(elements)
+    adapter.readElement(context.typed(parameterizedType.typeArguments[0]))
+    adapter.checkCast(elementType)
+    adapter.invokeInterface(Types.LIST, Methods.get("add", Types.BOOLEAN, Types.OBJECT))
+    adapter.pop()
+
+    adapter.iinc(index, 1)
+    adapter.goTo(begin)
+    adapter.mark(end)
+
+    adapter.loadLocal(elements)
   }
 
   override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    val parameterizedType = context.type.asParameterizedType()
+    val elementType = parameterizedType.typeArguments[0].raw
+
+    val element = adapter.newLocal(elementType)
+    val iterator = adapter.newLocal(Types.ITERATOR)
+
+    val begin = adapter.newLabel()
+    val end = adapter.newLabel()
+
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
-    adapter.checkCast(Types.LIST)
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeTypedList", Types.VOID, Types.LIST))
+    adapter.invokeInterface(Types.LIST, Methods.get("size", Types.INT))
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+
+    adapter.loadLocal(context.value())
+    adapter.invokeInterface(Types.LIST, Methods.get("iterator", Types.ITERATOR))
+    adapter.storeLocal(iterator)
+
+    adapter.mark(begin)
+    adapter.loadLocal(iterator)
+    adapter.invokeInterface(Types.ITERATOR, Methods.get("hasNext", Types.BOOLEAN))
+    adapter.ifZCmp(Opcodes.IFEQ, end)
+
+    adapter.loadLocal(iterator)
+    adapter.invokeInterface(Types.ITERATOR, Methods.get("next", Types.OBJECT))
+    adapter.checkCast(elementType)
+    adapter.storeLocal(element)
+    adapter.writeElement(context.typed(parameterizedType.typeArguments[0]).apply {
+      value(element)
+    })
+
+    adapter.goTo(begin)
+    adapter.mark(end)
   }
+
+  private fun GeneratorAdapter.readElement(context: ValueContext) = delegate.read(this, context)
+  private fun GeneratorAdapter.writeElement(context: ValueContext) = delegate.write(this, context)
 }
