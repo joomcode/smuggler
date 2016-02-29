@@ -5,8 +5,10 @@ import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.common.cast
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
+import io.mironov.smuggler.compiler.signature.GenericType
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import java.util.HashMap
@@ -386,7 +388,8 @@ internal class ArrayPropertyAdapter(
 internal object SparseArrayValueAdapter : ValueAdapter {
   override fun read(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
-    adapter.pushNull()
+    adapter.push(findElementTypeFrom(context))
+    adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readSparseArray", Types.ANDROID_SPARSE_ARRAY, Types.CLASS_LOADER))
     adapter.checkCast(context.type)
   }
@@ -396,5 +399,12 @@ internal object SparseArrayValueAdapter : ValueAdapter {
     adapter.loadLocal(context.value())
     adapter.checkCast(Types.ANDROID_SPARSE_ARRAY)
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeSparseArray", Types.VOID, Types.ANDROID_SPARSE_ARRAY))
+  }
+
+  private fun findElementTypeFrom(context: ValueContext): Type {
+    val generic = context.generic!!.cast<GenericType.ParameterizedType>()
+    val raw = generic.typeArguments[0].cast<GenericType.RawType>()
+
+    return raw.type
   }
 }
