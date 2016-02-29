@@ -3,7 +3,7 @@ package io.mironov.smuggler.compiler.signature
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.signature.SignatureVisitor
 
-class MethodSignatureReader : SignatureVisitor(Opcodes.ASM5) {
+internal class MethodSignatureReader : SignatureVisitor(Opcodes.ASM5) {
   private val builder = MethodSignatureMirror.Builder()
 
   override fun visitFormalTypeParameter(name: String) {

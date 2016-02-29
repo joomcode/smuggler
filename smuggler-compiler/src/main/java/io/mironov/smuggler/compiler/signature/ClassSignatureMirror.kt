@@ -1,9 +1,10 @@
 package io.mironov.smuggler.compiler.signature
 
+import io.mironov.smuggler.compiler.common.Types
 import org.objectweb.asm.signature.SignatureReader
 import java.util.ArrayList
 
-interface ClassSignatureMirror {
+internal interface ClassSignatureMirror {
   companion object {
     fun read(signature: String): ClassSignatureMirror {
       return ClassSignatureReader().run {
@@ -18,8 +19,8 @@ interface ClassSignatureMirror {
   val interfaces: List<GenericType>
 
   class Builder() {
+    var superType: GenericType = GenericType.RawType(Types.OBJECT)
     val typeParameters = ArrayList<TypeParameter.Builder>()
-    var superType: GenericType = OBJECT_RAW_TYPE
     val interfaces = ArrayList<GenericType>()
 
     fun build(): ClassSignatureMirror = ClassSignatureMirrorImpl(this)

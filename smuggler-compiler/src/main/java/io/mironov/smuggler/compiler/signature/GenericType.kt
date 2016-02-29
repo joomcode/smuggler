@@ -5,7 +5,7 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.signature.SignatureReader
 import java.util.concurrent.atomic.AtomicReference
 
-sealed class GenericType {
+internal sealed class GenericType {
   companion object {
     fun read(signature: String): GenericType {
       val result = AtomicReference<GenericType>()
@@ -56,5 +56,3 @@ sealed class GenericType {
     override fun toString(): String = "LowerBoundedType($lowerBound)"
   }
 }
-
-val OBJECT_RAW_TYPE = GenericType.RawType(Types.OBJECT)

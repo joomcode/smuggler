@@ -1,14 +1,15 @@
 package io.mironov.smuggler.compiler.signature
 
+import io.mironov.smuggler.compiler.common.Types
 import java.util.ArrayList
 
-interface TypeParameter {
+internal interface TypeParameter {
   val name: String
   val classBound: GenericType
   val interfaceBounds: List<GenericType>
 
   class Builder(val name: String) {
-    var classBound: GenericType = OBJECT_RAW_TYPE
+    var classBound: GenericType = GenericType.RawType(Types.OBJECT)
     val interfaceBounds = ArrayList<GenericType>()
 
     fun build(): TypeParameter = TypeParameterImpl(this)

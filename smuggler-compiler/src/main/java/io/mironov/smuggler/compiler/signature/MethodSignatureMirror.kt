@@ -3,7 +3,7 @@ package io.mironov.smuggler.compiler.signature
 import org.objectweb.asm.signature.SignatureReader
 import java.util.ArrayList
 
-interface MethodSignatureMirror {
+internal interface MethodSignatureMirror {
   companion object {
     fun read(signature: String): MethodSignatureMirror {
       return MethodSignatureReader().run {

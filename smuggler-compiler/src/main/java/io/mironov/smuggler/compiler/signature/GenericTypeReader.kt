@@ -6,7 +6,7 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.signature.SignatureVisitor
 import java.util.ArrayList
 
-class GenericTypeReader(private val callback: (GenericType) -> Unit) : SignatureVisitor(Opcodes.ASM5) {
+internal class GenericTypeReader(private val callback: (GenericType) -> Unit) : SignatureVisitor(Opcodes.ASM5) {
   private var genericType: GenericType? = null
   private var classType: Type? = null
   private var typeArguments = ArrayList<GenericType>()
