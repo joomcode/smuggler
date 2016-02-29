@@ -507,7 +507,7 @@ fun equals(left: SparseBooleanArray, right: SparseBooleanArray): Boolean {
   return true
 }
 
-fun <T> equals(left: SparseArray<T>, right: SparseArray<T>): Boolean {
+fun equals(left: SparseArray<*>, right: SparseArray<*>): Boolean {
   if (left.size() != right.size()) {
     return false
   }

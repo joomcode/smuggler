@@ -43,17 +43,17 @@ internal object ValueAdapterFactory {
   }
 
   fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
-    return from(registry, spec, property.type, property.name)
+    return from(registry, spec, property, property.type)
   }
   
-  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, type: Type, property: String): ValueAdapter {
+  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, type: Type): ValueAdapter {
     return ADAPTERS[type] ?: run {
       if (registry.isSubclassOf(type, Types.ENUM)) {
         return EnumValueAdapter
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
-        return SparseArrayValueAdapter
+        return SparseArrayValueAdapter.from(registry, spec, property)
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_BOOLEAN_ARRAY)) {
@@ -69,7 +69,7 @@ internal object ValueAdapterFactory {
       }
 
       if (type.sort == Type.ARRAY) {
-        return ArrayPropertyAdapter(from(registry, spec, Types.getElementType(type), property))
+        return ArrayPropertyAdapter(from(registry, spec, property, Types.getElementType(type)))
       }
 
       throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
@@ -385,10 +385,33 @@ internal class ArrayPropertyAdapter(
   private fun GeneratorAdapter.writeElement(context: ValueContext) = delegate.write(this, context)
 }
 
-internal object SparseArrayValueAdapter : ValueAdapter {
+internal class SparseArrayValueAdapter(
+    private val element: Type
+) : ValueAdapter {
+  companion object {
+    fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
+      if (property.generic !is GenericType.ParameterizedType) {
+        throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' must be parameterized as ''SparseArray<Foo>''",
+            spec.clazz.type.className, property.name)
+      }
+
+      if (property.generic.typeArguments.size != 1) {
+        throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' must have exactly one type argument",
+            spec.clazz.type.className, property.name)
+      }
+
+      if (property.generic.typeArguments[0] !is GenericType.RawType) {
+        throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' must be parameterized with a raw type",
+            spec.clazz.type.className, property.name)
+      }
+
+      return SparseArrayValueAdapter(property.generic.typeArguments[0].cast<GenericType.RawType>().type)
+    }
+  }
+
   override fun read(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
-    adapter.push(findElementTypeFrom(context))
+    adapter.push(element)
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readSparseArray", Types.ANDROID_SPARSE_ARRAY, Types.CLASS_LOADER))
     adapter.checkCast(context.type)
@@ -399,12 +422,5 @@ internal object SparseArrayValueAdapter : ValueAdapter {
     adapter.loadLocal(context.value())
     adapter.checkCast(Types.ANDROID_SPARSE_ARRAY)
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeSparseArray", Types.VOID, Types.ANDROID_SPARSE_ARRAY))
-  }
-
-  private fun findElementTypeFrom(context: ValueContext): Type {
-    val generic = context.generic!!.cast<GenericType.ParameterizedType>()
-    val raw = generic.typeArguments[0].cast<GenericType.RawType>()
-
-    return raw.type
   }
 }
