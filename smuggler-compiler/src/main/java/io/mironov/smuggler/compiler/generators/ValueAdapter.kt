@@ -1,7 +1,7 @@
 package io.mironov.smuggler.compiler.generators
 
 import io.mironov.smuggler.compiler.ClassRegistry
-import io.mironov.smuggler.compiler.SmugglerException
+import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
@@ -72,8 +72,7 @@ internal object ValueAdapterFactory {
         return ArrayPropertyAdapter(from(registry, spec, property, Types.getElementType(type)))
       }
 
-      throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
-          spec.clazz.type.className, property, type.className)
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property, type.className)
     }
   }
 }
@@ -391,18 +390,15 @@ internal class SparseArrayValueAdapter(
   companion object {
     fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
       if (property.generic !is GenericType.ParameterizedType) {
-        throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' must be parameterized as ''SparseArray<Foo>''",
-            spec.clazz.type.className, property.name)
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
       }
 
       if (property.generic.typeArguments.size != 1) {
-        throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' must have exactly one type argument",
-            spec.clazz.type.className, property.name)
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
       }
 
       if (property.generic.typeArguments[0] !is GenericType.RawType) {
-        throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' must be parameterized with a raw type",
-            spec.clazz.type.className, property.name)
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a raw type", property.name)
       }
 
       return SparseArrayValueAdapter(property.generic.typeArguments[0].cast<GenericType.RawType>().type)

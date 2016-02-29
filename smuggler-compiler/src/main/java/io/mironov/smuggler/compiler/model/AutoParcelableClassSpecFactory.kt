@@ -1,7 +1,7 @@
 package io.mironov.smuggler.compiler.model
 
 import io.mironov.smuggler.compiler.ClassRegistry
-import io.mironov.smuggler.compiler.SmugglerException
+import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
@@ -16,7 +16,7 @@ internal object AutoParcelableClassSpecFactory {
   fun from(reference: ClassReference, registry: ClassRegistry): AutoParcelableClassSpec {
     val spec = registry.resolve(reference, false)
     val metadata = spec.getAnnotation<Metadata>() ?: run {
-      throw SmugglerException("Invalid AutoParcelable class ''{0}'', only kotlin classes can implement AutoParcelable interface.", reference.type.className)
+      throw InvalidAutoParcelableException(reference.type, "Only kotlin classes can implement AutoParcelable interface.")
     }
 
     val proto = JvmProtoBufUtil.readClassDataFrom(metadata.data, metadata.strings)
@@ -24,11 +24,11 @@ internal object AutoParcelableClassSpecFactory {
     val resolver = proto.nameResolver
 
     if (!Flags.IS_DATA.get(clazz.flags)) {
-      throw SmugglerException("Invalid AutoParcelable class ''{0}'', only data classes can implement AutoParcelable interface.", reference.type.className)
+      throw InvalidAutoParcelableException(reference.type, "Only data classes can implement AutoParcelable interface.")
     }
 
     if (!spec.signature.isNullOrBlank()) {
-      throw SmugglerException("Invalid AutoParcelable class ''{0}'', generic classes are not supported at the moment.", spec.type.className)
+      throw InvalidAutoParcelableException(spec.type, "Generic classes are not supported at the moment.")
     }
 
     val creator = spec.getDeclaredField("CREATOR")
@@ -37,7 +37,7 @@ internal object AutoParcelableClassSpecFactory {
     }
 
     if (creator != null && creator.isStatic) {
-      throw SmugglerException("Invalid AutoParcelable class ''{0}'', AutoParcelable classes shouldn''t declare CREATOR field.", spec.type.className)
+      throw InvalidAutoParcelableException(spec.type, "AutoParcelable classes shouldn''t declare CREATOR field.")
     }
 
     val properties = constructor.valueParameterList.map { parameter ->
@@ -45,8 +45,8 @@ internal object AutoParcelableClassSpecFactory {
       val property = clazz.propertyList.first { resolver.getName(it.name).identifier == name }
 
       if (Flags.VISIBILITY.get(property.flags) != ProtoBuf.Visibility.PUBLIC) {
-        throw SmugglerException("Invalid AutoParcelable class ''{0}'', only public properties are supported at the moment, but ''{1}'' has ''{2}'' visibility.",
-            spec.type.className, resolver.getName(property.name).identifier, Flags.VISIBILITY.get(property.flags))
+        throw InvalidAutoParcelableException(spec.type, "Only public properties are supported at the moment, but ''{0}'' has ''{1}'' visibility.",
+            resolver.getName(property.name).identifier, Flags.VISIBILITY.get(property.flags))
       }
 
       val getter = spec.getDeclaredMethod("get${name.capitalize()}")!!
