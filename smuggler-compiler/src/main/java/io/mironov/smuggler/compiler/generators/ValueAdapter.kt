@@ -45,34 +45,30 @@ internal object ValueAdapterFactory {
   }
   
   fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, type: Type, property: String): ValueAdapter {
-    val adapter = ADAPTERS[type]
+    return ADAPTERS[type] ?: run {
+      if (registry.isSubclassOf(type, Types.ENUM)) {
+        return EnumValueAdapter
+      }
 
-    if (adapter != null) {
-      return adapter
+      if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_BOOLEAN_ARRAY)) {
+        return SparseBooleanArrayValueAdapter
+      }
+
+      if (registry.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
+        return ParcelableValueAdapter
+      }
+
+      if (registry.isSubclassOf(type, Types.SERIALIZABLE)) {
+        return SerializableValueAdapter
+      }
+
+      if (type.sort == Type.ARRAY) {
+        return ArrayPropertyAdapter(from(registry, spec, Types.getElementType(type), property))
+      }
+
+      throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
+          spec.clazz.type.className, property, type.className)
     }
-
-    if (registry.isSubclassOf(type, Types.ENUM)) {
-      return EnumValueAdapter
-    }
-
-    if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_BOOLEAN_ARRAY)) {
-      return SparseBooleanArrayValueAdapter
-    }
-
-    if (registry.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
-      return ParcelableValueAdapter
-    }
-
-    if (registry.isSubclassOf(type, Types.SERIALIZABLE)) {
-      return SerializableValueAdapter
-    }
-
-    if (type.sort == Type.ARRAY) {
-      return ArrayPropertyAdapter(from(registry, spec, Types.getElementType(type), property))
-    }
-
-    throw SmugglerException("Invalid AutoParcelable class ''{0}'', property ''{1}'' has unsupported type ''{2}''",
-        spec.clazz.type.className, property, type.className)
   }
 }
 
