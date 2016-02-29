@@ -436,7 +436,7 @@ internal class ListValueAdapter(
   companion object {
     fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
       if (generic !is GenericType.ParameterizedType) {
-        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''List<Foo>''", property.name)
       }
 
       if (generic.typeArguments.size != 1) {
