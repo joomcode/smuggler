@@ -2,6 +2,7 @@ package io.mironov.smuggler.sample
 
 import android.support.test.runner.AndroidJUnit4
 import android.text.TextUtils
+import android.util.SparseArray
 import android.util.SparseBooleanArray
 import io.mironov.smuggler.AutoParcelable
 import org.junit.Before
@@ -405,18 +406,44 @@ class SmugglerTest {
   }
 
   @Test fun shouldWorkWithSparseArrays() {
+    data class User(
+        val firstName: String,
+        val lastName: String
+    ) : AutoParcelable
+
+    data class Message(
+        val message: String,
+        val timestamp: Long
+    ) : AutoParcelable
+
     data class Sparse(
-        val booleans: SparseBooleanArray
+        val booleans: SparseBooleanArray,
+        val users: SparseArray<User>,
+        val messages: SparseArray<Message>
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
         return other is Sparse &&
-            equals(booleans, other.booleans)
+            equals(booleans, other.booleans) &&
+            equals(users, other.users) &&
+            equals(messages, other.messages)
       }
     }
 
     SmugglerAssertions.verify<Sparse>() {
       Sparse(
-          booleans = generator.nextSparseBooleanArray()
+          booleans = generator.nextSparseBooleanArray(),
+          users = generator.nextSparseArray {
+            User(
+                firstName = generator.nextString(),
+                lastName = generator.nextString()
+            )
+          },
+          messages = generator.nextSparseArray {
+            Message(
+                message = generator.nextString(),
+                timestamp = generator.nextLong()
+            )
+          }
       )
     }
   }
@@ -441,6 +468,20 @@ class SmugglerTest {
 }
 
 fun equals(left: SparseBooleanArray, right: SparseBooleanArray): Boolean {
+  if (left.size() != right.size()) {
+    return false
+  }
+
+  for (i in 0..left.size() - 1) {
+    if (left.keyAt(i) != right.keyAt(i) || left.valueAt(i) != right.valueAt(i)) {
+      return false
+    }
+  }
+
+  return true
+}
+
+fun <T> equals(left: SparseArray<T>, right: SparseArray<T>): Boolean {
   if (left.size() != right.size()) {
     return false
   }
