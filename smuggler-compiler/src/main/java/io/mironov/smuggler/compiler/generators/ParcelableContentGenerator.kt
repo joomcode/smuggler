@@ -57,7 +57,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
           storeLocal(this, Types.ANDROID_PARCEL)
         })
 
-        newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map { it.type.raw })) {
+        newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map { it.type.asAsmType() })) {
           spec.properties.forEach {
             ValueAdapterFactory.from(environment.registry, spec, it).read(this, context.typed(it.type))
           }
@@ -127,19 +127,19 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
         })
 
         spec.properties.forEach {
-          context.property(it.name, newLocal(it.type.raw).apply {
+          context.property(it.name, newLocal(it.type.asAsmType()).apply {
             loadThis()
             invokeVirtual(spec.clazz, it.getter)
-            storeLocal(this, it.type.raw)
+            storeLocal(this, it.type.asAsmType())
           })
         }
 
         spec.properties.forEach {
           val property = ValueAdapterFactory.from(environment.registry, spec, it)
 
-          context.value(newLocal(it.type.raw).apply {
+          context.value(newLocal(it.type.asAsmType()).apply {
             loadLocal(context.property(it.name))
-            storeLocal(this, it.type.raw)
+            storeLocal(this, it.type.asAsmType())
           })
 
           property.write(this, context.typed(it.type))

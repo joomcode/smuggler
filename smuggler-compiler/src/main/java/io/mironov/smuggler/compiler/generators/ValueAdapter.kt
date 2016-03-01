@@ -46,8 +46,8 @@ internal object ValueAdapterFactory {
   }
   
   fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
-    return ADAPTERS[generic.raw] ?: run {
-      val type = generic.raw
+    return ADAPTERS[generic.asAsmType()] ?: run {
+      val type = generic.asAsmType()
 
       if (registry.isSubclassOf(type, Types.ENUM)) {
         return EnumValueAdapter
@@ -255,15 +255,15 @@ internal object EnumValueAdapter : OptionalValueAdapter() {
   override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
-    adapter.invokeStatic(context.type.raw, Methods.get("values", Types.getArrayType(context.type.raw)))
-    adapter.swap(Types.INT, Types.getArrayType(context.type.raw))
-    adapter.arrayLoad(context.type.raw)
+    adapter.invokeStatic(context.type.asAsmType(), Methods.get("values", Types.getArrayType(context.type.asAsmType())))
+    adapter.swap(Types.INT, Types.getArrayType(context.type.asAsmType()))
+    adapter.arrayLoad(context.type.asAsmType())
   }
 
   override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
-    adapter.invokeVirtual(context.type.raw, Methods.get("ordinal", Types.INT))
+    adapter.invokeVirtual(context.type.asAsmType(), Methods.get("ordinal", Types.INT))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
   }
 }
@@ -272,7 +272,7 @@ internal object SerializableValueAdapter : ValueAdapter {
   override fun read(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readSerializable", Types.SERIALIZABLE))
-    adapter.checkCast(context.type.raw)
+    adapter.checkCast(context.type.asAsmType())
   }
 
   override fun write(adapter: GeneratorAdapter, context: ValueContext) {
@@ -286,10 +286,10 @@ internal object SerializableValueAdapter : ValueAdapter {
 internal object ParcelableValueAdapter : ValueAdapter {
   override fun read(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
-    adapter.push(context.type.raw)
+    adapter.push(context.type.asAsmType())
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readParcelable", Types.ANDROID_PARCELABLE, Types.CLASS_LOADER))
-    adapter.checkCast(context.type.raw)
+    adapter.checkCast(context.type.asAsmType())
   }
 
   override fun write(adapter: GeneratorAdapter, context: ValueContext) {
@@ -308,8 +308,8 @@ internal class ArrayPropertyAdapter(
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
 
-    val elementType = Types.getElementType(context.type.raw)
-    val elements = adapter.newLocal(context.type.raw)
+    val elementType = Types.getElementType(context.type.asAsmType())
+    val elements = adapter.newLocal(context.type.asAsmType())
 
     val begin = adapter.newLabel()
     val body = adapter.newLabel()
@@ -350,7 +350,7 @@ internal class ArrayPropertyAdapter(
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
 
-    val elementType = Types.getElementType(context.type.raw)
+    val elementType = Types.getElementType(context.type.asAsmType())
     val element = adapter.newLocal(elementType)
 
     val begin = adapter.newLabel()
@@ -419,7 +419,7 @@ internal class SparseArrayValueAdapter(
     adapter.push(element)
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readSparseArray", Types.ANDROID_SPARSE_ARRAY, Types.CLASS_LOADER))
-    adapter.checkCast(context.type.raw)
+    adapter.checkCast(context.type.asAsmType())
   }
 
   override fun write(adapter: GeneratorAdapter, context: ValueContext) {
@@ -455,7 +455,7 @@ internal class ListValueAdapter(
 
   override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val parameterizedType = context.type.asParameterizedType()
-    val elementType = parameterizedType.typeArguments[0].raw
+    val elementType = parameterizedType.typeArguments[0].asAsmType()
 
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
@@ -498,7 +498,7 @@ internal class ListValueAdapter(
 
   override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val parameterizedType = context.type.asParameterizedType()
-    val elementType = parameterizedType.typeArguments[0].raw
+    val elementType = parameterizedType.typeArguments[0].asAsmType()
 
     val element = adapter.newLocal(elementType)
     val iterator = adapter.newLocal(Types.ITERATOR)

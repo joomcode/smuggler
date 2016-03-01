@@ -5,20 +5,21 @@ import io.mironov.smuggler.compiler.common.cast
 import org.objectweb.asm.Type
 
 internal sealed class GenericType() {
-  val raw: Type
-    get() = when (this) {
-      is RawType -> type
-      is GenericArrayType -> Types.getArrayType(elementType.raw)
-      is ParameterizedType -> type
-      else -> throw UnsupportedOperationException()
-    }
-
   fun asRawType() = cast<RawType>()
   fun asTypeVariable() = cast<TypeVariable>()
   fun asGenericArrayType() = cast<GenericArrayType>()
   fun asParameterizedType() = cast<ParameterizedType>()
   fun asUpperBoundedType() = cast<UpperBoundedType>()
   fun asLowerBoundedType() = cast<LowerBoundedType>()
+
+  fun asAsmType(): Type {
+    return when (this) {
+      is RawType -> type
+      is GenericArrayType -> Types.getArrayType(elementType.asAsmType())
+      is ParameterizedType -> type
+      else -> throw UnsupportedOperationException()
+    }
+  }
 
   class RawType(val type: Type) : GenericType() {
     override fun toString(): String = "RawType($type)"
