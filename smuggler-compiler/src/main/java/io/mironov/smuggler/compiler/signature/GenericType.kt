@@ -1,5 +1,6 @@
 package io.mironov.smuggler.compiler.signature
 
+import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.cast
 import org.objectweb.asm.Type
 
@@ -7,6 +8,7 @@ internal sealed class GenericType() {
   val raw: Type
     get() = when (this) {
       is RawType -> type
+      is GenericArrayType -> Types.getArrayType(elementType.raw)
       is ParameterizedType -> type
       else -> throw UnsupportedOperationException()
     }
