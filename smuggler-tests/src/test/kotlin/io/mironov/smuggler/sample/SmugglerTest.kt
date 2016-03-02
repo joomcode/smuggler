@@ -1,7 +1,6 @@
 package io.mironov.smuggler.sample
 
 import android.support.test.runner.AndroidJUnit4
-import android.text.TextUtils
 import android.util.SparseArray
 import android.util.SparseBooleanArray
 import io.mironov.smuggler.AutoParcelable
@@ -9,7 +8,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.Serializable
-import java.util.Arrays
 
 @Suppress("EqualsOrHashCode")
 @RunWith(AndroidJUnit4::class)
