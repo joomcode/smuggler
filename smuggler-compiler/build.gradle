@@ -10,13 +10,15 @@ apply plugin: "com.jfrog.bintray"
 apply plugin: "maven-publish"
 
 dependencies {
+  compile "org.slf4j:slf4j-api:$slf4jVersion"
+
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
   compile "org.ow2.asm:asm:$asmVersion"
   compile "org.ow2.asm:asm-commons:$asmVersion"
 
-  compile "org.slf4j:slf4j-api:$slf4jVersion"
+  testCompile "junit:junit:$junitVersion"
 }
 
 publishing {

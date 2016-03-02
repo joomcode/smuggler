@@ -35,4 +35,5 @@ ext {
 
   asmVersion = "5.0.4"
   slf4jVersion = "1.7.13"
+  junitVersion = "4.12"
 }
