@@ -4,6 +4,7 @@ import android.util.SparseArray
 import android.util.SparseBooleanArray
 import io.mironov.smuggler.AutoParcelable
 import java.lang.reflect.Modifier
+import java.util.Arrays
 
 object SmugglerEquivalence {
   fun equals(left: Any?, right: Any?): Boolean = nullableEquals(left, right) { left, right ->
@@ -24,14 +25,14 @@ object SmugglerEquivalence {
 
     if (leftClass.isArray && rightClass.isArray) {
       return when (leftClass) {
-        BooleanArray::class.java -> equals(left as BooleanArray, right as BooleanArray)
-        ByteArray::class.java -> equals(left as ByteArray, right as ByteArray)
-        CharArray::class.java -> equals(left as CharArray, right as CharArray)
-        LongArray::class.java -> equals(left as LongArray, right as LongArray)
-        IntArray::class.java -> equals(left as IntArray, right as IntArray)
-        FloatArray::class.java -> equals(left as FloatArray, right as FloatArray)
-        DoubleArray::class.java -> equals(left as DoubleArray, right as DoubleArray)
-        ShortArray::class.java -> equals(left as ShortArray, right as ShortArray)
+        BooleanArray::class.java -> Arrays.equals(left as BooleanArray, right as BooleanArray)
+        ByteArray::class.java -> Arrays.equals(left as ByteArray, right as ByteArray)
+        CharArray::class.java -> Arrays.equals(left as CharArray, right as CharArray)
+        LongArray::class.java -> Arrays.equals(left as LongArray, right as LongArray)
+        IntArray::class.java -> Arrays.equals(left as IntArray, right as IntArray)
+        FloatArray::class.java -> Arrays.equals(left as FloatArray, right as FloatArray)
+        DoubleArray::class.java -> Arrays.equals(left as DoubleArray, right as DoubleArray)
+        ShortArray::class.java -> Arrays.equals(left as ShortArray, right as ShortArray)
         else -> equals(left as Array<*>, right as Array<*>)
       }
     }
@@ -49,54 +50,6 @@ object SmugglerEquivalence {
     }
 
     return left == right
-  }
-
-  fun equals(left: BooleanArray?, right: BooleanArray?): Boolean = nullableEquals(left, right) { left, right ->
-    left.size == right.size && 0.until(left.size).all {
-      left[it] == right[it]
-    }
-  }
-
-  fun equals(left: ByteArray?, right: ByteArray?): Boolean = nullableEquals(left, right) { left, right ->
-    left.size == right.size && 0.until(left.size).all {
-      left[it] == right[it]
-    }
-  }
-
-  fun equals(left: CharArray?, right: CharArray?): Boolean = nullableEquals(left, right) { left, right ->
-    left.size == right.size && 0.until(left.size).all {
-      left[it] == right[it]
-    }
-  }
-
-  fun equals(left: LongArray?, right: LongArray?): Boolean = nullableEquals(left, right) { left, right ->
-    left.size == right.size && 0.until(left.size).all {
-      left[it] == right[it]
-    }
-  }
-
-  fun equals(left: IntArray?, right: IntArray?): Boolean = nullableEquals(left, right) { left, right ->
-    left.size == right.size && 0.until(left.size).all {
-      left[it] == right[it]
-    }
-  }
-
-  fun equals(left: FloatArray?, right: FloatArray?): Boolean = nullableEquals(left, right) { left, right ->
-    left.size == right.size && 0.until(left.size).all {
-      left[it] == right[it]
-    }
-  }
-
-  fun equals(left: DoubleArray?, right: DoubleArray?): Boolean = nullableEquals(left, right) { left, right ->
-    left.size == right.size && 0.until(left.size).all {
-      left[it] == right[it]
-    }
-  }
-
-  fun equals(left: ShortArray?, right: ShortArray?): Boolean = nullableEquals(left, right) { left, right ->
-    left.size == right.size && 0.until(left.size).all {
-      left[it] == right[it]
-    }
   }
 
   fun equals(left: Array<*>?, right: Array<*>?): Boolean = nullableEquals(left, right) { left, right ->
