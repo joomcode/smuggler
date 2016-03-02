@@ -17,6 +17,10 @@ internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapte
     visitInsn(Opcodes.ACONST_NULL)
   }
 
+  fun add(type: Type) {
+    visitInsn(type.getOpcode(Opcodes.IADD))
+  }
+
   fun checkCast(spec: ClassSpec) {
     checkCast(spec.type)
   }
