@@ -493,10 +493,7 @@ class SmugglerTest {
         val messages: List<Message>,
         val booleans: List<Boolean>,
         val strings: List<String>,
-        val longs: List<Long>,
-        val multi: List<List<Long>>,
-        val lists: List<Array<List<Boolean>>>,
-        val arrays: Array<List<Array<Boolean>>>
+        val longs: List<Long>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Lists>() {
@@ -515,13 +512,28 @@ class SmugglerTest {
           },
           booleans = generator.nextList { generator.nextBoolean() },
           strings = generator.nextList { generator.nextString() },
-          longs = generator.nextList { generator.nextLong() },
-          multi = generator.nextList { generator.nextList { generator.nextLong() } },
+          longs = generator.nextList { generator.nextLong() }
+      )
+    }
+  }
+
+/*
+  @Test fun shouldWorkWithComplexListsAndArrays() {
+    data class ComplexArraysAndLists(
+        val multi: List<List<List<Long>>>,
+        val lists: List<Array<List<Boolean>>>,
+        val arrays: Array<List<Array<Boolean>>>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<ComplexArraysAndLists>() {
+      ComplexArraysAndLists(
+          multi = generator.nextList { generator.nextList { generator.nextList { generator.nextLong() } } },
           lists = generator.nextList { generator.nextArray { generator.nextList { generator.nextBoolean() } } },
           arrays = generator.nextArray { generator.nextList { generator.nextArray { generator.nextBoolean() } } }
       )
     }
   }
+*/
 
   private data class WithStaticClassInitializer(
       val payload: String,
