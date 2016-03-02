@@ -2,10 +2,11 @@ package io.mironov.smuggler.sample
 
 import android.util.SparseArray
 import android.util.SparseBooleanArray
+import io.mironov.smuggler.AutoParcelable
 import java.lang.reflect.Modifier
 
 object SmugglerEquivalence {
-  fun equals(left: Any?, right: Any?, reflective: Boolean): Boolean = nullableEquals(left, right) { left, right ->
+  fun equals(left: Any?, right: Any?): Boolean = nullableEquals(left, right) { left, right ->
     val leftClass = left.javaClass
     val rightClass = right.javaClass
 
@@ -31,26 +32,26 @@ object SmugglerEquivalence {
         FloatArray::class.java -> equals(left as FloatArray, right as FloatArray)
         DoubleArray::class.java -> equals(left as DoubleArray, right as DoubleArray)
         ShortArray::class.java -> equals(left as ShortArray, right as ShortArray)
-        else -> equals(left as Array<*>, right as Array<*>, false)
+        else -> equals(left as Array<*>, right as Array<*>)
       }
     }
 
     if (leftClass == SparseBooleanArray::class.java) {
-      return equals(left as SparseBooleanArray, right as SparseBooleanArray, false)
+      return equals(left as SparseBooleanArray, right as SparseBooleanArray)
     }
 
     if (leftClass == SparseArray::class.java) {
-      return equals(left as SparseArray<*>, right as SparseArray<*>, false)
+      return equals(left as SparseArray<*>, right as SparseArray<*>)
     }
 
-    if (!reflective) {
-      return left == right
+    if (AutoParcelable::class.java.isAssignableFrom(leftClass)) {
+      return leftClass.declaredFields
+          .each { it.isAccessible = true }
+          .filter { !Modifier.isStatic(it.modifiers) }
+          .all { equals(it.get(left), it.get(right)) }
     }
 
-    return leftClass.declaredFields
-        .each { it.isAccessible = true }
-        .filter { !Modifier.isStatic(it.modifiers) }
-        .all { equals(it.get(left), it.get(right), false) }
+    return left == right
   }
 
   fun equals(left: BooleanArray?, right: BooleanArray?): Boolean = nullableEquals(left, right) { left, right ->
@@ -101,21 +102,21 @@ object SmugglerEquivalence {
     }
   }
 
-  fun equals(left: Array<*>?, right: Array<*>?, reflective: Boolean): Boolean = nullableEquals(left, right) { left, right ->
+  fun equals(left: Array<*>?, right: Array<*>?): Boolean = nullableEquals(left, right) { left, right ->
     left.size == right.size && 0.until(left.size).all {
-      equals(left[it], right[it], reflective)
+      equals(left[it], right[it])
     }
   }
 
-  fun equals(left: SparseBooleanArray?, right: SparseBooleanArray?, reflective: Boolean): Boolean = nullableEquals(left, right) { left, right ->
+  fun equals(left: SparseBooleanArray?, right: SparseBooleanArray?): Boolean = nullableEquals(left, right) { left, right ->
     left.size() == right.size() && 0.until(left.size()).all {
-      left.keyAt(it) == right.keyAt(it) && equals(left.valueAt(it), right.valueAt(it), reflective)
+      left.keyAt(it) == right.keyAt(it) && equals(left.valueAt(it), right.valueAt(it))
     }
   }
 
-  fun equals(left: SparseArray<*>, right: SparseArray<*>, reflective: Boolean): Boolean = nullableEquals(left, right) { left, right ->
+  fun equals(left: SparseArray<*>, right: SparseArray<*>): Boolean = nullableEquals(left, right) { left, right ->
     left.size() == right.size() && 0.until(left.size()).all {
-      left.keyAt(it) == right.keyAt(it) && equals(left.valueAt(it), right.valueAt(it), reflective)
+      left.keyAt(it) == right.keyAt(it) && equals(left.valueAt(it), right.valueAt(it))
     }
   }
 

@@ -19,7 +19,7 @@ object SmugglerAssertions {
     val marshalled = marshall(parcelable)
     val unmarshalled = unmarshall<P>(marshalled, parcelable.javaClass.classLoader)
 
-    Assert.assertTrue(SmugglerEquivalence.equals(parcelable, unmarshalled, true))
+    Assert.assertTrue(SmugglerEquivalence.equals(parcelable, unmarshalled))
   }
 
   fun <P : AutoParcelable> verify(clazz: Class<P>) {
