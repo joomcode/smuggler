@@ -87,20 +87,7 @@ class SmugglerTest {
         val doubles: DoubleArray,
         val shorts: ShortArray,
         val strings: Array<String>
-    ) : AutoParcelable {
-      override fun equals(other: Any?): Boolean {
-        return other is PrimitiveArrays &&
-            Arrays.equals(booleans, other.booleans) &&
-            Arrays.equals(bytes, other.bytes) &&
-            Arrays.equals(chars, other.chars) &&
-            Arrays.equals(ints, other.ints) &&
-            Arrays.equals(longs, other.longs) &&
-            Arrays.equals(floats, other.floats) &&
-            Arrays.equals(doubles, other.doubles) &&
-            Arrays.equals(shorts, other.shorts) &&
-            Arrays.equals(strings, other.strings)
-      }
-    }
+    ) : AutoParcelable
 
     SmugglerAssertions.verify<PrimitiveArrays> {
       PrimitiveArrays(
@@ -241,14 +228,7 @@ class SmugglerTest {
         val title: String?,
         val participants: Array<User>?,
         val messages: Array<Message>?
-    ) : AutoParcelable {
-      override fun equals(other: Any?): Boolean {
-        return other is Chat &&
-            TextUtils.equals(title, other.title) &&
-            Arrays.equals(participants, other.participants) &&
-            Arrays.equals(messages, other.messages)
-      }
-    }
+    ) : AutoParcelable
 
     SmugglerAssertions.verify<Chat> {
       Chat(
@@ -280,20 +260,7 @@ class SmugglerTest {
         val doubles: Array<DoubleArray>?,
         val shorts: Array<ShortArray>?,
         val strings: Array<Array<String>>?
-    ) : AutoParcelable {
-      override fun equals(other: Any?): Boolean {
-        return other is MultiDimensionalPrimitiveArrays &&
-            Arrays.deepEquals(longs, other.longs) &&
-            Arrays.deepEquals(booleans, other.booleans) &&
-            Arrays.deepEquals(bytes, other.bytes) &&
-            Arrays.deepEquals(chars, other.chars) &&
-            Arrays.deepEquals(ints, other.ints) &&
-            Arrays.deepEquals(floats, other.floats) &&
-            Arrays.deepEquals(doubles, other.doubles) &&
-            Arrays.deepEquals(shorts, other.shorts) &&
-            Arrays.deepEquals(strings, other.strings)
-      }
-    }
+    ) : AutoParcelable
 
     SmugglerAssertions.verify<MultiDimensionalPrimitiveArrays> {
       MultiDimensionalPrimitiveArrays(
@@ -321,20 +288,7 @@ class SmugglerTest {
         val doubles: Array<Array<Double>>?,
         val shorts: Array<Array<Short>>?,
         val strings: Array<Array<String>>?
-    ) : AutoParcelable {
-      override fun equals(other: Any?): Boolean {
-        return other is MultiDimensionalBoxedArrays &&
-            Arrays.deepEquals(longs, other.longs) &&
-            Arrays.deepEquals(booleans, other.booleans) &&
-            Arrays.deepEquals(bytes, other.bytes) &&
-            Arrays.deepEquals(chars, other.chars) &&
-            Arrays.deepEquals(ints, other.ints) &&
-            Arrays.deepEquals(floats, other.floats) &&
-            Arrays.deepEquals(doubles, other.doubles) &&
-            Arrays.deepEquals(shorts, other.shorts) &&
-            Arrays.deepEquals(strings, other.strings)
-      }
-    }
+    ) : AutoParcelable
 
     SmugglerAssertions.verify<MultiDimensionalBoxedArrays> {
       MultiDimensionalBoxedArrays(
@@ -371,14 +325,7 @@ class SmugglerTest {
         val title: String,
         val participants: Array<User>,
         val messages: Array<Message>
-    ) : AutoParcelable {
-      override fun equals(other: Any?): Boolean {
-        return other is Chat &&
-            TextUtils.equals(title, other.title) &&
-            Arrays.deepEquals(participants, other.participants) &&
-            Arrays.deepEquals(messages, other.messages)
-      }
-    }
+    ) : AutoParcelable
 
     SmugglerAssertions.verify<Chat>() {
       Chat(
@@ -412,16 +359,7 @@ class SmugglerTest {
         val longs: SparseArray<Long>,
         val doubles: SparseArray<Double>,
         val floats: SparseArray<Float>
-    ) : AutoParcelable {
-      override fun equals(other: Any?): Boolean {
-        return other is Sparse &&
-            SmugglerEquivalence.equals(booleans, other.booleans) &&
-            SmugglerEquivalence.equals(strings, other.strings) &&
-            SmugglerEquivalence.equals(longs, other.longs) &&
-            SmugglerEquivalence.equals(doubles, other.doubles) &&
-            SmugglerEquivalence.equals(floats, other.floats)
-      }
-    }
+    ) : AutoParcelable
 
     SmugglerAssertions.verify<Sparse>() {
       Sparse(
@@ -449,14 +387,7 @@ class SmugglerTest {
         val booleans: SparseBooleanArray,
         val users: SparseArray<User>,
         val messages: SparseArray<Message>
-    ) : AutoParcelable {
-      override fun equals(other: Any?): Boolean {
-        return other is Sparse &&
-            SmugglerEquivalence.equals(booleans, other.booleans) &&
-            SmugglerEquivalence.equals(users, other.users) &&
-            SmugglerEquivalence.equals(messages, other.messages)
-      }
-    }
+    ) : AutoParcelable
 
     SmugglerAssertions.verify<Sparse>() {
       Sparse(
