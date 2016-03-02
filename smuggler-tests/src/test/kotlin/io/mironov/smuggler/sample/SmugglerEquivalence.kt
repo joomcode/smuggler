@@ -45,10 +45,7 @@ object SmugglerEquivalence {
     }
 
     if (AutoParcelable::class.java.isAssignableFrom(leftClass)) {
-      return leftClass.declaredFields
-          .each { it.isAccessible = true }
-          .filter { !Modifier.isStatic(it.modifiers) }
-          .all { equals(it.get(left), it.get(right)) }
+      return equals(left as AutoParcelable, right as AutoParcelable)
     }
 
     return left == right
@@ -120,13 +117,20 @@ object SmugglerEquivalence {
     }
   }
 
+  fun <P : AutoParcelable> equals(left: P?, right: P?): Boolean = nullableEquals(left, right) { left, right ->
+    return left.javaClass.declaredFields
+        .each { it.isAccessible = true }
+        .filter { !Modifier.isStatic(it.modifiers) }
+        .all { equals(it.get(left), it.get(right)) }
+  }
+
   inline fun <T> nullableEquals(left: T?, right: T?, equality: (T, T) -> Boolean): Boolean {
-    if (left != null && right != null) {
-      return equality(left, right)
+    if (left === right) {
+      return true
     }
 
-    if (left == null && right == null) {
-      return true
+    if (left != null && right != null) {
+      return equality(left, right)
     }
 
     return false
