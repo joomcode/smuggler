@@ -415,11 +415,11 @@ class SmugglerTest {
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
         return other is Sparse &&
-            equals(booleans, other.booleans) &&
-            equals(strings, other.strings) &&
-            equals(longs, other.longs) &&
-            equals(doubles, other.doubles) &&
-            equals(floats, other.floats)
+            SmugglerEquivalence.equals(booleans, other.booleans) &&
+            SmugglerEquivalence.equals(strings, other.strings) &&
+            SmugglerEquivalence.equals(longs, other.longs) &&
+            SmugglerEquivalence.equals(doubles, other.doubles) &&
+            SmugglerEquivalence.equals(floats, other.floats)
       }
     }
 
@@ -452,9 +452,9 @@ class SmugglerTest {
     ) : AutoParcelable {
       override fun equals(other: Any?): Boolean {
         return other is Sparse &&
-            equals(booleans, other.booleans) &&
-            equals(users, other.users) &&
-            equals(messages, other.messages)
+            SmugglerEquivalence.equals(booleans, other.booleans) &&
+            SmugglerEquivalence.equals(users, other.users) &&
+            SmugglerEquivalence.equals(messages, other.messages)
       }
     }
 
@@ -540,32 +540,4 @@ class SmugglerTest {
   private enum class Foo {
     FOO, BAR, FOO_FOO, BAR_BAR, FOO_BAR, BAR_FOO
   }
-}
-
-fun equals(left: SparseBooleanArray, right: SparseBooleanArray): Boolean {
-  if (left.size() != right.size()) {
-    return false
-  }
-
-  for (i in 0..left.size() - 1) {
-    if (left.keyAt(i) != right.keyAt(i) || left.valueAt(i) != right.valueAt(i)) {
-      return false
-    }
-  }
-
-  return true
-}
-
-fun equals(left: SparseArray<*>, right: SparseArray<*>): Boolean {
-  if (left.size() != right.size()) {
-    return false
-  }
-
-  for (i in 0..left.size() - 1) {
-    if (left.keyAt(i) != right.keyAt(i) || left.valueAt(i) != right.valueAt(i)) {
-      return false
-    }
-  }
-
-  return true
 }
