@@ -81,7 +81,7 @@ internal object ValueAdapterFactory {
         return SerializableValueAdapter
       }
 
-      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property, type.className)
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property.name, type.className)
     }
   }
 }
