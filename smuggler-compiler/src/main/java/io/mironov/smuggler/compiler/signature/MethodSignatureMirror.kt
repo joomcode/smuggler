@@ -19,12 +19,30 @@ internal interface MethodSignatureMirror {
   val exceptionTypes: List<GenericType>
 
   class Builder() {
-    var returnType: GenericType? = null
-    val typeParameters = ArrayList<TypeParameter.Builder>()
-    val parameterTypes = ArrayList<GenericType>()
-    val exceptionTypes = ArrayList<GenericType>()
+    private var returnType: GenericType? = null
+    private val typeParameters = ArrayList<TypeParameter.Builder>()
+    private val parameterTypes = ArrayList<GenericType>()
+    private val exceptionTypes = ArrayList<GenericType>()
 
-    fun build(): MethodSignatureMirror = MethodSignatureMirrorImpl(this)
+    fun addTypeParameterBuilder(builder: TypeParameter.Builder) = apply {
+      typeParameters += builder
+    }
+
+    fun addParameterType(parameterType: GenericType) = apply {
+      parameterTypes += parameterType
+    }
+
+    fun returnType(returnType: GenericType) = apply {
+      this.returnType = returnType
+    }
+
+    fun addExceptionType(exceptionType: GenericType) = apply {
+      exceptionTypes += exceptionType
+    }
+
+    fun build(): MethodSignatureMirror {
+      return MethodSignatureMirrorImpl(this)
+    }
 
     private class MethodSignatureMirrorImpl(builder: Builder) : MethodSignatureMirror {
       override val returnType: GenericType = builder.returnType!!

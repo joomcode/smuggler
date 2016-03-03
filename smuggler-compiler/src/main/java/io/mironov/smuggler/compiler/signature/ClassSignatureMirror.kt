@@ -1,8 +1,9 @@
 package io.mironov.smuggler.compiler.signature
 
 import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.common.cast
 import org.objectweb.asm.signature.SignatureReader
-import java.util.ArrayList
+import java.util.*
 
 internal interface ClassSignatureMirror {
   companion object {
@@ -19,16 +20,30 @@ internal interface ClassSignatureMirror {
   val interfaces: List<GenericType>
 
   class Builder() {
-    var superType: GenericType = GenericType.RawType(Types.OBJECT)
-    val typeParameters = ArrayList<TypeParameter.Builder>()
-    val interfaces = ArrayList<GenericType>()
+    private val typeParameters = ArrayList<TypeParameter.Builder>()
+    private var superType = GenericType.RawType(Types.OBJECT).cast<GenericType>()
+    private val interfaces = ArrayList<GenericType>()
 
-    fun build(): ClassSignatureMirror = ClassSignatureMirrorImpl(this)
+    fun addTypeParameterBuilder(builder: TypeParameter.Builder) = apply {
+      typeParameters += builder
+    }
+
+    fun superType(superType: GenericType) = apply {
+      this.superType = superType
+    }
+
+    fun addInterface(interfaceType: GenericType) = apply {
+      interfaces += interfaceType
+    }
+
+    fun build(): ClassSignatureMirror {
+      return ClassSignatureMirrorImpl(this)
+    }
 
     private class ClassSignatureMirrorImpl(builder: Builder) : ClassSignatureMirror {
-      override val typeParameters = ArrayList(builder.typeParameters.map { it.build() })
       override val superType = builder.superType
-      override val interfaces = builder.interfaces
+      override val typeParameters = builder.typeParameters.mapTo(ArrayList()) { it.build() }
+      override val interfaces = ArrayList(builder.interfaces)
     }
   }
 }

@@ -5,34 +5,39 @@ import org.objectweb.asm.signature.SignatureVisitor
 
 internal class ClassSignatureReader : SignatureVisitor(Opcodes.ASM5) {
   private val builder = ClassSignatureMirror.Builder()
+  private var typeParameterBuilder: TypeParameter.Builder? = null
 
   override fun visitFormalTypeParameter(name: String) {
-    builder.typeParameters += TypeParameter.Builder(name)
+    typeParameterBuilder = TypeParameter.Builder(name).apply {
+      builder.addTypeParameterBuilder(this)
+    }
   }
 
   override fun visitClassBound(): SignatureVisitor {
     return GenericTypeReader {
-      builder.typeParameters.last().classBound = it
+      typeParameterBuilder!!.classBound(it)
     }
   }
 
   override fun visitInterfaceBound(): SignatureVisitor {
     return GenericTypeReader {
-      builder.typeParameters.last().interfaceBounds += it
+      typeParameterBuilder!!.addInterfaceBound(it)
     }
   }
 
   override fun visitSuperclass(): SignatureVisitor {
     return GenericTypeReader {
-      builder.superType = it
+      builder.superType(it)
     }
   }
 
   override fun visitInterface(): SignatureVisitor {
     return GenericTypeReader {
-      builder.interfaces += it
+      builder.addInterface(it)
     }
   }
 
-  fun toClassSignature(): ClassSignatureMirror = builder.build()
+  fun toClassSignature(): ClassSignatureMirror {
+    return builder.build()
+  }
 }
