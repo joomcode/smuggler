@@ -33,7 +33,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
   }
 
   override fun generate(environment: GenerationEnvironment): Collection<GeneratedContent> {
-    return listOf(onCreatePatchedDataClass(spec, environment), onCreateCreatorGeneratedContent(spec, environment))
+    return listOf(onCreatePatchedClassGeneratedContent(spec, environment), onCreateCreatorGeneratedContent(spec, environment))
   }
 
   private fun onCreateCreatorGeneratedContent(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
@@ -85,7 +85,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
     })
   }
 
-  private fun onCreatePatchedDataClass(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
+  private fun onCreatePatchedClassGeneratedContent(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(spec.clazz.type, emptyMap(), environment.newClass {
       ClassReader(spec.clazz.opener.open()).accept(object : ClassVisitor(ASM5, this) {
         override fun visit(version: Int, access: Int, name: String, signature: String?, parent: String?, exceptions: Array<out String>?) {
