@@ -3,6 +3,7 @@ package io.mironov.smuggler.sample
 import android.util.SparseArray
 import android.util.SparseBooleanArray
 import java.util.ArrayList
+import java.util.LinkedHashSet
 import java.util.Random
 
 @Suppress("NOTHING_TO_INLINE")
@@ -16,6 +17,9 @@ class SmugglerGenerator(private val seed: Long) {
 
   inline fun <reified T : Any> nextList(factory: (Int) -> T) = createList(factory)
   inline fun <reified T : Any> nextNullableList(factory: (Int) -> T) = nextNullable { nextList(factory) }
+
+  inline fun <reified T : Any> nextSet(factory: (Int) -> T) = createSet(factory)
+  inline fun <reified T : Any> nextNullableSet(factory: (Int) -> T) = nextNullable { nextSet(factory) }
 
   fun nextArraySize() = random.nextInt(MAX_ARRAY_SIZE)
   fun nextNullableProbability() = random.nextInt(3) == 0
@@ -91,6 +95,14 @@ class SmugglerGenerator(private val seed: Long) {
 
   inline fun <reified T> createList(factory: (Int) -> T): List<T> {
     return ArrayList<T>().apply {
+      for (index in 0..nextArraySize() - 1) {
+        add(factory(index))
+      }
+    }
+  }
+
+  inline fun <reified T> createSet(factory: (Int) -> T): Set<T> {
+    return LinkedHashSet<T>().apply {
       for (index in 0..nextArraySize() - 1) {
         add(factory(index))
       }

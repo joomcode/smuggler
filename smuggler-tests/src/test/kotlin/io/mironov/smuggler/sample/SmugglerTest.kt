@@ -490,6 +490,46 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithSets() {
+    data class User(
+        val firstName: String,
+        val lastName: String
+    ) : AutoParcelable
+
+    data class Message(
+        val message: String,
+        val timestamp: Long
+    ) : AutoParcelable
+
+    data class Lists(
+        val users: Set<User>,
+        val messages: Set<Message>,
+        val booleans: Set<Boolean>,
+        val strings: Set<String>,
+        val longs: Set<Long>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Lists>() {
+      Lists(
+          users = generator.nextSet {
+            User(
+                firstName = generator.nextString(),
+                lastName = generator.nextString()
+            )
+          },
+          messages = generator.nextSet {
+            Message(
+                message = generator.nextString(),
+                timestamp = generator.nextLong()
+            )
+          },
+          booleans = generator.nextSet { generator.nextBoolean() },
+          strings = generator.nextSet { generator.nextString() },
+          longs = generator.nextSet { generator.nextLong() }
+      )
+    }
+  }
+
   private data class WithStaticClassInitializer(
       val payload: String,
       val message: String
