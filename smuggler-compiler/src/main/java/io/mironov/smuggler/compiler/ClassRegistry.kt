@@ -1,12 +1,9 @@
 package io.mironov.smuggler.compiler
 
 import io.mironov.smuggler.compiler.common.Types
-import io.mironov.smuggler.compiler.common.isPublic
 import io.mironov.smuggler.compiler.reflect.ClassReference
 import io.mironov.smuggler.compiler.reflect.ClassSpec
-import io.mironov.smuggler.compiler.reflect.MethodSpec
 import org.objectweb.asm.Type
-import java.util.ArrayList
 import java.util.HashMap
 import java.util.LinkedHashSet
 
@@ -109,29 +106,5 @@ internal class ClassRegistry(
     }
 
     return isSubclassOf(reference(type).parent, parent)
-  }
-
-  fun isCastableFromTo(type: Type, target: Type): Boolean {
-    return isSubclassOf(type, target) || isSubclassOf(target, type)
-  }
-
-  fun listPublicMethods(clazz: ClassSpec): Collection<MethodSpec> {
-    val result = ArrayList<MethodSpec>()
-
-    clazz.interfaces.forEach {
-      result.addAll(listPublicMethods(resolve(it)).filter {
-        clazz.getDeclaredMethod(it.name, it.type.descriptor) == null
-      })
-    }
-
-    if (clazz.type != Types.OBJECT) {
-      result.addAll(listPublicMethods(resolve(clazz.parent)).filter {
-        clazz.getDeclaredMethod(it.name, it.type.descriptor) == null
-      })
-    }
-
-    return clazz.methods.filterTo(result) {
-      it.isPublic
-    }
   }
 }
