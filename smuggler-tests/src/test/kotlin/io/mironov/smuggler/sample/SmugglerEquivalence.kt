@@ -37,6 +37,10 @@ object SmugglerEquivalence {
       }
     }
 
+    if (List::class.java.isAssignableFrom(leftClass)) {
+      return equals(left as List<*>, right as List<*>)
+    }
+
     if (leftClass == SparseBooleanArray::class.java) {
       return equals(left as SparseBooleanArray, right as SparseBooleanArray)
     }
@@ -53,6 +57,12 @@ object SmugglerEquivalence {
   }
 
   fun equals(left: Array<*>?, right: Array<*>?): Boolean = nullableEquals(left, right) { left, right ->
+    left.size == right.size && 0.until(left.size).all {
+      equals(left[it], right[it])
+    }
+  }
+
+  fun equals(left: List<*>?, right: List<*>?): Boolean = nullableEquals(left, right) { left, right ->
     left.size == right.size && 0.until(left.size).all {
       equals(left[it], right[it])
     }
