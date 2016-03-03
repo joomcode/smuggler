@@ -69,6 +69,10 @@ internal object ValueAdapterFactory {
         return ParcelableValueAdapter
       }
 
+      if (generic is GenericType.ArrayType) {
+        return ArrayPropertyAdapter(from(registry, spec, property, generic.elementType))
+      }
+
       if (type.sort == Type.ARRAY) {
         return ArrayPropertyAdapter(from(registry, spec, property, GenericType.RawType(Types.getElementType(type))))
       }
@@ -336,7 +340,7 @@ internal class ArrayPropertyAdapter(
     adapter.mark(body)
     adapter.loadLocal(elements)
     adapter.loadLocal(index)
-    adapter.readElement(context.typed(GenericType.RawType(elementType)))
+    adapter.readElement(context.asElementContext())
     adapter.arrayStore(elementType)
 
     adapter.iinc(index, 1)
@@ -380,13 +384,21 @@ internal class ArrayPropertyAdapter(
     adapter.loadLocal(index)
     adapter.arrayLoad(elementType)
     adapter.storeLocal(element)
-    adapter.writeElement(context.typed(GenericType.RawType(elementType)).apply {
+    adapter.writeElement(context.asElementContext().apply {
       value(element)
     })
 
     adapter.iinc(index, 1)
     adapter.goTo(begin)
     adapter.mark(end)
+  }
+
+  private fun ValueContext.asElementContext(): ValueContext {
+    return if (type !is GenericType.ArrayType) {
+      typed(GenericType.RawType(Types.getElementType(type.asAsmType())))
+    } else {
+      typed(type.elementType)
+    }
   }
 
   private fun GeneratorAdapter.readElement(context: ValueContext) = delegate.read(this, context)
@@ -443,13 +455,13 @@ internal class ListValueAdapter(
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
       }
 
-      val first = generic.typeArguments[0]
+      val parameter = generic.typeArguments[0]
 
-      if (first !is GenericType.RawType && first !is GenericType.ParameterizedType) {
+      if (parameter !is GenericType.RawType && parameter !is GenericType.ParameterizedType && parameter !is GenericType.ArrayType) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
       }
 
-      return ListValueAdapter(ValueAdapterFactory.from(registry, spec, property, first))
+      return ListValueAdapter(ValueAdapterFactory.from(registry, spec, property, parameter))
     }
   }
 

@@ -446,7 +446,6 @@ class SmugglerTest {
     }
   }
 
-/*
   @Test fun shouldWorkWithComplexListsAndArrays() {
     data class ComplexArraysAndLists(
         val multi: List<List<List<Long>>>,
@@ -462,7 +461,6 @@ class SmugglerTest {
       )
     }
   }
-*/
 
   private data class WithStaticClassInitializer(
       val payload: String,
