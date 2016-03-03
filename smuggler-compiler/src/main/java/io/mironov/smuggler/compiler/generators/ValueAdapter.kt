@@ -54,7 +54,11 @@ internal object ValueAdapterFactory {
       }
 
       if (type == Types.LIST) {
-        return ListValueAdapter.from(registry, spec, property, generic)
+        return CollectionValueAdapter.from(Types.LIST, Types.ARRAY_LIST, registry, spec, property, generic)
+      }
+
+      if (type == Types.SET) {
+        return CollectionValueAdapter.from(Types.SET, Types.LINKED_SET, registry, spec, property, generic)
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
@@ -442,11 +446,13 @@ internal class SparseArrayValueAdapter(
   }
 }
 
-internal class ListValueAdapter(
+internal class CollectionValueAdapter(
+    private val collection: Type,
+    private val implementation: Type,
     private val delegate: ValueAdapter
 ) : OptionalValueAdapter() {
   companion object {
-    fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+    fun from(collection: Type, implementation: Type, registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
       if (generic !is GenericType.ParameterizedType) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''List<Foo>''", property.name)
       }
@@ -461,7 +467,7 @@ internal class ListValueAdapter(
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
       }
 
-      return ListValueAdapter(ValueAdapterFactory.from(registry, spec, property, parameter))
+      return CollectionValueAdapter(collection, implementation, ValueAdapterFactory.from(registry, spec, property, parameter))
     }
   }
 
@@ -471,7 +477,7 @@ internal class ListValueAdapter(
 
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
-    val elements = adapter.newLocal(Types.LIST)
+    val elements = adapter.newLocal(collection)
 
     val begin = adapter.newLabel()
     val body = adapter.newLabel()
@@ -481,7 +487,7 @@ internal class ListValueAdapter(
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     adapter.storeLocal(length)
 
-    adapter.newInstance(Types.ARRAY_LIST, Methods.getConstructor())
+    adapter.newInstance(implementation, Methods.getConstructor())
     adapter.storeLocal(elements)
 
     adapter.push(0)
@@ -498,7 +504,7 @@ internal class ListValueAdapter(
     adapter.loadLocal(elements)
     adapter.readElement(context.typed(parameterizedType.typeArguments[0]))
     adapter.checkCast(elementType)
-    adapter.invokeInterface(Types.LIST, Methods.get("add", Types.BOOLEAN, Types.OBJECT))
+    adapter.invokeInterface(Types.COLLECTION, Methods.get("add", Types.BOOLEAN, Types.OBJECT))
     adapter.pop()
 
     adapter.iinc(index, 1)
@@ -520,11 +526,11 @@ internal class ListValueAdapter(
 
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
-    adapter.invokeInterface(Types.LIST, Methods.get("size", Types.INT))
+    adapter.invokeInterface(Types.COLLECTION, Methods.get("size", Types.INT))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
 
     adapter.loadLocal(context.value())
-    adapter.invokeInterface(Types.LIST, Methods.get("iterator", Types.ITERATOR))
+    adapter.invokeInterface(Types.COLLECTION, Methods.get("iterator", Types.ITERATOR))
     adapter.storeLocal(iterator)
 
     adapter.mark(begin)
