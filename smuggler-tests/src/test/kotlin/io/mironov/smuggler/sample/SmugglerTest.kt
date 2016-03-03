@@ -464,6 +464,32 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithGenericProperties() {
+    data class Container<T>(
+        val value: T
+    ) : Serializable
+
+    data class WithGenerics(
+        val integer: Container<Int>?,
+        val string: Container<String>?
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<WithGenerics> {
+      WithGenerics(
+          integer = generator.nextNullable {
+            Container(
+                value = generator.nextInt()
+            )
+          },
+          string = generator.nextNullable {
+            Container(
+                value = generator.nextString()
+            )
+          }
+      )
+    }
+  }
+
   private data class WithStaticClassInitializer(
       val payload: String,
       val message: String
