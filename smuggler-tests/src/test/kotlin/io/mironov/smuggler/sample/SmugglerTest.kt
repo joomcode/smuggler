@@ -530,6 +530,36 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithComplexSets() {
+    data class ComplexArraysAndLists(
+        val one: Set<Set<Set<Long>>>,
+        val two: Set<Array<Set<Boolean>>>,
+        val three: Set<Array<Array<Boolean>>>,
+        val four: Array<Set<Array<Boolean>>>,
+        val five: Array<List<Set<Boolean>>>,
+        val six: Array<Set<List<Boolean>>>,
+        val seven: Set<Array<List<Boolean>>>,
+        val eight: Set<List<Array<Boolean>>>,
+        val nine: List<Array<Set<Boolean>>>,
+        val ten: List<Set<Array<Boolean>>>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<ComplexArraysAndLists>() {
+      ComplexArraysAndLists(
+          one = generator.nextSet { generator.nextSet { generator.nextSet { generator.nextLong() } } },
+          two = generator.nextSet { generator.nextArray { generator.nextSet { generator.nextBoolean() } } },
+          three = generator.nextSet { generator.nextArray { generator.nextArray { generator.nextBoolean() } } },
+          four = generator.nextArray { generator.nextSet { generator.nextArray { generator.nextBoolean() } } },
+          five = generator.nextArray { generator.nextList { generator.nextSet { generator.nextBoolean() } } },
+          six = generator.nextArray { generator.nextSet { generator.nextList { generator.nextBoolean() } } },
+          seven = generator.nextSet { generator.nextArray { generator.nextList { generator.nextBoolean() } } },
+          eight = generator.nextSet { generator.nextList { generator.nextArray { generator.nextBoolean() } } },
+          nine = generator.nextList { generator.nextArray { generator.nextSet { generator.nextBoolean() } } },
+          ten = generator.nextList { generator.nextSet { generator.nextArray { generator.nextBoolean() } } }
+      )
+    }
+  }
+
   private data class WithStaticClassInitializer(
       val payload: String,
       val message: String
