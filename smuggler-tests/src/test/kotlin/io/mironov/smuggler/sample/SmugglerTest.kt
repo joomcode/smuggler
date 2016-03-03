@@ -448,16 +448,18 @@ class SmugglerTest {
 
   @Test fun shouldWorkWithComplexListsAndArrays() {
     data class ComplexArraysAndLists(
-        val multi: List<List<List<Long>>>,
-        val lists: List<Array<List<Boolean>>>,
-        val arrays: Array<List<Array<Boolean>>>
+        val one: List<List<List<Long>>>,
+        val two: List<Array<List<Boolean>>>,
+        val three: List<Array<Array<Boolean>>>,
+        val four: Array<List<Array<Boolean>>>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<ComplexArraysAndLists>() {
       ComplexArraysAndLists(
-          multi = generator.nextList { generator.nextList { generator.nextList { generator.nextLong() } } },
-          lists = generator.nextList { generator.nextArray { generator.nextList { generator.nextBoolean() } } },
-          arrays = generator.nextArray { generator.nextList { generator.nextArray { generator.nextBoolean() } } }
+          one = generator.nextList { generator.nextList { generator.nextList { generator.nextLong() } } },
+          two = generator.nextList { generator.nextArray { generator.nextList { generator.nextBoolean() } } },
+          three = generator.nextList { generator.nextArray { generator.nextArray { generator.nextBoolean() } } },
+          four = generator.nextArray { generator.nextList { generator.nextArray { generator.nextBoolean() } } }
       )
     }
   }
