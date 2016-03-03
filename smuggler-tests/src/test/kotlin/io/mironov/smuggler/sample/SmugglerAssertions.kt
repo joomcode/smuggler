@@ -10,7 +10,7 @@ object SmugglerAssertions {
   inline fun <reified P : AutoParcelable> verify(factory: () -> P) {
     verify(P::class.java)
 
-    for (i in 0..100 - 1) {
+    0.until(25).forEach {
       verify(factory())
     }
   }
