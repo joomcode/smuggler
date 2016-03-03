@@ -41,6 +41,10 @@ object SmugglerEquivalence {
       return equals(left as List<*>, right as List<*>)
     }
 
+    if (Set::class.java.isAssignableFrom(leftClass)) {
+      return equals(left as Set<*>, right as Set<*>)
+    }
+
     if (leftClass == SparseBooleanArray::class.java) {
       return equals(left as SparseBooleanArray, right as SparseBooleanArray)
     }
@@ -65,6 +69,12 @@ object SmugglerEquivalence {
   fun equals(left: List<*>?, right: List<*>?): Boolean = nullableEquals(left, right) { left, right ->
     left.size == right.size && 0.until(left.size).all {
       equals(left[it], right[it])
+    }
+  }
+
+  fun equals(left: Set<*>?, right: Set<*>?): Boolean = nullableEquals(left, right) { left, right ->
+    left.size == right.size && left.all {
+      contains(right, it)
     }
   }
 
@@ -97,6 +107,10 @@ object SmugglerEquivalence {
     }
 
     return false
+  }
+
+  private fun contains(set: Set<*>, value: Any?): Boolean {
+    return set.any { equals(it, value) }
   }
 
   private inline fun <T> Array<T>.each(action: (T) -> Unit): Array<T> = apply {
