@@ -72,7 +72,7 @@ internal class GenericTypeReader(
     }
 
     while (arrayDimensions > 0) {
-      genericType = GenericType.GenericArrayType(genericType!!)
+      genericType = GenericType.ArrayType(genericType!!)
       --arrayDimensions
     }
   }

@@ -7,7 +7,7 @@ import org.objectweb.asm.Type
 internal sealed class GenericType {
   fun asRawType() = cast<RawType>()
   fun asTypeVariable() = cast<TypeVariable>()
-  fun asGenericArrayType() = cast<GenericArrayType>()
+  fun asGenericArrayType() = cast<ArrayType>()
   fun asParameterizedType() = cast<ParameterizedType>()
   fun asInnerType() = cast<InnerType>()
   fun asUpperBoundedType() = cast<UpperBoundedType>()
@@ -16,7 +16,7 @@ internal sealed class GenericType {
   fun asAsmType(): Type {
     return when (this) {
       is RawType -> type
-      is GenericArrayType -> Types.getArrayType(elementType.asAsmType())
+      is ArrayType -> Types.getArrayType(elementType.asAsmType())
       is ParameterizedType -> type
       else -> throw UnsupportedOperationException()
     }
@@ -34,7 +34,7 @@ internal sealed class GenericType {
     override fun hashCode(): Int = 31 + name.hashCode()
   }
 
-  class GenericArrayType(val elementType: GenericType) : GenericType() {
+  class ArrayType(val elementType: GenericType) : GenericType() {
     override fun toString(): String = "$elementType[]"
     override fun equals(other: Any?): Boolean = equals(other) { elementType == it.elementType }
     override fun hashCode(): Int = 31 + elementType.hashCode()
