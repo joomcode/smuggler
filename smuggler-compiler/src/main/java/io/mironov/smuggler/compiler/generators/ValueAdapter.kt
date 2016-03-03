@@ -161,7 +161,7 @@ internal open class SimpleBoxedValueAdapter(
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(boxed, Methods.get(unboxer, unboxed))
 
-    delegate.write(adapter, context.typed(unboxed).apply {
+    delegate.write(adapter, context.typed(GenericType.RawType(unboxed)).apply {
       value(adapter.newLocal(unboxed).apply {
         adapter.storeLocal(this)
       })
@@ -336,7 +336,7 @@ internal class ArrayPropertyAdapter(
     adapter.mark(body)
     adapter.loadLocal(elements)
     adapter.loadLocal(index)
-    adapter.readElement(context.typed(elementType))
+    adapter.readElement(context.typed(GenericType.RawType(elementType)))
     adapter.arrayStore(elementType)
 
     adapter.iinc(index, 1)

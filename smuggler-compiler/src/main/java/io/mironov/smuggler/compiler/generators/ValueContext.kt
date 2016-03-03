@@ -2,7 +2,6 @@ package io.mironov.smuggler.compiler.generators
 
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.signature.GenericType
-import org.objectweb.asm.Type
 import java.util.HashMap
 import java.util.NoSuchElementException
 
@@ -10,10 +9,6 @@ internal class ValueContext(
     val type: GenericType = GenericType.RawType(Types.OBJECT)
 ) {
   private val names = HashMap<String, Int>()
-
-  fun typed(newType: Type): ValueContext {
-    return typed(GenericType.RawType(newType))
-  }
 
   fun typed(newType: GenericType): ValueContext {
     val context = ValueContext(newType)
