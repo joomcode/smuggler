@@ -66,7 +66,7 @@ public class SmugglerTransform extends Transform {
         QualifiedContent.Scope.SUB_PROJECTS,
         QualifiedContent.Scope.SUB_PROJECTS_LOCAL_DEPS,
         QualifiedContent.Scope.EXTERNAL_LIBRARIES,
-        QualifiedContent.Scope.PROVIDED_ONLY,
+        QualifiedContent.Scope.PROVIDED_ONLY
     )
   }
 
