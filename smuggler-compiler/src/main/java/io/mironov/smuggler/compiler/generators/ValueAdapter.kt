@@ -54,15 +54,15 @@ internal object ValueAdapterFactory {
       }
 
       if (type == Types.LIST) {
-        return CollectionValueAdapter.from(Types.LIST, Types.ARRAY_LIST, registry, spec, property, generic)
+        return createCollection(Types.LIST, Types.ARRAY_LIST, registry, spec, property, generic)
       }
 
       if (type == Types.SET) {
-        return CollectionValueAdapter.from(Types.SET, Types.LINKED_SET, registry, spec, property, generic)
+        return createCollection(Types.SET, Types.LINKED_SET, registry, spec, property, generic)
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
-        return SparseArrayValueAdapter.from(registry, spec, property)
+        return createSparseArray(registry, spec, property)
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_BOOLEAN_ARRAY)) {
@@ -87,6 +87,40 @@ internal object ValueAdapterFactory {
 
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property.name, type.className)
     }
+  }
+
+  private fun createCollection(collection: Type, implementation: Type, registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+    if (generic !is GenericType.ParameterizedType) {
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''List<Foo>''", property.name)
+    }
+
+    if (generic.typeArguments.size != 1) {
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
+    }
+
+    val parameter = generic.typeArguments[0]
+
+    if (parameter !is GenericType.RawType && parameter !is GenericType.ParameterizedType && parameter !is GenericType.ArrayType) {
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
+    }
+
+    return CollectionValueAdapter(collection, implementation, ValueAdapterFactory.create(registry, spec, property, parameter))
+  }
+
+  private fun createSparseArray(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
+    if (property.type !is GenericType.ParameterizedType) {
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
+    }
+
+    if (property.type.typeArguments.size != 1) {
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
+    }
+
+    if (property.type.typeArguments[0] !is GenericType.RawType) {
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a raw type", property.name)
+    }
+
+    return SparseArrayValueAdapter(property.type.typeArguments[0].asRawType().type)
   }
 }
 
@@ -412,24 +446,6 @@ internal class ArrayPropertyAdapter(
 internal class SparseArrayValueAdapter(
     private val element: Type
 ) : ValueAdapter {
-  companion object {
-    fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
-      if (property.type !is GenericType.ParameterizedType) {
-        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
-      }
-
-      if (property.type.typeArguments.size != 1) {
-        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
-      }
-
-      if (property.type.typeArguments[0] !is GenericType.RawType) {
-        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a raw type", property.name)
-      }
-
-      return SparseArrayValueAdapter(property.type.typeArguments[0].asRawType().type)
-    }
-  }
-
   override fun read(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.push(element)
@@ -451,26 +467,6 @@ internal class CollectionValueAdapter(
     private val implementation: Type,
     private val delegate: ValueAdapter
 ) : OptionalValueAdapter() {
-  companion object {
-    fun from(collection: Type, implementation: Type, registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
-      if (generic !is GenericType.ParameterizedType) {
-        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''List<Foo>''", property.name)
-      }
-
-      if (generic.typeArguments.size != 1) {
-        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
-      }
-
-      val parameter = generic.typeArguments[0]
-
-      if (parameter !is GenericType.RawType && parameter !is GenericType.ParameterizedType && parameter !is GenericType.ArrayType) {
-        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
-      }
-
-      return CollectionValueAdapter(collection, implementation, ValueAdapterFactory.create(registry, spec, property, parameter))
-    }
-  }
-
   override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val parameterizedType = context.type.asParameterizedType()
     val elementType = parameterizedType.typeArguments[0].asAsmType()
