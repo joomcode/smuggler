@@ -26,7 +26,10 @@ import org.objectweb.asm.Opcodes.ASM5
 import org.objectweb.asm.commons.Method
 
 @Suppress("UNUSED_PARAMETER")
-internal class ParcelableContentGenerator(private val spec: AutoParcelableClassSpec) : ContentGenerator {
+internal class ParcelableContentGenerator(
+    private val spec: AutoParcelableClassSpec,
+    private val factory: ValueAdapterFactory
+) : ContentGenerator {
   private companion object {
     private const val ACC_METHOD_DEFAULT = ACC_PUBLIC + ACC_FINAL
     private const val ACC_METHOD_BRIDGE = ACC_PUBLIC + ACC_FINAL + ACC_SYNTHETIC + ACC_BRIDGE
@@ -38,9 +41,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
 
   private fun onCreateCreatorGeneratedContent(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(creatorTypeFrom(spec), emptyMap(), environment.newClass {
-      val factory = ValueAdapterFactory.from(environment.registry)
       val type = creatorTypeFrom(spec)
-
       val signature = creatorTypeSignatureFrom(spec)
       val interfaces = arrayOf(Types.ANDROID_CREATOR)
 
@@ -116,7 +117,6 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
       }
 
       newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
-        val factory = ValueAdapterFactory.from(environment.registry)
         val context = ValueContext()
 
         context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
