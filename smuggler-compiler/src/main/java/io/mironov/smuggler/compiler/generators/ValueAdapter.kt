@@ -98,21 +98,13 @@ internal class ValueAdapterFactory private constructor(
   }
 
   private fun createCollection(collection: Type, implementation: Type, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
-    if (generic !is GenericType.ParameterizedType) {
-      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''List<Foo>''", property.name)
-    }
+    val adapters = createAdaptersForParameterizedType(spec, property, generic)
 
-    if (generic.typeArguments.size != 1) {
+    if (adapters.size != 1) {
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
     }
 
-    val parameter = generic.typeArguments[0]
-
-    if (parameter !is GenericType.RawType && parameter !is GenericType.ParameterizedType && parameter !is GenericType.ArrayType) {
-      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
-    }
-
-    return CollectionValueAdapter(collection, implementation, create(spec, property, parameter))
+    return CollectionValueAdapter(collection, implementation, adapters[0])
   }
 
   private fun createSparseArray(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
@@ -129,6 +121,22 @@ internal class ValueAdapterFactory private constructor(
     }
 
     return SparseArrayValueAdapter(property.type.typeArguments[0].asRawType().type)
+  }
+
+  private fun createAdaptersForParameterizedType(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): List<ValueAdapter> {
+    if (generic !is GenericType.ParameterizedType) {
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized", property.name)
+    }
+
+    generic.typeArguments.forEach {
+      if (it !is GenericType.RawType && it !is GenericType.ParameterizedType && it !is GenericType.ArrayType) {
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
+      }
+    }
+
+    return generic.typeArguments.map {
+      create(spec, property, it)
+    }
   }
 }
 

@@ -544,6 +544,7 @@ class SmugglerTest {
     }
   }
 
+/*
   @Test fun shouldWorkWithMaps() {
     data class User(
         val firstName: String,
@@ -613,6 +614,7 @@ class SmugglerTest {
       )
     }
   }
+*/
 
   private data class WithStaticClassInitializer(
       val payload: String,
