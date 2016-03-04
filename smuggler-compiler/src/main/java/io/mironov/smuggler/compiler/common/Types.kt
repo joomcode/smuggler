@@ -37,6 +37,7 @@ internal object Types {
   val TREE_SET = Type.getType(java.util.TreeSet::class.java)
 
   val MAP = Type.getType(java.util.Map::class.java)
+  val ENTRY = Type.getType(java.util.Map.Entry::class.java)
   val HASH_MAP = Type.getType(java.util.HashMap::class.java)
   val LINKED_MAP = Type.getType(java.util.LinkedHashMap::class.java)
   val TREE_MAP = Type.getType(java.util.TreeMap::class.java)

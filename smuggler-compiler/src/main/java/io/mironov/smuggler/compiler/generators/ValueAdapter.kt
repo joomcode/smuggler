@@ -585,10 +585,106 @@ internal class MapValueAdapter(
     private val value: ValueAdapter
 ) : OptionalValueAdapter() {
   override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
-    adapter.pushNull()
+    val parameterizedType = context.type.asParameterizedType()
+
+    val keyType = parameterizedType.typeArguments[0].asAsmType()
+    val valueType = parameterizedType.typeArguments[1].asAsmType()
+
+    val index = adapter.newLocal(Types.INT)
+    val length = adapter.newLocal(Types.INT)
+    val elements = adapter.newLocal(Types.MAP)
+
+    val begin = adapter.newLabel()
+    val body = adapter.newLabel()
+    val end = adapter.newLabel()
+
+    adapter.loadLocal(context.parcel())
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+    adapter.storeLocal(length)
+
+    adapter.newInstance(Types.LINKED_MAP, Methods.getConstructor())
+    adapter.storeLocal(elements)
+
+    adapter.push(0)
+    adapter.storeLocal(index)
+
+    adapter.mark(begin)
+    adapter.loadLocal(index)
+    adapter.loadLocal(length)
+
+    adapter.ifICmp(Opcodes.IFLT, body)
+    adapter.goTo(end)
+
+    adapter.mark(body)
+    adapter.loadLocal(elements)
+    adapter.readKey(context.typed(parameterizedType.typeArguments[0]))
+    adapter.checkCast(keyType)
+    adapter.readValue(context.typed(parameterizedType.typeArguments[1]))
+    adapter.checkCast(valueType)
+    adapter.invokeInterface(Types.MAP, Methods.get("put", Types.OBJECT, Types.OBJECT, Types.OBJECT))
+    adapter.pop()
+
+    adapter.iinc(index, 1)
+    adapter.goTo(begin)
+    adapter.mark(end)
+
+    adapter.loadLocal(elements)
   }
 
   override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
-    // empty for now
+    val parameterizedType = context.type.asParameterizedType()
+
+    val keyType = parameterizedType.typeArguments[0].asAsmType()
+    val valueType = parameterizedType.typeArguments[1].asAsmType()
+
+    val keyElement = adapter.newLocal(keyType)
+    val valueElement = adapter.newLocal(valueType)
+    val iterator = adapter.newLocal(Types.ITERATOR)
+
+    val begin = adapter.newLabel()
+    val end = adapter.newLabel()
+
+    adapter.loadLocal(context.parcel())
+    adapter.loadLocal(context.value())
+    adapter.invokeInterface(Types.MAP, Methods.get("size", Types.INT))
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+
+    adapter.loadLocal(context.value())
+    adapter.invokeInterface(Types.MAP, Methods.get("entrySet", Types.SET))
+    adapter.invokeInterface(Types.COLLECTION, Methods.get("iterator", Types.ITERATOR))
+    adapter.storeLocal(iterator)
+
+    adapter.mark(begin)
+    adapter.loadLocal(iterator)
+    adapter.invokeInterface(Types.ITERATOR, Methods.get("hasNext", Types.BOOLEAN))
+    adapter.ifZCmp(Opcodes.IFEQ, end)
+
+    adapter.loadLocal(iterator)
+    adapter.invokeInterface(Types.ITERATOR, Methods.get("next", Types.OBJECT))
+    adapter.checkCast(Types.ENTRY)
+    adapter.dup()
+
+    adapter.invokeInterface(Types.ENTRY, Methods.get("getKey", Types.OBJECT))
+    adapter.checkCast(keyType)
+    adapter.storeLocal(keyElement)
+    adapter.writeKey(context.typed(parameterizedType.typeArguments[0]).apply {
+      value(keyElement)
+    })
+
+    adapter.invokeInterface(Types.ENTRY, Methods.get("getValue", Types.OBJECT))
+    adapter.checkCast(valueType)
+    adapter.storeLocal(valueElement)
+    adapter.writeValue(context.typed(parameterizedType.typeArguments[1]).apply {
+      value(valueElement)
+    })
+
+    adapter.goTo(begin)
+    adapter.mark(end)
   }
+
+  private fun GeneratorAdapter.readKey(context: ValueContext) = key.read(this, context)
+  private fun GeneratorAdapter.writeKey(context: ValueContext) = key.write(this, context)
+
+  private fun GeneratorAdapter.readValue(context: ValueContext) = value.read(this, context)
+  private fun GeneratorAdapter.writeValue(context: ValueContext) = value.write(this, context)
 }
