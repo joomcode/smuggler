@@ -69,6 +69,18 @@ internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapte
     invokeVirtual(owner, Methods.get(method))
   }
 
+  fun invokeSpecial(owner: ClassSpec, method: Method) {
+    visitMethodInsn(Opcodes.INVOKESPECIAL, owner.type.internalName, method.name, method.descriptor, false)
+  }
+
+  fun invokeSpecial(owner: ClassSpec, method: MethodSpec) {
+    visitMethodInsn(Opcodes.INVOKESPECIAL, owner.type.internalName, method.name, method.type.descriptor, false)
+  }
+
+  fun invokeSpecial(owner: Type, method: MethodSpec) {
+    visitMethodInsn(Opcodes.INVOKESPECIAL, owner.internalName, method.name, method.type.descriptor, false)
+  }
+
   fun newInstance(type: Type, method: Method, args: () -> Unit = {}) {
     newInstance(type)
     dup()
