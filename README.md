@@ -19,6 +19,13 @@ data class Chat(
 ) : AutoParcelable
 ```
 
+# Known limitations
+- Only data classes are supported
+- Data classes with type parameters aren't supported at the moment
+- Lists, Maps and Arrays with bounded type parameters aren't supported at the moment
+- Custom type adapters aren't supported at the moment
+- Android Gradle Plugin 2.0.0 isn't supported at the moment
+
 # License
 
     Copyright 2016 Vladimir Mironov
