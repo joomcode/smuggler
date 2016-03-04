@@ -38,7 +38,9 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
 
   private fun onCreateCreatorGeneratedContent(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(creatorTypeFrom(spec), emptyMap(), environment.newClass {
+      val factory = ValueAdapterFactory.from(environment.registry)
       val type = creatorTypeFrom(spec)
+
       val signature = creatorTypeSignatureFrom(spec)
       val interfaces = arrayOf(Types.ANDROID_CREATOR)
 
@@ -59,7 +61,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
 
         newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map { it.type.asAsmType() })) {
           spec.properties.forEach {
-            ValueAdapterFactory.create(environment.registry, spec, it).read(this, context.typed(it.type))
+            factory.create(spec, it).read(this, context.typed(it.type))
           }
         }
       }
@@ -114,6 +116,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
       }
 
       newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
+        val factory = ValueAdapterFactory.from(environment.registry)
         val context = ValueContext()
 
         context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
@@ -135,7 +138,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
         }
 
         spec.properties.forEach {
-          val property = ValueAdapterFactory.create(environment.registry, spec, it)
+          val property = factory.create(spec, it)
 
           context.value(newLocal(it.type.asAsmType()).apply {
             loadLocal(context.property(it.name))

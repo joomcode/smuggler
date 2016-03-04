@@ -17,7 +17,15 @@ internal interface ValueAdapter {
   fun write(adapter: GeneratorAdapter, context: ValueContext)
 }
 
-internal object ValueAdapterFactory {
+internal class ValueAdapterFactory private constructor(
+    private val registry: ClassRegistry
+) {
+  companion object {
+    fun from(registry: ClassRegistry): ValueAdapterFactory {
+      return ValueAdapterFactory(registry)
+    }
+  }
+
   private val ADAPTERS = HashMap<Type, ValueAdapter>().apply {
     put(Types.BOOLEAN, BooleanValueAdapter)
     put(Types.BYTE, ByteValueAdapter)
@@ -41,11 +49,11 @@ internal object ValueAdapterFactory {
     put(Types.ANDROID_BUNDLE, BundleValueAdapter)
   }
 
-  fun create(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
-    return create(registry, spec, property, property.type)
+  fun create(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
+    return create(spec, property, property.type)
   }
   
-  fun create(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+  fun create(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
     return ADAPTERS[generic.asAsmType()] ?: run {
       val type = generic.asAsmType()
 
@@ -54,15 +62,15 @@ internal object ValueAdapterFactory {
       }
 
       if (type == Types.LIST) {
-        return createCollection(Types.LIST, Types.ARRAY_LIST, registry, spec, property, generic)
+        return createCollection(Types.LIST, Types.ARRAY_LIST, spec, property, generic)
       }
 
       if (type == Types.SET) {
-        return createCollection(Types.SET, Types.LINKED_SET, registry, spec, property, generic)
+        return createCollection(Types.SET, Types.LINKED_SET, spec, property, generic)
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
-        return createSparseArray(registry, spec, property)
+        return createSparseArray(spec, property)
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_BOOLEAN_ARRAY)) {
@@ -74,11 +82,11 @@ internal object ValueAdapterFactory {
       }
 
       if (generic is GenericType.ArrayType) {
-        return ArrayPropertyAdapter(create(registry, spec, property, generic.elementType))
+        return ArrayPropertyAdapter(create(spec, property, generic.elementType))
       }
 
       if (type.sort == Type.ARRAY) {
-        return ArrayPropertyAdapter(create(registry, spec, property, GenericType.RawType(Types.getElementType(type))))
+        return ArrayPropertyAdapter(create(spec, property, GenericType.RawType(Types.getElementType(type))))
       }
 
       if (registry.isSubclassOf(type, Types.SERIALIZABLE)) {
@@ -89,7 +97,7 @@ internal object ValueAdapterFactory {
     }
   }
 
-  private fun createCollection(collection: Type, implementation: Type, registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+  private fun createCollection(collection: Type, implementation: Type, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
     if (generic !is GenericType.ParameterizedType) {
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''List<Foo>''", property.name)
     }
@@ -104,10 +112,10 @@ internal object ValueAdapterFactory {
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
     }
 
-    return CollectionValueAdapter(collection, implementation, ValueAdapterFactory.create(registry, spec, property, parameter))
+    return CollectionValueAdapter(collection, implementation, create(spec, property, parameter))
   }
 
-  private fun createSparseArray(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
+  private fun createSparseArray(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
     if (property.type !is GenericType.ParameterizedType) {
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
     }
