@@ -11,91 +11,92 @@ import java.util.Random
 class SmugglerGenerator(private val seed: Long) {
   private val random = Random(seed)
 
-  inline fun <T : Any> nextNullable(factory: () -> T): T? = if (nextNullableProbability()) null else factory()
+  inline fun <T : Any> nextValue(factory: () -> T): T? = factory()
+  inline fun <T : Any> nextNullableValue(factory: () -> T): T? = if (nextNullableProbability()) null else factory()
 
   inline fun <reified T : Any> nextArray(factory: (Int) -> T) = Array(nextArraySize()) { factory(it) }
-  inline fun <reified T : Any> nextNullableArray(factory: (Int) -> T) = nextNullable { nextArray(factory) }
+  inline fun <reified T : Any> nextNullableArray(factory: (Int) -> T) = nextNullableValue { nextArray(factory) }
 
   inline fun <reified T : Any> nextList(factory: (Int) -> T) = createList(factory)
-  inline fun <reified T : Any> nextNullableList(factory: (Int) -> T) = nextNullable { nextList(factory) }
+  inline fun <reified T : Any> nextNullableList(factory: (Int) -> T) = nextNullableValue { nextList(factory) }
 
   inline fun <reified T : Any> nextSet(factory: (Int) -> T) = createSet(factory)
-  inline fun <reified T : Any> nextNullableSet(factory: (Int) -> T) = nextNullable { nextSet(factory) }
+  inline fun <reified T : Any> nextNullableSet(factory: (Int) -> T) = nextNullableValue { nextSet(factory) }
 
   inline fun <reified K : Any, reified V : Any> nextMap(key: (Int) -> K, value: (Int) -> V) = createMap(key, value)
-  inline fun <reified K : Any, reified V : Any> nextNullableMap(key: (Int) -> K, value: (Int) -> V) = nextNullable { nextMap(key, value) }
+  inline fun <reified K : Any, reified V : Any> nextNullableMap(key: (Int) -> K, value: (Int) -> V) = nextNullableValue { nextMap(key, value) }
 
   fun nextArraySize() = random.nextInt(MAX_ARRAY_SIZE)
   fun nextNullableProbability() = random.nextInt(3) == 0
 
   fun nextBoolean() = random.nextBoolean()
-  fun nextNullableBoolean() = nextNullable { nextBoolean() }
+  fun nextNullableBoolean() = nextNullableValue { nextBoolean() }
 
   fun nextInt() = random.nextInt()
-  fun nextNullableInt() = nextNullable { nextInt() }
+  fun nextNullableInt() = nextNullableValue { nextInt() }
 
   fun nextLong() = random.nextLong()
-  fun nextNullableLong() = nextNullable { nextLong() }
+  fun nextNullableLong() = nextNullableValue { nextLong() }
 
   fun nextFloat() = random.nextFloat()
-  fun nextNullableFloat() = nextNullable { nextFloat() }
+  fun nextNullableFloat() = nextNullableValue { nextFloat() }
 
   fun nextDouble() = random.nextDouble()
-  fun nextNullableDouble() = nextNullable { nextDouble() }
+  fun nextNullableDouble() = nextNullableValue { nextDouble() }
 
   fun nextShort() = random.nextInt().toShort()
-  fun nextNullableShort() = nextNullable { nextShort() }
+  fun nextNullableShort() = nextNullableValue { nextShort() }
 
   fun nextByte() = random.nextInt().toByte()
-  fun nextNullableByte() = nextNullable { nextByte() }
+  fun nextNullableByte() = nextNullableValue { nextByte() }
 
   fun nextChar() = random.nextInt().toChar()
-  fun nextNullableChar() = nextNullable { nextChar() }
+  fun nextNullableChar() = nextNullableValue { nextChar() }
 
   fun nextString() = String(nextCharArray())
-  fun nextNullableString() = nextNullable { nextString() }
+  fun nextNullableString() = nextNullableValue { nextString() }
 
   fun <E : Enum<E>> nextEnum(clazz: Class<E>) = clazz.enumConstants[random.nextInt(clazz.enumConstants.size)]
-  fun <E : Enum<E>> nextNullableEnum(clazz: Class<E>) = nextNullable { nextEnum(clazz) }
+  fun <E : Enum<E>> nextNullableEnum(clazz: Class<E>) = nextNullableValue { nextEnum(clazz) }
 
   fun nextBooleanArray() = BooleanArray(nextArraySize()) { nextBoolean() }
-  fun nextNullableBooleanArray() = nextNullable { nextBooleanArray() }
+  fun nextNullableBooleanArray() = nextNullableValue { nextBooleanArray() }
 
   fun nextIntArray() = IntArray(nextArraySize()) { nextInt() }
-  fun nextNullableIntArray() = nextNullable { nextIntArray() }
+  fun nextNullableIntArray() = nextNullableValue { nextIntArray() }
 
   fun nextLongArray() = LongArray(nextArraySize()) { nextLong() }
-  fun nextNullableLongArray() = nextNullable { nextLongArray() }
+  fun nextNullableLongArray() = nextNullableValue { nextLongArray() }
 
   fun nextFloatArray() = FloatArray(nextArraySize()) { nextFloat() }
-  fun nextNullableFloatArray() = nextNullable { nextFloatArray() }
+  fun nextNullableFloatArray() = nextNullableValue { nextFloatArray() }
 
   fun nextDoubleArray() = DoubleArray(nextArraySize()) { nextDouble() }
-  fun nextNullableDoubleArray() = nextNullable { nextDoubleArray() }
+  fun nextNullableDoubleArray() = nextNullableValue { nextDoubleArray() }
 
   fun nextShortArray() = ShortArray(nextArraySize()) { nextShort() }
-  fun nextNullableShortArray() = nextNullable { nextShortArray() }
+  fun nextNullableShortArray() = nextNullableValue { nextShortArray() }
 
   fun nextByteArray() = ByteArray(nextArraySize()) { nextByte() }
-  fun nextNullableByteArray() = nextNullable { nextByteArray() }
+  fun nextNullableByteArray() = nextNullableValue { nextByteArray() }
 
   fun nextCharArray() = CharArray(nextArraySize()) { nextChar() }
-  fun nextNullableCharArray() = nextNullable { nextCharArray() }
+  fun nextNullableCharArray() = nextNullableValue { nextCharArray() }
 
   fun nextStringArray() = Array(nextArraySize()) { nextString() }
-  fun nextNullableStringArray() = nextNullable { nextStringArray() }
+  fun nextNullableStringArray() = nextNullableValue { nextStringArray() }
 
   fun nextSparseBooleanArray() = createSparseBooleanArray()
-  fun nextNullableSparseBooleanArray() = nextNullable { nextSparseBooleanArray() }
+  fun nextNullableSparseBooleanArray() = nextNullableValue { nextSparseBooleanArray() }
 
   fun nextSparseBooleanArrayArray() = nextArray { nextSparseBooleanArray() }
-  fun nextNullableSparseBooleanArrayArray() = nextNullable { nextSparseBooleanArrayArray() }
+  fun nextNullableSparseBooleanArrayArray() = nextNullableValue { nextSparseBooleanArrayArray() }
 
   inline fun <reified T> nextSparseArray(factory: (Int) -> T) = createSparseArray(factory)
-  inline fun <reified T> nextNullableSparseArray(factory: (Int) -> T) = nextNullable { nextSparseArray(factory) }
+  inline fun <reified T> nextNullableSparseArray(factory: (Int) -> T) = nextNullableValue { nextSparseArray(factory) }
 
   inline fun <reified T> nextSparseArrayArray(factory: (Int) -> T) = nextArray { createSparseArray(factory) }
-  inline fun <reified T> nextNullableSparseArrayArray(factory: (Int) -> T) = nextNullable { nextSparseArrayArray(factory) }
+  inline fun <reified T> nextNullableSparseArrayArray(factory: (Int) -> T) = nextNullableValue { nextSparseArrayArray(factory) }
 
   inline fun <reified T> createList(factory: (Int) -> T): List<T> {
     return ArrayList<T>().apply {

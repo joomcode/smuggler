@@ -172,19 +172,19 @@ class SmugglerTest {
 
     SmugglerAssertions.verify<Message> {
       Message(
-          user = generator.nextNullable {
+          user = generator.nextNullableValue {
             User(
                 firstName = generator.nextString(),
                 lastName = generator.nextString()
             )
           },
-          payload = generator.nextNullable {
+          payload = generator.nextNullableValue {
             Payload(
                 text = generator.nextString(),
                 timestamp = generator.nextLong()
             )
           },
-          status = generator.nextNullable {
+          status = generator.nextNullableValue {
             Status(
                 seen = generator.nextBoolean(),
                 delivered = generator.nextBoolean()
@@ -472,12 +472,12 @@ class SmugglerTest {
 
     SmugglerAssertions.verify<WithGenerics> {
       WithGenerics(
-          integer = generator.nextNullable {
+          integer = generator.nextNullableValue {
             Container(
                 value = generator.nextInt()
             )
           },
-          string = generator.nextNullable {
+          string = generator.nextNullableValue {
             Container(
                 value = generator.nextString()
             )
