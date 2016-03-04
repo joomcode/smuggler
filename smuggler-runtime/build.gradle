@@ -1,18 +1,8 @@
-import com.android.build.api.transform.Context
-import com.android.build.api.transform.Format
-import com.android.build.api.transform.QualifiedContent
-import com.android.build.api.transform.Transform
-import com.android.build.api.transform.TransformException
-import com.android.build.api.transform.TransformInput
-import com.android.build.api.transform.TransformOutputProvider
-import org.apache.commons.io.FileUtils
-
 buildscript {
   dependencies {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintrayVersion"
     classpath "com.android.tools.build:gradle:$androidToolsVersion"
-    classpath "com.android.tools.build:transform-api:$androidToolsVersion"
   }
 }
 
@@ -20,7 +10,6 @@ apply plugin: "com.jfrog.bintray"
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 apply plugin: "maven-publish"
-apply plugin: ShrinkPlugin
 
 android {
   compileSdkVersion projectCompileSdkVersion
@@ -78,47 +67,4 @@ bintray {
 task androidSourcesJar(type: Jar) {
   classifier = 'sources'
   from android.sourceSets.main.java.source
-}
-
-public class ShrinkPlugin implements Plugin<Project> {
-  @Override
-  public void apply(final Project project) {
-    project.android.registerTransform(new Transform() {
-      @Override
-      public void transform(final Context context, final Collection<TransformInput> inputs, final Collection<TransformInput> references, final TransformOutputProvider provider, final boolean incremental) throws IOException, TransformException, InterruptedException {
-        inputs.each {
-          it.directoryInputs.each {
-            final def output = provider.getContentLocation(it.name, it.contentTypes, it.scopes, Format.DIRECTORY)
-            final def input = it.file
-
-            FileUtils.iterateFiles(input, ["class"] as String[], true).each {
-              if (!it.absolutePath.contains("BuildConfig.class")) {
-                FileUtils.copyFile(it, new File(output, input.toURI().relativize(it.toURI()).path))
-              }
-            }
-          }
-        }
-      }
-
-      @Override
-      public Set<QualifiedContent.ContentType> getInputTypes() {
-        return EnumSet.of(QualifiedContent.DefaultContentType.CLASSES)
-      }
-
-      @Override
-      public Set<QualifiedContent.Scope> getScopes() {
-        return EnumSet.of(QualifiedContent.Scope.PROJECT)
-      }
-
-      @Override
-      public String getName() {
-        return "shrink"
-      }
-
-      @Override
-      public boolean isIncremental() {
-        return false
-      }
-    })
-  }
 }
