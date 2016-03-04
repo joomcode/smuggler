@@ -41,16 +41,9 @@ internal object AutoParcelableClassSpecFactory {
       throw InvalidAutoParcelableException(spec.type, "AutoParcelable classes shouldn''t declare CREATOR field.")
     }
 
-    val properties = constructor.valueParameterList.map { parameter ->
+    val properties = constructor.valueParameterList.mapIndexed { index, parameter ->
       val name = resolver.getName(parameter.name).identifier
-      val property = clazz.propertyList.first { resolver.getName(it.name).identifier == name }
-
-      if (Flags.VISIBILITY.get(property.flags) != ProtoBuf.Visibility.PUBLIC) {
-        throw InvalidAutoParcelableException(spec.type, "Only public properties are supported at the moment, but ''{0}'' has ''{1}'' visibility.",
-            resolver.getName(property.name).identifier, Flags.VISIBILITY.get(property.flags))
-      }
-
-      val getter = spec.getDeclaredMethod("get${name.capitalize()}")!!
+      val getter = spec.getDeclaredMethod("component${index + 1}")!!
       val signature = getter.signature
 
       val generic = if (signature != null) MethodSignatureMirror.read(signature) else null

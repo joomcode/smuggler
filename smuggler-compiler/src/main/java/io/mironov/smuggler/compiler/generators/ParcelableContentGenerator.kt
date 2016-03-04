@@ -7,6 +7,7 @@ import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.given
+import io.mironov.smuggler.compiler.common.isPrivate
 import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.reflect.MethodSpec
@@ -132,7 +133,13 @@ internal class ParcelableContentGenerator(
         spec.properties.forEach {
           context.property(it.name, newLocal(it.type.asAsmType()).apply {
             loadThis()
-            invokeVirtual(spec.clazz, it.getter)
+
+            if (it.getter.isPrivate) {
+              invokeSpecial(spec.clazz, it.getter)
+            } else {
+              invokeVirtual(spec.clazz, it.getter)
+            }
+
             storeLocal(this, it.type.asAsmType())
           })
         }
