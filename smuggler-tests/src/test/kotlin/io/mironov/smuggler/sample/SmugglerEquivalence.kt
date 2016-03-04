@@ -60,9 +60,55 @@ object SmugglerEquivalence {
     return left == right
   }
 
+  fun hashCode(value: Any?): Int = nullableHashCode(value) { value ->
+    val clazz = value.javaClass
+
+    if (clazz.isArray) {
+      return when (value.javaClass) {
+        BooleanArray::class.java -> Arrays.hashCode(value as BooleanArray)
+        ByteArray::class.java -> Arrays.hashCode(value as ByteArray)
+        CharArray::class.java -> Arrays.hashCode(value as CharArray)
+        LongArray::class.java -> Arrays.hashCode(value as LongArray)
+        IntArray::class.java -> Arrays.hashCode(value as IntArray)
+        FloatArray::class.java -> Arrays.hashCode(value as FloatArray)
+        DoubleArray::class.java -> Arrays.hashCode(value as DoubleArray)
+        ShortArray::class.java -> Arrays.hashCode(value as ShortArray)
+        else -> hashCode(value as Array<*>)
+      }
+    }
+
+    if (List::class.java.isAssignableFrom(clazz)) {
+      return hashCode(value as List<*>)
+    }
+
+    if (Set::class.java.isAssignableFrom(clazz)) {
+      return hashCode(value as Set<*>)
+    }
+
+    if (clazz == SparseBooleanArray::class.java) {
+      return hashCode(value as SparseBooleanArray)
+    }
+
+    if (clazz == SparseArray::class.java) {
+      return hashCode(value as SparseArray<*>)
+    }
+
+    if (AutoParcelable::class.java.isAssignableFrom(clazz)) {
+      return hashCode(value as AutoParcelable)
+    }
+
+    return value.hashCode()
+  }
+
   fun equals(left: Array<*>?, right: Array<*>?): Boolean = nullableEquals(left, right) { left, right ->
     left.size == right.size && 0.until(left.size).all {
       equals(left[it], right[it])
+    }
+  }
+
+  fun hashCode(value: Array<*>?): Int = nullableHashCode(value) { value ->
+    value.fold(0) { hash, element ->
+      31 * hash + hashCode(element)
     }
   }
 
@@ -72,9 +118,21 @@ object SmugglerEquivalence {
     }
   }
 
+  fun hashCode(value: List<*>?): Int = nullableHashCode(value) { value ->
+    value.fold(0) { hash, element ->
+      31 * hash + hashCode(element)
+    }
+  }
+
   fun equals(left: Set<*>?, right: Set<*>?): Boolean = nullableEquals(left, right) { left, right ->
     left.size == right.size && left.all {
       contains(right, it)
+    }
+  }
+
+  fun hashCode(value: Set<*>?): Int = nullableHashCode(value) { value ->
+    value.fold(0) { hash, element ->
+      31 * hash + hashCode(element)
     }
   }
 
@@ -84,9 +142,21 @@ object SmugglerEquivalence {
     }
   }
 
+  fun hashCode(value: SparseBooleanArray?): Int = nullableHashCode(value) { value ->
+    0.until(value.size()).fold(0) { hash, index ->
+      31 * 31 * hash + 31 * hashCode(value.valueAt(index)) + value.keyAt(index)
+    }
+  }
+
   fun equals(left: SparseArray<*>, right: SparseArray<*>): Boolean = nullableEquals(left, right) { left, right ->
     left.size() == right.size() && 0.until(left.size()).all {
       left.keyAt(it) == right.keyAt(it) && equals(left.valueAt(it), right.valueAt(it))
+    }
+  }
+
+  fun hashCode(value: SparseArray<*>?): Int = nullableHashCode(value) { value ->
+    0.until(value.size()).fold(0) { hash, index ->
+      31 * 31 * hash + 31 * hashCode(value.valueAt(index)) + value.keyAt(index)
     }
   }
 
@@ -95,6 +165,13 @@ object SmugglerEquivalence {
         .each { it.isAccessible = true }
         .filter { !Modifier.isStatic(it.modifiers) }
         .all { equals(it.get(left), it.get(right)) }
+  }
+
+  fun <P : AutoParcelable> hashCode(value: P?): Int = nullableHashCode(value) { value ->
+    return value.javaClass.declaredFields
+        .each { it.isAccessible = true }
+        .filter { !Modifier.isStatic(it.modifiers) }
+        .fold(0) { hash, value -> 31 * hash + hashCode(value) }
   }
 
   inline fun <T> nullableEquals(left: T?, right: T?, equality: (T, T) -> Boolean): Boolean {
@@ -107,6 +184,10 @@ object SmugglerEquivalence {
     }
 
     return false
+  }
+
+  inline fun <T> nullableHashCode(value: T?, code: (T) -> Int): Int {
+    return value?.let(code) ?: 0
   }
 
   private fun contains(set: Set<*>, value: Any?): Boolean {
