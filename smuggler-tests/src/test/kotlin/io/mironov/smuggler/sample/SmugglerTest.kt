@@ -544,6 +544,76 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithMaps() {
+    data class User(
+        val firstName: String,
+        val lastName: String
+    ) : AutoParcelable
+
+    data class Message(
+        val message: String,
+        val timestamp: Long
+    ) : AutoParcelable
+
+    data class Maps(
+        val one: Map<String, String>,
+        val two: Map<String, Array<String>>,
+        val three: Map<Int, Boolean>,
+        val four: Map<Int, User>,
+        val five: Map<Int, Array<Message>>,
+        val six: Map<Long, List<Message>>,
+        val seven: Map<List<Message>, List<User>>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Maps> {
+      Maps(
+          one = generator.nextMap({ generator.nextString() }, { generator.nextString() }),
+          two = generator.nextMap({ generator.nextString() }, { generator.nextArray { generator.nextString() } }),
+          three = generator.nextMap({ generator.nextInt() }, { generator.nextBoolean() }),
+          four = generator.nextMap({ generator.nextInt() }, {
+            User(
+                firstName = generator.nextString(),
+                lastName = generator.nextString()
+            )
+          }),
+          five = generator.nextMap({ generator.nextInt() }, {
+            generator.nextArray {
+              Message(
+                  message = generator.nextString(),
+                  timestamp = generator.nextLong()
+              )
+            }
+          }),
+          six = generator.nextMap({ generator.nextLong() }, {
+            generator.nextList {
+              Message(
+                  message = generator.nextString(),
+                  timestamp = generator.nextLong()
+              )
+            }
+          }),
+          seven = generator.nextMap(
+              key = {
+                generator.nextList {
+                  Message(
+                      message = generator.nextString(),
+                      timestamp = generator.nextLong()
+                  )
+                }
+              },
+              value = {
+                generator.nextList {
+                  User(
+                      firstName = generator.nextString(),
+                      lastName = generator.nextString()
+                  )
+                }
+              }
+          )
+      )
+    }
+  }
+
   private data class WithStaticClassInitializer(
       val payload: String,
       val message: String
