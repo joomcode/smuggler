@@ -614,6 +614,28 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithPrivateProperties() {
+    data class Numbers(
+        private val one: String,
+        private val two: String,
+        private val three: String,
+        val four: String,
+        val five: String,
+        val six: String
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Numbers> {
+      Numbers(
+          one = generator.nextString(),
+          two = generator.nextString(),
+          three = generator.nextString(),
+          four = generator.nextString(),
+          five = generator.nextString(),
+          six = generator.nextString()
+      )
+    }
+  }
+
   private data class WithStaticClassInitializer(
       val payload: String,
       val message: String
