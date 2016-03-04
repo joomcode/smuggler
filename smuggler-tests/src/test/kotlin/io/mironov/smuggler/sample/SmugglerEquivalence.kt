@@ -5,6 +5,7 @@ import android.util.SparseBooleanArray
 import io.mironov.smuggler.AutoParcelable
 import java.lang.reflect.Modifier
 import java.util.Arrays
+import java.util.HashSet
 
 object SmugglerEquivalence {
   fun equals(left: Any?, right: Any?): Boolean = nullableEquals(left, right) { left, right ->
@@ -125,15 +126,11 @@ object SmugglerEquivalence {
   }
 
   fun equals(left: Set<*>?, right: Set<*>?): Boolean = nullableEquals(left, right) { left, right ->
-    left.size == right.size && left.all {
-      contains(right, it)
-    }
+    left.mapTo(HashSet(), { Equality(it) }) == right.mapTo(HashSet(), { Equality(it) })
   }
 
   fun hashCode(value: Set<*>?): Int = nullableHashCode(value) { value ->
-    value.fold(0) { hash, element ->
-      31 * hash + hashCode(element)
-    }
+    value.mapTo(HashSet(), { Equality(it) }).hashCode()
   }
 
   fun equals(left: SparseBooleanArray?, right: SparseBooleanArray?): Boolean = nullableEquals(left, right) { left, right ->
@@ -171,7 +168,7 @@ object SmugglerEquivalence {
     return value.javaClass.declaredFields
         .each { it.isAccessible = true }
         .filter { !Modifier.isStatic(it.modifiers) }
-        .fold(0) { hash, value -> 31 * hash + hashCode(value) }
+        .fold(0) { hash, field -> 31 * hash + hashCode(field.get(value)) }
   }
 
   inline fun <T> nullableEquals(left: T?, right: T?, equality: (T, T) -> Boolean): Boolean {
@@ -190,8 +187,9 @@ object SmugglerEquivalence {
     return value?.let(code) ?: 0
   }
 
-  private fun contains(set: Set<*>, value: Any?): Boolean {
-    return set.any { equals(it, value) }
+  private data class Equality<T>(private val value: T) {
+    override fun equals(other: Any?): Boolean = other is Equality<*> && equals(value, other.value)
+    override fun hashCode(): Int = hashCode(value)
   }
 
   private inline fun <T> Array<T>.each(action: (T) -> Unit): Array<T> = apply {
