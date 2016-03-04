@@ -61,6 +61,10 @@ internal class ValueAdapterFactory private constructor(
         return EnumValueAdapter
       }
 
+      if (type == Types.MAP) {
+        return createMap(spec, property, generic)
+      }
+
       if (type == Types.LIST) {
         return createCollection(Types.LIST, Types.ARRAY_LIST, spec, property, generic)
       }
@@ -105,6 +109,16 @@ internal class ValueAdapterFactory private constructor(
     }
 
     return CollectionValueAdapter(collection, implementation, adapters[0])
+  }
+
+  private fun createMap(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+    val adapters = createAdaptersForParameterizedType(spec, property, generic)
+
+    if (adapters.size != 2) {
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly two type arguments", property.name)
+    }
+
+    return MapValueAdapter(adapters[0], adapters[1])
   }
 
   private fun createSparseArray(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
@@ -564,4 +578,17 @@ internal class CollectionValueAdapter(
 
   private fun GeneratorAdapter.readElement(context: ValueContext) = delegate.read(this, context)
   private fun GeneratorAdapter.writeElement(context: ValueContext) = delegate.write(this, context)
+}
+
+internal class MapValueAdapter(
+    private val key: ValueAdapter,
+    private val value: ValueAdapter
+) : OptionalValueAdapter() {
+  override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.pushNull()
+  }
+
+  override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    // empty for now
+  }
 }
