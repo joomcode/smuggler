@@ -10,7 +10,6 @@ import io.mironov.smuggler.compiler.reflect.ClassReference
 import io.mironov.smuggler.compiler.signature.GenericType
 import io.mironov.smuggler.compiler.signature.MethodSignatureMirror
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
-import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
 
 internal object AutoParcelableClassSpecFactory {
