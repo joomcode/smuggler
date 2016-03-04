@@ -38,6 +38,10 @@ object SmugglerEquivalence {
       }
     }
 
+    if (Map::class.java.isAssignableFrom(leftClass)) {
+      return equals(left as Map<*, *>, right as Map<*, *>)
+    }
+
     if (List::class.java.isAssignableFrom(leftClass)) {
       return equals(left as List<*>, right as List<*>)
     }
@@ -76,6 +80,10 @@ object SmugglerEquivalence {
         ShortArray::class.java -> Arrays.hashCode(value as ShortArray)
         else -> hashCode(value as Array<*>)
       }
+    }
+
+    if (Map::class.java.isAssignableFrom(clazz)) {
+      return hashCode(value as Map<*, *>)
     }
 
     if (List::class.java.isAssignableFrom(clazz)) {
@@ -126,11 +134,22 @@ object SmugglerEquivalence {
   }
 
   fun equals(left: Set<*>?, right: Set<*>?): Boolean = nullableEquals(left, right) { left, right ->
-    left.mapTo(HashSet(), { Equality(it) }) == right.mapTo(HashSet(), { Equality(it) })
+    left.mapTo(HashSet(), { Wrapper(it) }) == right.mapTo(HashSet(), { Wrapper(it) })
   }
 
   fun hashCode(value: Set<*>?): Int = nullableHashCode(value) { value ->
-    value.mapTo(HashSet(), { Equality(it) }).hashCode()
+    value.mapTo(HashSet(), { Wrapper(it) }).hashCode()
+  }
+
+  fun equals(left: Map<*, *>?, right: Map<*, *>?): Boolean = nullableEquals(left, right) { left, right ->
+    val one = left.entries.associateBy({ Wrapper(it.key) }, { Wrapper(it.value) })
+    val two = right.entries.associateBy({ Wrapper(it.key) }, { Wrapper(it.value) })
+
+    one == two
+  }
+
+  fun hashCode(value: Map<*, *>?): Int = nullableHashCode(value) { value ->
+    value.entries.associateBy({ Wrapper(it.key) }, { Wrapper(it.value) }).hashCode()
   }
 
   fun equals(left: SparseBooleanArray?, right: SparseBooleanArray?): Boolean = nullableEquals(left, right) { left, right ->
@@ -187,8 +206,8 @@ object SmugglerEquivalence {
     return value?.let(code) ?: 0
   }
 
-  private data class Equality<T>(private val value: T) {
-    override fun equals(other: Any?): Boolean = other is Equality<*> && equals(value, other.value)
+  private data class Wrapper<T>(private val value: T) {
+    override fun equals(other: Any?): Boolean = other is Wrapper<*> && equals(value, other.value)
     override fun hashCode(): Int = hashCode(value)
   }
 
