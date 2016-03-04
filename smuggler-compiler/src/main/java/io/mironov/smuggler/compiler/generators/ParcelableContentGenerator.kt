@@ -59,7 +59,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
 
         newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map { it.type.asAsmType() })) {
           spec.properties.forEach {
-            ValueAdapterFactory.from(environment.registry, spec, it).read(this, context.typed(it.type))
+            ValueAdapterFactory.create(environment.registry, spec, it).read(this, context.typed(it.type))
           }
         }
       }
@@ -135,7 +135,7 @@ internal class ParcelableContentGenerator(private val spec: AutoParcelableClassS
         }
 
         spec.properties.forEach {
-          val property = ValueAdapterFactory.from(environment.registry, spec, it)
+          val property = ValueAdapterFactory.create(environment.registry, spec, it)
 
           context.value(newLocal(it.type.asAsmType()).apply {
             loadLocal(context.property(it.name))

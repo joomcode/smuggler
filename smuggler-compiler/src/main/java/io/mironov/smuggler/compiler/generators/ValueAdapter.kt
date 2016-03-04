@@ -41,11 +41,11 @@ internal object ValueAdapterFactory {
     put(Types.ANDROID_BUNDLE, BundleValueAdapter)
   }
 
-  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
-    return from(registry, spec, property, property.type)
+  fun create(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
+    return create(registry, spec, property, property.type)
   }
   
-  fun from(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+  fun create(registry: ClassRegistry, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
     return ADAPTERS[generic.asAsmType()] ?: run {
       val type = generic.asAsmType()
 
@@ -74,11 +74,11 @@ internal object ValueAdapterFactory {
       }
 
       if (generic is GenericType.ArrayType) {
-        return ArrayPropertyAdapter(from(registry, spec, property, generic.elementType))
+        return ArrayPropertyAdapter(create(registry, spec, property, generic.elementType))
       }
 
       if (type.sort == Type.ARRAY) {
-        return ArrayPropertyAdapter(from(registry, spec, property, GenericType.RawType(Types.getElementType(type))))
+        return ArrayPropertyAdapter(create(registry, spec, property, GenericType.RawType(Types.getElementType(type))))
       }
 
       if (registry.isSubclassOf(type, Types.SERIALIZABLE)) {
@@ -467,7 +467,7 @@ internal class CollectionValueAdapter(
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
       }
 
-      return CollectionValueAdapter(collection, implementation, ValueAdapterFactory.from(registry, spec, property, parameter))
+      return CollectionValueAdapter(collection, implementation, ValueAdapterFactory.create(registry, spec, property, parameter))
     }
   }
 
