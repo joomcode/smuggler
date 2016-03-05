@@ -19,6 +19,56 @@ data class Chat(
 ) : AutoParcelable
 ```
 
+# Project Setup
+### Add JCenter Repository
+Make sure you have `jcenter()` repository in your root `build.gradle`:
+```
+buildscript {
+  repositories {
+    ...
+    jcenter()
+  }
+}
+
+allprojects {
+  buildscript {
+    repositories {
+      ...
+      jcenter()
+    }
+  }
+
+  repositories {
+    ...
+    jcenter()
+  }
+}
+```
+### Add Smuggler plugin
+```
+buildscript {
+  dependencies {
+  	classpath "com.android.tools.build:gradle:1.5.0"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0"
+    classpath "io.mironov.smuggler:smuggler-plugin:0.10.0-alpha4"
+  }
+}
+```
+**Important note #1**: Only android gradle plugin 1.5.0 and up is supported.
+
+**Important note #2:** In case you are using android gradle plugin 2.0.0, you have to use an experimental version of smuggler plugin: `io.mironov.smuggler:smuggler-plugin-experimental:0.10.0-alpha4`
+
+**Important note #3**: In case you have a mutli-module project and want to use `AutoParceable`, you have to add `smuggler-plugin` to each module.
+### Apply smuggler plugin
+```
+apply plugin: "com.android.application"
+apply plugin: "io.mironov.smuggler"
+```
+**Important note #1**: Smuggler plugin must be applied **after** android plugin.
+
+**Improtant note #2**: Experimental plugin has the same id, so you don't need to add `-experimental` suffix.
+
+
 # Known limitations
 - Only data classes are supported
 - Data classes with type parameters aren't supported at the moment
