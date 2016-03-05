@@ -27,6 +27,8 @@ android {
 }
 
 dependencies {
+  compile project(":smuggler-samples:smuggler-library")
+
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
