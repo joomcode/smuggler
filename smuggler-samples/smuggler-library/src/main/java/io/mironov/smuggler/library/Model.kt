@@ -3,18 +3,17 @@ package io.mironov.smuggler.library
 import io.mironov.smuggler.AutoParcelable
 
 data class User(
-    val firstName: String,
-    val lastName: String
+    var firstName: String,
+    var lastName: String
 ) : AutoParcelable
 
 data class Message(
-    val text: String,
-    val timestamp: Long,
-    val seen: Boolean
+    var text: String,
+    var seen: Boolean
 ) : AutoParcelable
 
 data class Chat(
-    val title: String,
-    val participants: List<User>,
-    val messages: List<Message>
+    var title: String,
+    var participants: List<User>,
+    var messages: List<Message>
 ) : AutoParcelable
