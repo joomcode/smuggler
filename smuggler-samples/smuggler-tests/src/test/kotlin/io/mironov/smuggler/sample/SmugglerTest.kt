@@ -4,6 +4,9 @@ import android.support.test.runner.AndroidJUnit4
 import android.util.SparseArray
 import android.util.SparseBooleanArray
 import io.mironov.smuggler.AutoParcelable
+import io.mironov.smuggler.library.Chat
+import io.mironov.smuggler.library.Message
+import io.mironov.smuggler.library.User
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -632,6 +635,26 @@ class SmugglerTest {
           four = generator.nextString(),
           five = generator.nextString(),
           six = generator.nextString()
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithLibraryProjects() {
+    SmugglerAssertions.verify<Chat>() {
+      Chat(
+          title = generator.nextString(),
+          participants = generator.nextList {
+            User(
+                firstName = generator.nextString(),
+                lastName = generator.nextString()
+            )
+          },
+          messages = generator.nextList {
+            Message(
+                text = generator.nextString(),
+                seen = generator.nextBoolean()
+            )
+          }
       )
     }
   }
