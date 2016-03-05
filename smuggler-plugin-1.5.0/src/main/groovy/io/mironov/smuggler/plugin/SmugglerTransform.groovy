@@ -8,6 +8,7 @@ import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformOutputProvider
+import com.android.build.gradle.LibraryExtension
 import com.google.common.collect.Iterables
 import io.mironov.smuggler.compiler.SmugglerCompiler
 import io.mironov.smuggler.compiler.SmugglerOptions
@@ -27,9 +28,19 @@ public class SmugglerTransform extends Transform {
     final def input = Iterables.getOnlyElement(Iterables.getOnlyElement(inputs).directoryInputs)
     final def output = provider.getContentLocation(input.name, input.contentTypes, input.scopes, Format.DIRECTORY)
 
-    final def android = project.extensions.findByType(AppExtension)
-    final def libs = new ArrayList<File>(android.bootClasspath)
+    final def application = project.extensions.findByType(AppExtension)
+    final def library = project.extensions.findByType(LibraryExtension)
+
+    final def libs = new ArrayList<File>()
     final def classes = new ArrayList<File>()
+
+    if (application != null) {
+      libs.addAll(application.bootClasspath)
+    }
+
+    if (library != null) {
+      libs.addAll(library.bootClasspath)
+    }
 
     inputs.each {
       classes.addAll(it.directoryInputs*.file)
