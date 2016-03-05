@@ -6,7 +6,7 @@ buildscript {
   }
 }
 
-apply plugin: "com.android.application"
+apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 apply plugin: "io.mironov.smuggler"
 
@@ -17,19 +17,10 @@ android {
   defaultConfig {
     targetSdkVersion projectTargetSdkVersion
     minSdkVersion 21
-
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-  }
-
-  sourceSets {
-    androidTest.java.srcDirs += 'src/test/kotlin'
   }
 }
 
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-
-  androidTestCompile "com.android.support.test:runner:$supportTestRunnerVersion"
-  androidTestCompile "com.android.support.test:rules:$supportTestRunnerVersion"
 }

@@ -6,4 +6,6 @@ include ':smuggler-plugin-2.0.0'
 
 if (!hasProperty("skipSample")) {
   include ':smuggler-samples:smuggler-tests'
+  include ':smuggler-samples:smuggler-application'
+  include ':smuggler-samples:smuggler-library'
 }
