@@ -63,7 +63,7 @@ internal class ParcelableContentGenerator(
 
         newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map { it.type.asAsmType() })) {
           spec.properties.forEach {
-            factory.create(spec, it).read(this, context.typed(it.type))
+            factory.create(spec, it).fromParcel(this, context.typed(it.type))
           }
         }
       }
@@ -152,7 +152,7 @@ internal class ParcelableContentGenerator(
             storeLocal(this, it.type.asAsmType())
           })
 
-          property.write(this, context.typed(it.type))
+          property.toParcel(this, context.typed(it.type))
         }
       }
 

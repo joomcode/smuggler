@@ -13,8 +13,8 @@ import org.objectweb.asm.Type
 import java.util.HashMap
 
 internal interface ValueAdapter {
-  fun read(adapter: GeneratorAdapter, context: ValueContext)
-  fun write(adapter: GeneratorAdapter, context: ValueContext)
+  fun fromParcel(adapter: GeneratorAdapter, context: ValueContext)
+  fun toParcel(adapter: GeneratorAdapter, context: ValueContext)
 }
 
 internal class ValueAdapterFactory private constructor(
@@ -155,7 +155,7 @@ internal class ValueAdapterFactory private constructor(
 }
 
 internal abstract class OptionalValueAdapter() : ValueAdapter {
-  final override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+  final override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     val start = adapter.newLabel()
     val end = adapter.newLabel()
 
@@ -172,7 +172,7 @@ internal abstract class OptionalValueAdapter() : ValueAdapter {
     adapter.mark(end)
   }
 
-  final override fun write(adapter: GeneratorAdapter, context: ValueContext) {
+  final override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
     val start = adapter.newLabel()
     val end = adapter.newLabel()
 
@@ -205,12 +205,12 @@ internal open class SimpleValueAdapter(
     private val reader: String,
     private val writer: String
 ) : ValueAdapter {
-  override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get(reader, type))
   }
 
-  override fun write(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get(writer, Types.VOID, type))
@@ -225,7 +225,7 @@ internal open class SimpleBoxedValueAdapter(
     private val boxer: String
 ) : OptionalValueAdapter() {
   override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
-    delegate.read(adapter, context)
+    delegate.fromParcel(adapter, context)
     adapter.invokeStatic(boxed, Methods.get(boxer, boxed, unboxed))
   }
 
@@ -233,7 +233,7 @@ internal open class SimpleBoxedValueAdapter(
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(boxed, Methods.get(unboxer, unboxed))
 
-    delegate.write(adapter, context.typed(GenericType.RawType(unboxed)).apply {
+    delegate.toParcel(adapter, context.typed(GenericType.RawType(unboxed)).apply {
       value(adapter.newLocal(unboxed).apply {
         adapter.storeLocal(this)
       })
@@ -260,13 +260,13 @@ internal object BoxedShortValueAdapter : SimpleBoxedValueAdapter(ShortValueAdapt
 internal object BoxedBooleanValueAdapter : SimpleBoxedValueAdapter(BooleanValueAdapter, Types.BOOLEAN, Types.BOXED_BOOLEAN, "booleanValue", "valueOf")
 
 internal object CharValueAdapter : ValueAdapter {
-  override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     adapter.cast(Types.INT, Types.CHAR)
   }
 
-  override fun write(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
     adapter.cast(Types.CHAR, Types.INT)
@@ -275,13 +275,13 @@ internal object CharValueAdapter : ValueAdapter {
 }
 
 internal object ShortValueAdapter : ValueAdapter {
-  override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     adapter.cast(Types.INT, Types.SHORT)
   }
 
-  override fun write(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
     adapter.cast(Types.SHORT, Types.INT)
@@ -290,7 +290,7 @@ internal object ShortValueAdapter : ValueAdapter {
 }
 
 internal object BooleanValueAdapter : ValueAdapter {
-  override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     val start = adapter.newLabel()
     val end = adapter.newLabel()
 
@@ -306,7 +306,7 @@ internal object BooleanValueAdapter : ValueAdapter {
     adapter.mark(end)
   }
 
-  override fun write(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
     val start = adapter.newLabel()
     val end = adapter.newLabel()
 
@@ -341,13 +341,13 @@ internal object EnumValueAdapter : OptionalValueAdapter() {
 }
 
 internal object SerializableValueAdapter : ValueAdapter {
-  override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readSerializable", Types.SERIALIZABLE))
     adapter.checkCast(context.type.asAsmType())
   }
 
-  override fun write(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
     adapter.checkCast(Types.SERIALIZABLE)
@@ -356,7 +356,7 @@ internal object SerializableValueAdapter : ValueAdapter {
 }
 
 internal object ParcelableValueAdapter : ValueAdapter {
-  override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.push(context.type.asAsmType())
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
@@ -364,7 +364,7 @@ internal object ParcelableValueAdapter : ValueAdapter {
     adapter.checkCast(context.type.asAsmType())
   }
 
-  override fun write(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
     adapter.checkCast(Types.ANDROID_PARCELABLE)
@@ -469,14 +469,14 @@ internal class ArrayPropertyAdapter(
     }
   }
 
-  private fun GeneratorAdapter.readElement(context: ValueContext) = delegate.read(this, context)
-  private fun GeneratorAdapter.writeElement(context: ValueContext) = delegate.write(this, context)
+  private fun GeneratorAdapter.readElement(context: ValueContext) = delegate.fromParcel(this, context)
+  private fun GeneratorAdapter.writeElement(context: ValueContext) = delegate.toParcel(this, context)
 }
 
 internal class SparseArrayValueAdapter(
     private val element: Type
 ) : ValueAdapter {
-  override fun read(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.push(element)
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
@@ -484,7 +484,7 @@ internal class SparseArrayValueAdapter(
     adapter.checkCast(context.type.asAsmType())
   }
 
-  override fun write(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
     adapter.checkCast(Types.ANDROID_SPARSE_ARRAY)
@@ -576,8 +576,8 @@ internal class CollectionValueAdapter(
     adapter.mark(end)
   }
 
-  private fun GeneratorAdapter.readElement(context: ValueContext) = delegate.read(this, context)
-  private fun GeneratorAdapter.writeElement(context: ValueContext) = delegate.write(this, context)
+  private fun GeneratorAdapter.readElement(context: ValueContext) = delegate.fromParcel(this, context)
+  private fun GeneratorAdapter.writeElement(context: ValueContext) = delegate.toParcel(this, context)
 }
 
 internal class MapValueAdapter(
@@ -682,9 +682,9 @@ internal class MapValueAdapter(
     adapter.mark(end)
   }
 
-  private fun GeneratorAdapter.readKey(context: ValueContext) = key.read(this, context)
-  private fun GeneratorAdapter.writeKey(context: ValueContext) = key.write(this, context)
+  private fun GeneratorAdapter.readKey(context: ValueContext) = key.fromParcel(this, context)
+  private fun GeneratorAdapter.writeKey(context: ValueContext) = key.toParcel(this, context)
 
-  private fun GeneratorAdapter.readValue(context: ValueContext) = value.read(this, context)
-  private fun GeneratorAdapter.writeValue(context: ValueContext) = value.write(this, context)
+  private fun GeneratorAdapter.readValue(context: ValueContext) = value.fromParcel(this, context)
+  private fun GeneratorAdapter.writeValue(context: ValueContext) = value.toParcel(this, context)
 }
