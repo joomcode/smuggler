@@ -11,6 +11,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.Serializable
+import java.util.Date
 
 @Suppress("EqualsOrHashCode")
 @RunWith(AndroidJUnit4::class)
@@ -629,6 +630,20 @@ class SmugglerTest {
                 seen = generator.nextBoolean()
             )
           }
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithDates() {
+    data class Sample(
+        val start: Date,
+        val end: Date
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Sample>() {
+      Sample(
+          start = Date(generator.nextLong()),
+          end = Date(generator.nextLong())
       )
     }
   }
