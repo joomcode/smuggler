@@ -68,6 +68,15 @@ apply plugin: "io.mironov.smuggler"
 
 **Improtant note #2**: Experimental plugin has the same id, so you don't need to add `-experimental` suffix.
 
+# Supported types
+- Primitive types: `boolean`, `byte`, `char`, `double`, `float`, `int`, `long`, `short`
+- Boxed types: `Boolean`, `Byte`, `Char`, `Double`, `Float`, `Int`, `Long`, `Short`
+- Other types: `String`, `Bundle`, `SparseBooleanArray`, `Date`, `SparseArray`
+- All `Parcelable` subclasses
+- All `Enum` subclasses
+- All `Serializable` subclasses
+- `Arrays` of any supported type, including primitive arrays and multidimensional arrays like: `Array<Array<Array<User>>`
+- `Sets`, `Lists` and `Maps` of any supported type, including primitive types and complex types like: `Map<List<Message>, List<Array<Set<User>>>`
 
 # Known limitations
 - Only data classes are supported
