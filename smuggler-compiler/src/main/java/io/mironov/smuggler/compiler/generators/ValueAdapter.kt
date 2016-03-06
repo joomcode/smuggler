@@ -46,6 +46,8 @@ internal class ValueAdapterFactory private constructor(
     put(Types.BOXED_SHORT, BoxedShortValueAdapter)
 
     put(Types.STRING, StringValueAdapter)
+    put(Types.DATE, DateValueAdapter)
+
     put(Types.ANDROID_BUNDLE, BundleValueAdapter)
   }
 
@@ -59,10 +61,6 @@ internal class ValueAdapterFactory private constructor(
 
       if (registry.isSubclassOf(type, Types.ENUM)) {
         return EnumValueAdapter
-      }
-
-      if (type == Types.DATE) {
-        return DateValueAdapter
       }
 
       if (type == Types.MAP) {
@@ -346,11 +344,17 @@ internal object EnumValueAdapter : OptionalValueAdapter() {
 
 internal object DateValueAdapter : OptionalValueAdapter() {
   override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
-    adapter.pushNull()
+    adapter.newInstance(Types.DATE, Methods.getConstructor(Types.LONG)) {
+      adapter.loadLocal(context.parcel())
+      adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readLong", Types.LONG))
+    }
   }
 
   override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
-    // empty
+    adapter.loadLocal(context.parcel())
+    adapter.loadLocal(context.value())
+    adapter.invokeVirtual(Types.DATE, Methods.get("getTime", Types.LONG))
+    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeLong", Types.VOID, Types.LONG))
   }
 }
 
