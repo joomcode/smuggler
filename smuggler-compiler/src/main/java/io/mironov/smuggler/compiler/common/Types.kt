@@ -3,6 +3,7 @@ package io.mironov.smuggler.compiler.common
 import io.mironov.smuggler.compiler.annotations.AnnotationDelegate
 import org.objectweb.asm.Type
 import java.io.Serializable
+import java.util.Date
 import java.util.HashSet
 
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
@@ -19,28 +20,30 @@ internal object Types {
     add(Type.VOID_TYPE)
   }
 
-  val OBJECT = Type.getType(Any::class.java)
-  val CLASS = Type.getType(Class::class.java)
-  val CLASS_LOADER = Type.getType(ClassLoader::class.java)
-  val ENUM = Type.getType(Enum::class.java)
-  val SERIALIZABLE = Type.getType(Serializable::class.java)
-  val ITERATOR = Type.getType(java.util.Iterator::class.java)
-  val COLLECTION = Type.getType(java.util.Collection::class.java)
+  val OBJECT = getType<Any>()
+  val CLASS = getType<Class<*>>()
+  val CLASS_LOADER = getType<ClassLoader>()
+  val ENUM = getType<Enum<*>>()
+  val SERIALIZABLE = getType<Serializable>()
+  val DATE = getType<Date>()
 
-  val LIST = Type.getType(java.util.List::class.java)
-  val ARRAY_LIST = Type.getType(java.util.ArrayList::class.java)
-  val LINKED_LIST = Type.getType(java.util.LinkedList::class.java)
+  val ITERATOR = getType<java.util.Iterator<*>>()
+  val COLLECTION = getType<java.util.Collection<*>>()
 
-  val SET = Type.getType(java.util.Set::class.java)
-  val HASH_SET = Type.getType(java.util.HashSet::class.java)
-  val LINKED_SET = Type.getType(java.util.LinkedHashSet::class.java)
-  val TREE_SET = Type.getType(java.util.TreeSet::class.java)
+  val LIST = getType<java.util.List<*>>()
+  val ARRAY_LIST = getType<java.util.ArrayList<*>>()
+  val LINKED_LIST = getType<java.util.LinkedList<*>>()
 
-  val MAP = Type.getType(java.util.Map::class.java)
-  val ENTRY = Type.getType(java.util.Map.Entry::class.java)
-  val HASH_MAP = Type.getType(java.util.HashMap::class.java)
-  val LINKED_MAP = Type.getType(java.util.LinkedHashMap::class.java)
-  val TREE_MAP = Type.getType(java.util.TreeMap::class.java)
+  val SET = getType<java.util.Set<*>>()
+  val HASH_SET = getType<java.util.HashSet<*>>()
+  val LINKED_SET = getType<java.util.LinkedHashSet<*>>()
+  val TREE_SET = getType<java.util.TreeSet<*>>()
+
+  val MAP = getType<java.util.Map<*, *>>()
+  val ENTRY = getType<java.util.Map.Entry<*, *>>()
+  val HASH_MAP = getType<java.util.HashMap<*, *>>()
+  val LINKED_MAP = getType<java.util.LinkedHashMap<*, *>>()
+  val TREE_MAP = getType<java.util.TreeMap<*, *>>()
 
   val BYTE = Type.BYTE_TYPE
   val CHAR = Type.CHAR_TYPE
@@ -50,17 +53,17 @@ internal object Types {
   val LONG = Type.LONG_TYPE
   val SHORT = Type.SHORT_TYPE
   val BOOLEAN = Type.BOOLEAN_TYPE
-  val STRING = Type.getType(String::class.java)
+  val STRING = getType<String>()
   val VOID = Type.VOID_TYPE
 
-  val BOXED_BYTE = Type.getType(java.lang.Byte::class.java)
-  val BOXED_CHAR = Type.getType(java.lang.Character::class.java)
-  val BOXED_DOUBLE = Type.getType(java.lang.Double::class.java)
-  val BOXED_FLOAT = Type.getType(java.lang.Float::class.java)
-  val BOXED_INT = Type.getType(java.lang.Integer::class.java)
-  val BOXED_LONG = Type.getType(java.lang.Long::class.java)
-  val BOXED_SHORT = Type.getType(java.lang.Short::class.java)
-  val BOXED_BOOLEAN = Type.getType(java.lang.Boolean::class.java)
+  val BOXED_BYTE = getType<java.lang.Byte>()
+  val BOXED_CHAR = getType<java.lang.Character>()
+  val BOXED_DOUBLE = getType<java.lang.Double>()
+  val BOXED_FLOAT = getType<java.lang.Float>()
+  val BOXED_INT = getType<java.lang.Integer>()
+  val BOXED_LONG = getType<java.lang.Long>()
+  val BOXED_SHORT = getType<java.lang.Short>()
+  val BOXED_BOOLEAN = getType<java.lang.Boolean>()
 
   val ANDROID_PARCEL = Type.getObjectType("android/os/Parcel")
   val ANDROID_PARCELABLE = Type.getObjectType("android/os/Parcelable")
@@ -71,6 +74,10 @@ internal object Types {
 
   val SMUGGLER_PARCELABLE = Type.getObjectType("io/mironov/smuggler/AutoParcelable")
   val SMUGGLER_FACTORY = Type.getObjectType("io/mironov/smuggler/SmugglerFactory")
+
+  inline fun <reified T : Any> getType(): Type {
+    return Type.getType(T::class.java)
+  }
 
   fun getArrayType(type: Type): Type {
     return Type.getType("[${type.descriptor}")
