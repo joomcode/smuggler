@@ -163,7 +163,7 @@ internal abstract class OptionalValueAdapter() : ValueAdapter {
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     adapter.ifZCmp(Opcodes.IFEQ, start)
 
-    adapter.readNotNullValue(context)
+    adapter.fromParcelNotNullValue(context)
     adapter.goTo(end)
 
     adapter.mark(start)
@@ -182,7 +182,7 @@ internal abstract class OptionalValueAdapter() : ValueAdapter {
     adapter.loadLocal(context.parcel())
     adapter.push(1)
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
-    adapter.writeNotNullValue(context)
+    adapter.toParcelNotNullValue(context)
     adapter.goTo(end)
 
     adapter.mark(start)
@@ -193,11 +193,11 @@ internal abstract class OptionalValueAdapter() : ValueAdapter {
     adapter.mark(end)
   }
 
-  private fun GeneratorAdapter.readNotNullValue(context: ValueContext) = readNotNull(this, context)
-  private fun GeneratorAdapter.writeNotNullValue(context: ValueContext) = writeNotNull(this, context)
+  private fun GeneratorAdapter.fromParcelNotNullValue(context: ValueContext) = fromParcelNotNull(this, context)
+  private fun GeneratorAdapter.toParcelNotNullValue(context: ValueContext) = toParcelNotNull(this, context)
 
-  abstract fun readNotNull(adapter: GeneratorAdapter, context: ValueContext)
-  abstract fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext)
+  abstract fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext)
+  abstract fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext)
 }
 
 internal open class SimpleValueAdapter(
@@ -224,12 +224,12 @@ internal open class SimpleBoxedValueAdapter(
     private val unboxer: String,
     private val boxer: String
 ) : OptionalValueAdapter() {
-  override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     delegate.fromParcel(adapter, context)
     adapter.invokeStatic(boxed, Methods.get(boxer, boxed, unboxed))
   }
 
-  override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(boxed, Methods.get(unboxer, unboxed))
 
@@ -324,7 +324,7 @@ internal object BooleanValueAdapter : ValueAdapter {
 }
 
 internal object EnumValueAdapter : OptionalValueAdapter() {
-  override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     adapter.invokeStatic(context.type.asAsmType(), Methods.get("values", Types.getArrayType(context.type.asAsmType())))
@@ -332,7 +332,7 @@ internal object EnumValueAdapter : OptionalValueAdapter() {
     adapter.arrayLoad(context.type.asAsmType())
   }
 
-  override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(context.type.asAsmType(), Methods.get("ordinal", Types.INT))
@@ -376,7 +376,7 @@ internal object ParcelableValueAdapter : ValueAdapter {
 internal class ArrayPropertyAdapter(
     private val delegate: ValueAdapter
 ) : OptionalValueAdapter() {
-  final override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  final override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
 
@@ -418,7 +418,7 @@ internal class ArrayPropertyAdapter(
     adapter.loadLocal(elements)
   }
 
-  final override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  final override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
 
@@ -497,7 +497,7 @@ internal class CollectionValueAdapter(
     private val implementation: Type,
     private val delegate: ValueAdapter
 ) : OptionalValueAdapter() {
-  override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val parameterizedType = context.type.asParameterizedType()
     val elementType = parameterizedType.typeArguments[0].asAsmType()
 
@@ -540,7 +540,7 @@ internal class CollectionValueAdapter(
     adapter.loadLocal(elements)
   }
 
-  override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val parameterizedType = context.type.asParameterizedType()
     val elementType = parameterizedType.typeArguments[0].asAsmType()
 
@@ -584,7 +584,7 @@ internal class MapValueAdapter(
     private val key: ValueAdapter,
     private val value: ValueAdapter
 ) : OptionalValueAdapter() {
-  override fun readNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val parameterizedType = context.type.asParameterizedType()
 
     val keyType = parameterizedType.typeArguments[0].asAsmType()
@@ -631,7 +631,7 @@ internal class MapValueAdapter(
     adapter.loadLocal(elements)
   }
 
-  override fun writeNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val parameterizedType = context.type.asParameterizedType()
 
     val keyType = parameterizedType.typeArguments[0].asAsmType()
