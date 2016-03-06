@@ -2,11 +2,18 @@ package io.mironov.smuggler.compiler.generators
 
 import io.mironov.smuggler.compiler.ClassRegistry
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
+import io.mironov.smuggler.compiler.InvalidTypeAdapterException
+import io.mironov.smuggler.compiler.annotations.GlobalAdapter
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.common.isAbstract
+import io.mironov.smuggler.compiler.common.isInterface
+import io.mironov.smuggler.compiler.common.isPublic
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
+import io.mironov.smuggler.compiler.reflect.ClassReference
+import io.mironov.smuggler.compiler.reflect.ClassSpec
 import io.mironov.smuggler.compiler.signature.GenericType
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
@@ -18,15 +25,45 @@ internal interface ValueAdapter {
 }
 
 internal class ValueAdapterFactory private constructor(
-    private val registry: ClassRegistry
+    private val registry: ClassRegistry,
+    private val globals: Map<Type, ValueAdapter>
 ) {
   companion object {
     fun from(registry: ClassRegistry): ValueAdapterFactory {
-      return ValueAdapterFactory(registry)
+      val adapters = findTypeAdapterClasses(registry).map { registry.resolve(it) }
+      val global = adapters.filter { it.getAnnotation<GlobalAdapter>() != null }
+
+      return ValueAdapterFactory(registry, global.associateBy(ClassSpec::type) {
+        createValueAdapterFrom(it, registry)
+      })
+    }
+
+    private fun findTypeAdapterClasses(registry: ClassRegistry): Collection<ClassReference> {
+      return registry.inputs.filter {
+        !it.isInterface && registry.isSubclassOf(it.type, Types.SMUGGLER_ADAPTER)
+      }
+    }
+
+    private fun createValueAdapterFrom(spec: ClassSpec, registry: ClassRegistry): ValueAdapter {
+      val constructor = spec.getConstructor()
+
+      if (constructor == null || !constructor.isPublic) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public no args constructor")
+      }
+
+      if (spec.isAbstract) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be not abstract")
+      }
+
+      if (!spec.isPublic) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public visibility")
+      }
+
+      throw UnsupportedOperationException()
     }
   }
 
-  private val ADAPTERS = HashMap<Type, ValueAdapter>().apply {
+  private val adapters = HashMap<Type, ValueAdapter>().apply {
     put(Types.BOOLEAN, BooleanValueAdapter)
     put(Types.BYTE, ByteValueAdapter)
     put(Types.CHAR, CharValueAdapter)
@@ -57,7 +94,7 @@ internal class ValueAdapterFactory private constructor(
   }
   
   fun create(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
-    return ADAPTERS[generic.asAsmType()] ?: run {
+    return adapters[generic.asAsmType()] ?: globals[generic.asAsmType()] ?: run {
       val type = generic.asAsmType()
 
       if (registry.isSubclassOf(type, Types.ENUM)) {
