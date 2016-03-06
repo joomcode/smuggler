@@ -48,6 +48,7 @@ internal class ValueAdapterFactory private constructor(
     put(Types.STRING, StringValueAdapter)
     put(Types.DATE, DateValueAdapter)
 
+    put(Types.ANDROID_SPARSE_BOOLEAN_ARRAY, SparseBooleanArrayValueAdapter)
     put(Types.ANDROID_BUNDLE, BundleValueAdapter)
   }
 
@@ -77,10 +78,6 @@ internal class ValueAdapterFactory private constructor(
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
         return createSparseArray(spec, property)
-      }
-
-      if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_BOOLEAN_ARRAY)) {
-        return SparseBooleanArrayValueAdapter
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
