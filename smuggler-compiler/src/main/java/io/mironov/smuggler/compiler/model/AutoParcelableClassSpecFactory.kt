@@ -10,6 +10,7 @@ import io.mironov.smuggler.compiler.reflect.ClassReference
 import io.mironov.smuggler.compiler.signature.GenericType
 import io.mironov.smuggler.compiler.signature.MethodSignatureMirror
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
+import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
 
 internal object AutoParcelableClassSpecFactory {
@@ -32,8 +33,12 @@ internal object AutoParcelableClassSpecFactory {
     }
 
     val creator = spec.getDeclaredField("CREATOR")
-    val constructor = clazz.constructorList.first {
-      !Flags.IS_SECONDARY.get(it.flags)
+    val constructor = clazz.constructorList.singleOrNull() { !Flags.IS_SECONDARY.get(it.flags) } ?: run {
+      throw InvalidAutoParcelableException(spec.type, "AutoParcelable classes must have exactly one primary constructor.")
+    }
+
+    if (Flags.VISIBILITY.get(constructor.flags) != ProtoBuf.Visibility.PUBLIC) {
+      throw InvalidAutoParcelableException(spec.type, "AutoParcelable classes must have primary constructor with public visibility.")
     }
 
     if (creator != null && creator.isStatic) {
