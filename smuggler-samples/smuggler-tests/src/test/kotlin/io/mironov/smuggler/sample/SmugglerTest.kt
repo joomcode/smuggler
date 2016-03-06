@@ -463,32 +463,6 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithGenericProperties() {
-    data class Container<T>(
-        val value: T
-    ) : Serializable
-
-    data class WithGenerics(
-        val integer: Container<Int>?,
-        val string: Container<String>?
-    ) : AutoParcelable
-
-    SmugglerAssertions.verify<WithGenerics> {
-      WithGenerics(
-          integer = generator.nextNullableValue {
-            Container(
-                value = generator.nextInt()
-            )
-          },
-          string = generator.nextNullableValue {
-            Container(
-                value = generator.nextString()
-            )
-          }
-      )
-    }
-  }
-
   @Test fun shouldWorkWithSets() {
     data class User(
         val firstName: String,
