@@ -1,9 +1,12 @@
 package io.mironov.smuggler.sample
 
+import android.os.Parcel
 import android.support.test.runner.AndroidJUnit4
 import android.util.SparseArray
 import android.util.SparseBooleanArray
 import io.mironov.smuggler.AutoParcelable
+import io.mironov.smuggler.GlobalAdapter
+import io.mironov.smuggler.TypeAdapter
 import io.mironov.smuggler.library.Chat
 import io.mironov.smuggler.library.Message
 import io.mironov.smuggler.library.User
@@ -11,6 +14,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.Serializable
+import java.math.BigInteger
+import java.util.Calendar
 import java.util.Date
 
 @Suppress("EqualsOrHashCode")
@@ -645,6 +650,30 @@ class SmugglerTest {
           start = Date(generator.nextLong()),
           end = Date(generator.nextLong())
       )
+    }
+  }
+
+  @GlobalAdapter
+  class BigIntegerTypeAdapter : TypeAdapter<BigInteger> {
+    override fun fromParcel(parcel: Parcel): BigInteger {
+      return BigInteger(parcel.createByteArray())
+    }
+
+    override fun toParcel(value: BigInteger, parcel: Parcel, flags: Int) {
+      parcel.writeByteArray(value.toByteArray())
+    }
+  }
+
+  @GlobalAdapter
+  class CalendarTypeAdapter : TypeAdapter<Calendar> {
+    override fun fromParcel(parcel: Parcel): Calendar {
+      return Calendar.getInstance().apply {
+        timeInMillis = parcel.readLong()
+      }
+    }
+
+    override fun toParcel(value: Calendar, parcel: Parcel, flags: Int) {
+      parcel.writeLong(value.timeInMillis)
     }
   }
 
