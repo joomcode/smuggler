@@ -61,6 +61,10 @@ internal class ValueAdapterFactory private constructor(
         return EnumValueAdapter
       }
 
+      if (type == Types.DATE) {
+        return DateValueAdapter
+      }
+
       if (type == Types.MAP) {
         return createMap(spec, property, generic)
       }
@@ -337,6 +341,16 @@ internal object EnumValueAdapter : OptionalValueAdapter() {
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(context.type.asAsmType(), Methods.get("ordinal", Types.INT))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+  }
+}
+
+internal object DateValueAdapter : OptionalValueAdapter() {
+  override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.pushNull()
+  }
+
+  override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    // empty
   }
 }
 
