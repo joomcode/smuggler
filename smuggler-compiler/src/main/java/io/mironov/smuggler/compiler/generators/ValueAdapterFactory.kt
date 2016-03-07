@@ -3,7 +3,6 @@ package io.mironov.smuggler.compiler.generators
 import io.mironov.smuggler.compiler.ClassRegistry
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.InvalidTypeAdapterException
-import io.mironov.smuggler.compiler.annotations.AdaptedType
 import io.mironov.smuggler.compiler.annotations.GlobalAdapter
 import io.mironov.smuggler.compiler.annotations.LocalAdapter
 import io.mironov.smuggler.compiler.annotations.Metadata
@@ -17,6 +16,7 @@ import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import io.mironov.smuggler.compiler.reflect.ClassReference
 import io.mironov.smuggler.compiler.reflect.ClassSpec
+import io.mironov.smuggler.compiler.signature.ClassSignatureMirror
 import io.mironov.smuggler.compiler.signature.GenericType
 import org.objectweb.asm.Type
 import java.util.HashMap
@@ -117,10 +117,39 @@ internal class ValueAdapterFactory private constructor(
       return adapted to AssistedValueAdapter.fromClass(spec.type, adapted)
     }
 
+    @Suppress("IfNullToElvis")
     private fun createAssistedTypeForTypeAdapter(spec: ClassSpec, registry: ClassRegistry): Type {
-      return spec.getAnnotation<AdaptedType>()?.value() ?: run {
-        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have @AdaptedType annotation")
+      val signature = ClassSignatureMirror.read(spec.signature ?: run {
+        throw InvalidTypeAdapterException(spec.type, "Unable to extract signature from TypeAdapter")
+      })
+
+      if (!signature.typeParameters.isEmpty()) {
+        throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter can't have any type parameters")
       }
+
+      val adapter = signature.interfaces.singleOrNull {
+        it.asAsmType() == Types.SMUGGLER_ADAPTER
+      }
+
+      if (adapter == null) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be a direct child of the TypeAdapter interface")
+      }
+
+      if (adapter !is GenericType.ParameterizedType) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must provide a type argument for TypeAdapter interface")
+      }
+
+      if (adapter.typeArguments.size != 1) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must provide exactly one type argument for TypeAdapter interface")
+      }
+
+      val argument = adapter.typeArguments[0]
+
+      if (argument !is GenericType.RawType) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must parameterize TypeAdapter interface with a raw type")
+      }
+
+      return argument.type
     }
   }
 

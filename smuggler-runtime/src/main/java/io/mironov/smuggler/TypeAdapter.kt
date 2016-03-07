@@ -6,11 +6,6 @@ import kotlin.reflect.KClass
 @Beta
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
-annotation class AdaptedType(val value: KClass<*>)
-
-@Beta
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
 annotation class LocalAdapter(vararg val value: KClass<out TypeAdapter<*>>)
 
 @Beta

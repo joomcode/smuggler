@@ -9,8 +9,3 @@ interface GlobalAdapter
 interface LocalAdapter {
   fun value(): Array<Type>
 }
-
-@AnnotationDelegate("io.mironov.smuggler.AdaptedType")
-interface AdaptedType {
-  fun value(): Type
-}
