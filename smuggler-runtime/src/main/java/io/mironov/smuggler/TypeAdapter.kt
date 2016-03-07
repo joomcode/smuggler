@@ -1,6 +1,22 @@
 package io.mironov.smuggler
 
 import android.os.Parcel
+import kotlin.reflect.KClass
+
+@Beta
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
+annotation class AdaptedType(val value: KClass<*>)
+
+@Beta
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
+annotation class ClassAdapter(val value: Array<KClass<out TypeAdapter<*>>>)
+
+@Beta
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
+annotation class GlobalAdapter()
 
 @Beta
 interface TypeAdapter<T> {
