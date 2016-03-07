@@ -562,3 +562,28 @@ internal class MapValueAdapter(
   private fun GeneratorAdapter.readValue(context: ValueContext) = value.fromParcel(this, context)
   private fun GeneratorAdapter.writeValue(context: ValueContext) = value.toParcel(this, context)
 }
+
+internal class AdaptedValueAdapter(
+    private val adapterType: Type,
+    private val elementType: Type
+) : OptionalValueAdapter() {
+  private companion object {
+    private val METHOD_TO_PARCEL = Methods.get("toParcel", Types.VOID, Types.OBJECT, Types.ANDROID_PARCEL, Types.INT)
+    private val METHOD_FROM_PARCEL = Methods.get("fromParcel", Types.OBJECT)
+  }
+
+  override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.newInstance(adapterType, Methods.getConstructor())
+    adapter.loadArg(context.parcel())
+    adapter.invokeInterface(Types.SMUGGLER_ADAPTER, METHOD_FROM_PARCEL)
+    adapter.checkCast(elementType)
+  }
+
+  override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.newInstance(adapterType, Methods.getConstructor())
+    adapter.loadArg(context.value())
+    adapter.loadArg(context.parcel())
+    adapter.loadArg(context.flags())
+    adapter.invokeInterface(Types.SMUGGLER_ADAPTER, METHOD_TO_PARCEL)
+  }
+}
