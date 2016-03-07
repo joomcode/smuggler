@@ -124,7 +124,7 @@ internal class ValueAdapterFactory private constructor(
       })
 
       if (!signature.typeParameters.isEmpty()) {
-        throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter can't have any type parameters")
+        throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can't have any type parameters")
       }
 
       val adapter = signature.interfaces.singleOrNull {
