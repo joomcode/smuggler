@@ -63,6 +63,10 @@ internal class ValueAdapterFactory private constructor(
       })
     }
 
+    fun from(factory: ValueAdapterFactory, spec: AutoParcelableClassSpec): ValueAdapterFactory {
+      return factory
+    }
+
     private fun findTypeAdapterClasses(registry: ClassRegistry): Collection<ClassReference> {
       return registry.inputs.filter {
         !it.isInterface && registry.isSubclassOf(it.type, Types.SMUGGLER_ADAPTER)

@@ -20,7 +20,7 @@ class SmugglerCompiler {
 
     findAutoParcelableClasses(registry).forEach {
       val spec = AutoParcelableClassSpecFactory.from(it, registry)
-      val generator = ParcelableContentGenerator(spec, factory)
+      val generator = ParcelableContentGenerator(spec, ValueAdapterFactory.from(factory, spec))
 
       generator.generate(environment).forEach {
         File(options.output, it.path).writeBytes(it.content)
