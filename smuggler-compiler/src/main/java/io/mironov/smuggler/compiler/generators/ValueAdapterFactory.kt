@@ -59,7 +59,7 @@ internal class ValueAdapterFactory private constructor(
       val global = adapters.filter { it.getAnnotation<GlobalAdapter>() != null }
 
       return ValueAdapterFactory(registry, ADAPTERS + global.associate {
-        createAdaptedValueAdapter(it, registry)
+        createAssistedValueAdapter(it, registry)
       })
     }
 
@@ -73,11 +73,15 @@ internal class ValueAdapterFactory private constructor(
       }
     }
 
-    private fun createAdaptedValueAdapter(spec: ClassSpec, registry: ClassRegistry): Pair<Type, ValueAdapter> {
+    private fun createAssistedValueAdapter(spec: ClassSpec, registry: ClassRegistry): Pair<Type, ValueAdapter> {
       val constructor = spec.getConstructor()
 
       val adapted = spec.getAnnotation<AdaptedType>()
       val metadata = spec.getAnnotation<Metadata>()
+
+      if (!registry.isSubclassOf(spec.type, Types.SMUGGLER_ADAPTER)) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must implement TypeAdapter interface")
+      }
 
       if (adapted == null) {
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have @AdaptedType annotation")
