@@ -5,8 +5,8 @@ import org.objectweb.asm.Type
 @AnnotationDelegate("io.mironov.smuggler.GlobalAdapter")
 interface GlobalAdapter
 
-@AnnotationDelegate("io.mironov.smuggler.ClassAdapter")
-interface ClassAdapter {
+@AnnotationDelegate("io.mironov.smuggler.LocalAdapter")
+interface LocalAdapter {
   fun value(): Array<Type>
 }
 
