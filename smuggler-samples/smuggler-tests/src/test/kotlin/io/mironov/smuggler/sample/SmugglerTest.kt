@@ -7,6 +7,7 @@ import android.util.SparseBooleanArray
 import io.mironov.smuggler.AdaptedType
 import io.mironov.smuggler.AutoParcelable
 import io.mironov.smuggler.GlobalAdapter
+import io.mironov.smuggler.LocalAdapter
 import io.mironov.smuggler.TypeAdapter
 import io.mironov.smuggler.library.Chat
 import io.mironov.smuggler.library.Message
@@ -664,6 +665,46 @@ class SmugglerTest {
       Global(
           integer = BigInteger(generator.nextInt().toString()),
           calendar = Calendar.getInstance().apply { timeInMillis = generator.nextLong() }
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithLocalAdapters() {
+    data class Timestamp(val millis: Long)
+    data class Date(val millis: Long)
+
+    @AdaptedType(Timestamp::class)
+    class TimestampTypeAdapter : TypeAdapter<Timestamp> {
+      override fun fromParcel(parcel: Parcel): Timestamp {
+        return Timestamp(parcel.readLong())
+      }
+
+      override fun toParcel(value: Timestamp, parcel: Parcel, flags: Int) {
+        parcel.writeLong(value.millis)
+      }
+    }
+
+    @AdaptedType(Date::class)
+    class DateTypeAdapter : TypeAdapter<Date> {
+      override fun fromParcel(parcel: Parcel): Date {
+        return Date(parcel.readLong())
+      }
+
+      override fun toParcel(value: Date, parcel: Parcel, flags: Int) {
+        parcel.writeLong(value.millis)
+      }
+    }
+
+    @LocalAdapter(TimestampTypeAdapter::class, DateTypeAdapter::class)
+    data class Local(
+        val timestamp: Timestamp,
+        val date: Date
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Local>() {
+      Local(
+          timestamp = Timestamp(generator.nextLong()),
+          date = Date(generator.nextLong())
       )
     }
   }

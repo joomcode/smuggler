@@ -11,7 +11,7 @@ annotation class AdaptedType(val value: KClass<*>)
 @Beta
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
-annotation class LocalAdapter(val value: Array<KClass<out TypeAdapter<*>>>)
+annotation class LocalAdapter(vararg val value: KClass<out TypeAdapter<*>>)
 
 @Beta
 @Retention(AnnotationRetention.RUNTIME)
