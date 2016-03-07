@@ -52,7 +52,7 @@ internal class ValueAdapterFactory private constructor(
       val adapters = findTypeAdapterClasses(registry).map { registry.resolve(it) }
       val global = adapters.filter { it.getAnnotation<GlobalAdapter>() != null }
 
-      return ValueAdapterFactory(registry, ADAPTERS + global.associateBy(ClassSpec::type) {
+      return ValueAdapterFactory(registry, ADAPTERS + global.associate {
         createAdaptedValueAdapter(it, registry)
       })
     }
@@ -63,7 +63,7 @@ internal class ValueAdapterFactory private constructor(
       }
     }
 
-    private fun createAdaptedValueAdapter(spec: ClassSpec, registry: ClassRegistry): ValueAdapter {
+    private fun createAdaptedValueAdapter(spec: ClassSpec, registry: ClassRegistry): Pair<Type, ValueAdapter> {
       val constructor = spec.getConstructor()
       val adapted = spec.getAnnotation<AdaptedType>()
 
@@ -83,7 +83,7 @@ internal class ValueAdapterFactory private constructor(
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have @AdaptedType annotation")
       }
 
-      return AdaptedValueAdapter(spec.type, adapted.value())
+      return adapted.value() to AdaptedValueAdapter(spec.type, adapted.value())
     }
   }
 
