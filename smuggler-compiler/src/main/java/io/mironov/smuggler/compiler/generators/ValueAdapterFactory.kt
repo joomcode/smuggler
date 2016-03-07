@@ -88,7 +88,7 @@ internal class ValueAdapterFactory private constructor(
         }
 
         if (Flags.CLASS_KIND.get(clazz.flags) == ProtoBuf.Class.Kind.OBJECT) {
-          return adapted.value() to AdaptedWithObjectValueAdapter(spec.type, adapted.value())
+          return adapted.value() to AssistedValueAdapter.fromObject(spec.type, adapted.value())
         }
       }
 
@@ -104,7 +104,7 @@ internal class ValueAdapterFactory private constructor(
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public visibility")
       }
 
-      return adapted.value() to AdaptedWithClassValueAdapter(spec.type, adapted.value())
+      return adapted.value() to AssistedValueAdapter.fromClass(spec.type, adapted.value())
     }
   }
 

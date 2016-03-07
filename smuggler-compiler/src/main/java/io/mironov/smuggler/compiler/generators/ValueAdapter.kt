@@ -563,52 +563,47 @@ internal class MapValueAdapter(
   private fun GeneratorAdapter.writeValue(context: ValueContext) = value.toParcel(this, context)
 }
 
-internal class AdaptedWithClassValueAdapter(
-    private val adapterType: Type,
-    private val elementType: Type
+internal class AssistedValueAdapter(
+    private val assistant: Assistant,
+    private val element: Type
 ) : OptionalValueAdapter() {
-  private companion object {
+  companion object {
     private val METHOD_TO_PARCEL = Methods.get("toParcel", Types.VOID, Types.OBJECT, Types.ANDROID_PARCEL, Types.INT)
     private val METHOD_FROM_PARCEL = Methods.get("fromParcel", Types.OBJECT, Types.ANDROID_PARCEL)
+
+    fun fromObject(assistant: Type, element: Type): ValueAdapter {
+      return AssistedValueAdapter(Assistant.Object(assistant), element)
+    }
+
+    fun fromClass(assistant: Type, element: Type): ValueAdapter {
+      return AssistedValueAdapter(Assistant.Class(assistant), element)
+    }
+  }
+
+  sealed class Assistant {
+    class Class(val type: Type) : Assistant()
+    class Object(val type: Type) : Assistant()
   }
 
   override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
-    adapter.newInstance(adapterType, Methods.getConstructor())
+    adapter.loadAssistant(assistant)
     adapter.loadLocal(context.parcel())
     adapter.invokeInterface(Types.SMUGGLER_ADAPTER, METHOD_FROM_PARCEL)
-    adapter.checkCast(elementType)
+    adapter.checkCast(element)
   }
 
   override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
-    adapter.newInstance(adapterType, Methods.getConstructor())
+    adapter.loadAssistant(assistant)
     adapter.loadLocal(context.value())
     adapter.loadLocal(context.parcel())
     adapter.loadLocal(context.flags())
     adapter.invokeInterface(Types.SMUGGLER_ADAPTER, METHOD_TO_PARCEL)
   }
-}
 
-internal class AdaptedWithObjectValueAdapter(
-    private val adapterType: Type,
-    private val elementType: Type
-) : OptionalValueAdapter() {
-  private companion object {
-    private val METHOD_TO_PARCEL = Methods.get("toParcel", Types.VOID, Types.OBJECT, Types.ANDROID_PARCEL, Types.INT)
-    private val METHOD_FROM_PARCEL = Methods.get("fromParcel", Types.OBJECT, Types.ANDROID_PARCEL)
-  }
-
-  override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
-    adapter.getStatic(adapterType, "INSTANCE", adapterType)
-    adapter.loadLocal(context.parcel())
-    adapter.invokeInterface(Types.SMUGGLER_ADAPTER, METHOD_FROM_PARCEL)
-    adapter.checkCast(elementType)
-  }
-
-  override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
-    adapter.getStatic(adapterType, "INSTANCE", adapterType)
-    adapter.loadLocal(context.value())
-    adapter.loadLocal(context.parcel())
-    adapter.loadLocal(context.flags())
-    adapter.invokeInterface(Types.SMUGGLER_ADAPTER, METHOD_TO_PARCEL)
+  private fun GeneratorAdapter.loadAssistant(assistant: Assistant) {
+    when (assistant) {
+      is Assistant.Class -> newInstance(assistant.type, Methods.getConstructor())
+      is Assistant.Object -> getStatic(assistant.type, "INSTANCE", assistant.type)
+    }
   }
 }
