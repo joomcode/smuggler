@@ -65,12 +65,11 @@ internal class ValueAdapterFactory private constructor(
     }
 
     fun from(factory: ValueAdapterFactory, spec: AutoParcelableClassSpec): ValueAdapterFactory {
-      val registry = factory.registry
       val locals = spec.clazz.getAnnotation<LocalAdapter>()
       val types = locals?.value().orEmpty()
 
-      return ValueAdapterFactory(registry, factory.adapters + types.associate {
-        createAssistedValueAdapter(registry.resolve(it), registry)
+      return ValueAdapterFactory(factory.registry, factory.adapters + types.associate {
+        createAssistedValueAdapter(factory.registry.resolve(it), factory.registry)
       })
     }
 
@@ -83,15 +82,11 @@ internal class ValueAdapterFactory private constructor(
     private fun createAssistedValueAdapter(spec: ClassSpec, registry: ClassRegistry): Pair<Type, ValueAdapter> {
       val constructor = spec.getConstructor()
 
-      val adapted = spec.getAnnotation<AdaptedType>()
+      val adapted = createAssistedTypeForTypeAdapter(spec, registry)
       val metadata = spec.getAnnotation<Metadata>()
 
       if (!registry.isSubclassOf(spec.type, Types.SMUGGLER_ADAPTER)) {
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must implement TypeAdapter interface")
-      }
-
-      if (adapted == null) {
-        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have @AdaptedType annotation")
       }
 
       if (metadata != null) {
@@ -103,7 +98,7 @@ internal class ValueAdapterFactory private constructor(
         }
 
         if (Flags.CLASS_KIND.get(clazz.flags) == ProtoBuf.Class.Kind.OBJECT) {
-          return adapted.value() to AssistedValueAdapter.fromObject(spec.type, adapted.value())
+          return adapted to AssistedValueAdapter.fromObject(spec.type, adapted)
         }
       }
 
@@ -119,7 +114,13 @@ internal class ValueAdapterFactory private constructor(
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public visibility")
       }
 
-      return adapted.value() to AssistedValueAdapter.fromClass(spec.type, adapted.value())
+      return adapted to AssistedValueAdapter.fromClass(spec.type, adapted)
+    }
+
+    private fun createAssistedTypeForTypeAdapter(spec: ClassSpec, registry: ClassRegistry): Type {
+      return spec.getAnnotation<AdaptedType>()?.value() ?: run {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have @AdaptedType annotation")
+      }
     }
   }
 
