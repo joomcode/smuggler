@@ -657,13 +657,17 @@ class SmugglerTest {
   @Test fun shouldWorkWithGlobalAdapters() {
     data class Global(
         val integer: BigInteger,
-        val calendar: Calendar
+        val calendar: Calendar,
+        val integers: List<BigInteger>,
+        val calendars: List<Calendar>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Global>() {
       Global(
           integer = BigInteger(generator.nextInt().toString()),
-          calendar = Calendar.getInstance().apply { timeInMillis = generator.nextLong() }
+          calendar = Calendar.getInstance().apply { timeInMillis = generator.nextLong() },
+          integers = generator.nextList { BigInteger(generator.nextInt().toString()) },
+          calendars = generator.nextList { Calendar.getInstance().apply { timeInMillis = generator.nextLong() } }
       )
     }
   }
