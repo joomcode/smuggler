@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.support.test.runner.AndroidJUnit4
 import android.util.SparseArray
 import android.util.SparseBooleanArray
+import io.mironov.smuggler.AdaptedType
 import io.mironov.smuggler.AutoParcelable
 import io.mironov.smuggler.GlobalAdapter
 import io.mironov.smuggler.TypeAdapter
@@ -654,6 +655,7 @@ class SmugglerTest {
   }
 
   @GlobalAdapter
+  @AdaptedType(BigInteger::class)
   class BigIntegerTypeAdapter : TypeAdapter<BigInteger> {
     override fun fromParcel(parcel: Parcel): BigInteger {
       return BigInteger(parcel.createByteArray())
@@ -665,6 +667,7 @@ class SmugglerTest {
   }
 
   @GlobalAdapter
+  @AdaptedType(Calendar::class)
   class CalendarTypeAdapter : TypeAdapter<Calendar> {
     override fun fromParcel(parcel: Parcel): Calendar {
       return Calendar.getInstance().apply {

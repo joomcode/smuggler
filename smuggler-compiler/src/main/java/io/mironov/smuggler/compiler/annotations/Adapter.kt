@@ -1,16 +1,16 @@
 package io.mironov.smuggler.compiler.annotations
 
-import kotlin.reflect.KClass
+import org.objectweb.asm.Type
 
 @AnnotationDelegate("io.mironov.smuggler.GlobalAdapter")
 interface GlobalAdapter
 
 @AnnotationDelegate("io.mironov.smuggler.ClassAdapter")
 interface ClassAdapter {
-  fun value(): Array<KClass<*>>
+  fun value(): Array<Type>
 }
 
 @AnnotationDelegate("io.mironov.smuggler.AdaptedType")
 interface AdaptedType {
-  fun value(): KClass<*>
+  fun value(): Type
 }

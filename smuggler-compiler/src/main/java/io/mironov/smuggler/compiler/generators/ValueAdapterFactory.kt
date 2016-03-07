@@ -3,6 +3,7 @@ package io.mironov.smuggler.compiler.generators
 import io.mironov.smuggler.compiler.ClassRegistry
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.InvalidTypeAdapterException
+import io.mironov.smuggler.compiler.annotations.AdaptedType
 import io.mironov.smuggler.compiler.annotations.GlobalAdapter
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.isAbstract
@@ -52,7 +53,7 @@ internal class ValueAdapterFactory private constructor(
       val global = adapters.filter { it.getAnnotation<GlobalAdapter>() != null }
 
       return ValueAdapterFactory(registry, ADAPTERS + global.associateBy(ClassSpec::type) {
-        createValueAdapterFrom(it, registry)
+        createAdaptedValueAdapter(it, registry)
       })
     }
 
@@ -62,8 +63,9 @@ internal class ValueAdapterFactory private constructor(
       }
     }
 
-    private fun createValueAdapterFrom(spec: ClassSpec, registry: ClassRegistry): ValueAdapter {
+    private fun createAdaptedValueAdapter(spec: ClassSpec, registry: ClassRegistry): ValueAdapter {
       val constructor = spec.getConstructor()
+      val adapted = spec.getAnnotation<AdaptedType>()
 
       if (constructor == null || !constructor.isPublic) {
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public no args constructor")
@@ -77,7 +79,11 @@ internal class ValueAdapterFactory private constructor(
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public visibility")
       }
 
-      throw UnsupportedOperationException()
+      if (adapted == null) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have @AdaptedType annotation")
+      }
+
+      return AdaptedValueAdapter(spec.type, adapted.value())
     }
   }
 
