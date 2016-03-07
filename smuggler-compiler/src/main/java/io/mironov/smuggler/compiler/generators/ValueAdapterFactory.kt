@@ -82,7 +82,7 @@ internal class ValueAdapterFactory private constructor(
     private fun createAssistedValueAdapter(spec: ClassSpec, registry: ClassRegistry): Pair<Type, ValueAdapter> {
       val constructor = spec.getConstructor()
 
-      val adapted = createAssistedTypeForTypeAdapter(spec, registry)
+      val assisted = createAssistedTypeForTypeAdapter(spec, registry)
       val metadata = spec.getAnnotation<Metadata>()
 
       if (!registry.isSubclassOf(spec.type, Types.SMUGGLER_ADAPTER)) {
@@ -98,7 +98,7 @@ internal class ValueAdapterFactory private constructor(
         }
 
         if (Flags.CLASS_KIND.get(clazz.flags) == ProtoBuf.Class.Kind.OBJECT) {
-          return adapted to AssistedValueAdapter.fromObject(spec.type, adapted)
+          return assisted to AssistedValueAdapter.fromObject(spec.type, assisted)
         }
       }
 
@@ -114,7 +114,7 @@ internal class ValueAdapterFactory private constructor(
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public visibility")
       }
 
-      return adapted to AssistedValueAdapter.fromClass(spec.type, adapted)
+      return assisted to AssistedValueAdapter.fromClass(spec.type, assisted)
     }
 
     @Suppress("IfNullToElvis")
