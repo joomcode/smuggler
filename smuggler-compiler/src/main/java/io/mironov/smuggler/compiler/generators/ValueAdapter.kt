@@ -248,7 +248,7 @@ internal object ParcelableValueAdapter : ValueAdapter {
 }
 
 internal class ArrayPropertyAdapter(
-    private val delegate: ValueAdapter
+    private val element: ValueAdapter
 ) : OptionalValueAdapter() {
   final override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val index = adapter.newLocal(Types.INT)
@@ -343,8 +343,8 @@ internal class ArrayPropertyAdapter(
     }
   }
 
-  private fun GeneratorAdapter.readElement(context: ValueContext) = delegate.fromParcel(this, context)
-  private fun GeneratorAdapter.writeElement(context: ValueContext) = delegate.toParcel(this, context)
+  private fun GeneratorAdapter.readElement(context: ValueContext) = element.fromParcel(this, context)
+  private fun GeneratorAdapter.writeElement(context: ValueContext) = element.toParcel(this, context)
 }
 
 internal class SparseArrayValueAdapter(
