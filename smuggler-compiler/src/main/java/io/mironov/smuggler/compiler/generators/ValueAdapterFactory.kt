@@ -5,6 +5,7 @@ import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.InvalidTypeAdapterException
 import io.mironov.smuggler.compiler.annotations.AdaptedType
 import io.mironov.smuggler.compiler.annotations.GlobalAdapter
+import io.mironov.smuggler.compiler.annotations.LocalAdapter
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
@@ -64,7 +65,13 @@ internal class ValueAdapterFactory private constructor(
     }
 
     fun from(factory: ValueAdapterFactory, spec: AutoParcelableClassSpec): ValueAdapterFactory {
-      return factory
+      val registry = factory.registry
+      val locals = spec.clazz.getAnnotation<LocalAdapter>()
+      val types = locals?.value().orEmpty()
+
+      return ValueAdapterFactory(registry, factory.adapters + types.associate {
+        createAssistedValueAdapter(registry.resolve(it), registry)
+      })
     }
 
     private fun findTypeAdapterClasses(registry: ClassRegistry): Collection<ClassReference> {
