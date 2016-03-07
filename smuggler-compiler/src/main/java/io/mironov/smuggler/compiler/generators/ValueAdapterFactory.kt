@@ -5,6 +5,9 @@ import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.InvalidTypeAdapterException
 import io.mironov.smuggler.compiler.annotations.AdaptedType
 import io.mironov.smuggler.compiler.annotations.GlobalAdapter
+import io.mironov.smuggler.compiler.annotations.Metadata
+import io.mironov.smuggler.compiler.annotations.data
+import io.mironov.smuggler.compiler.annotations.strings
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.isAbstract
 import io.mironov.smuggler.compiler.common.isInterface
@@ -16,6 +19,9 @@ import io.mironov.smuggler.compiler.reflect.ClassSpec
 import io.mironov.smuggler.compiler.signature.GenericType
 import org.objectweb.asm.Type
 import java.util.HashMap
+import kotlin.reflect.jvm.internal.impl.serialization.Flags
+import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
+import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
 
 internal class ValueAdapterFactory private constructor(
     private val registry: ClassRegistry,
@@ -65,7 +71,22 @@ internal class ValueAdapterFactory private constructor(
 
     private fun createAdaptedValueAdapter(spec: ClassSpec, registry: ClassRegistry): Pair<Type, ValueAdapter> {
       val constructor = spec.getConstructor()
+
       val adapted = spec.getAnnotation<AdaptedType>()
+      val metadata = spec.getAnnotation<Metadata>()
+
+      if (adapted == null) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have @AdaptedType annotation")
+      }
+
+      if (metadata != null) {
+        val proto = JvmProtoBufUtil.readClassDataFrom(metadata.data, metadata.strings)
+        val clazz = proto.classProto
+
+        if (Flags.CLASS_KIND.get(clazz.flags) == ProtoBuf.Class.Kind.OBJECT) {
+          return adapted.value() to AdaptedWithObjectValueAdapter(spec.type, adapted.value())
+        }
+      }
 
       if (constructor == null || !constructor.isPublic) {
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public no args constructor")
@@ -77,10 +98,6 @@ internal class ValueAdapterFactory private constructor(
 
       if (!spec.isPublic) {
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public visibility")
-      }
-
-      if (adapted == null) {
-        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have @AdaptedType annotation")
       }
 
       return adapted.value() to AdaptedWithClassValueAdapter(spec.type, adapted.value())

@@ -682,7 +682,7 @@ class SmugglerTest {
 
   @GlobalAdapter
   @AdaptedType(Calendar::class)
-  class CalendarTypeAdapter : TypeAdapter<Calendar> {
+  object CalendarTypeAdapter : TypeAdapter<Calendar> {
     override fun fromParcel(parcel: Parcel): Calendar {
       return Calendar.getInstance().apply {
         timeInMillis = parcel.readLong()
