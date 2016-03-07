@@ -654,6 +654,20 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithGlobalAdapters() {
+    data class Global(
+        val integer: BigInteger,
+        val calendar: Calendar
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Global>() {
+      Global(
+          integer = BigInteger(generator.nextInt().toString()),
+          calendar = Calendar.getInstance().apply { timeInMillis = generator.nextLong() }
+      )
+    }
+  }
+
   @GlobalAdapter
   @AdaptedType(BigInteger::class)
   class BigIntegerTypeAdapter : TypeAdapter<BigInteger> {
