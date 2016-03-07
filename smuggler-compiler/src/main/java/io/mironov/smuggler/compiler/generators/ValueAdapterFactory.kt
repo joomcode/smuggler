@@ -83,7 +83,7 @@ internal class ValueAdapterFactory private constructor(
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have @AdaptedType annotation")
       }
 
-      return adapted.value() to AdaptedValueAdapter(spec.type, adapted.value())
+      return adapted.value() to AdaptedWithClassValueAdapter(spec.type, adapted.value())
     }
   }
 

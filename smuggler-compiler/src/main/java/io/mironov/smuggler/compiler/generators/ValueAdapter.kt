@@ -563,7 +563,7 @@ internal class MapValueAdapter(
   private fun GeneratorAdapter.writeValue(context: ValueContext) = value.toParcel(this, context)
 }
 
-internal class AdaptedValueAdapter(
+internal class AdaptedWithClassValueAdapter(
     private val adapterType: Type,
     private val elementType: Type
 ) : OptionalValueAdapter() {
