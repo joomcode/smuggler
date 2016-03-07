@@ -20,53 +20,34 @@ data class Chat(
 ```
 
 # Project Setup
-### Add JCenter Repository
-Make sure you have `jcenter()` repository in your root `build.gradle`:
 ```gradle
 buildscript {
   repositories {
-    ...
+    mavenCentral()
     jcenter()
   }
-}
-
-allprojects {
-  buildscript {
-    repositories {
-      ...
-      jcenter()
-    }
-  }
-
-  repositories {
-    ...
-    jcenter()
-  }
-}
-```
-### Add Smuggler plugin
-```gradle
-buildscript {
+    
   dependencies {
   	classpath "com.android.tools.build:gradle:1.5.0"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0"
-    classpath "io.mironov.smuggler:smuggler-plugin:0.10.0"
+    classpath "io.mironov.smuggler:smuggler-plugin:0.11.0"
   }
 }
-```
-**Important note #1:** Only android gradle plugin 1.5.0 and up is supported.
 
-**Important note #2:** In case you are using android gradle plugin 2.0.0, you have to use an experimental version of smuggler plugin: `io.mironov.smuggler:smuggler-plugin-experimental:0.10.0`
+repositories {
+  mavenCentral()
+  jcenter()
+}
 
-**Important note #3:** In case you have a mutli-module project and want to use `AutoParceable`, you have to add `smuggler-plugin` to each module.
-### Apply Smuggler plugin
-```gradle
 apply plugin: "com.android.application"
 apply plugin: "io.mironov.smuggler"
 ```
-**Important note #1:** Smuggler plugin must be applied **after** android plugin.
-
-**Improtant note #2:** Experimental plugin has the same id, so you don't need to add `-experimental` suffix.
+Some **important** notes:
+- Only android gradle plugin 1.5.0 and up is supported.
+- In case you are using android gradle plugin 2.0.0, you have to use an experimental version of smuggler plugin: `io.mironov.smuggler:smuggler-plugin-experimental:0.11.0`
+- In case you have a mutli-module project and want to use `AutoParceable`, you have to add `smuggler-plugin` to each module.
+- Smuggler plugin must be applied **after** android plugin.
+- Experimental plugin has the same id, so you don't need to add `-experimental` suffix when applying plugin.
 
 # Supported types
 - Primitive types: `boolean`, `byte`, `char`, `double`, `float`, `int`, `long`, `short`
@@ -78,11 +59,43 @@ apply plugin: "io.mironov.smuggler"
 - `Arrays` of any supported type, including primitive arrays and multidimensional arrays like: `Array<Array<Array<User>>`
 - `Sets`, `Lists` and `Maps` of any supported type, including primitive types and complex types like: `Map<List<Message>, List<Array<Set<User>>>`
 
+# Custom types
+- Serialization and deserialization of custom types are supported via `TypeAdapter`'s:
+  ```kotlin
+  object BigIntegerTypeAdapter : TypeAdapter<BigInteger> {
+    override fun fromParcel(parcel: Parcel): BigInteger {
+      return BigInteger(parcel.createByteArray())
+    }
+  
+    override fun toParcel(value: BigInteger, parcel: Parcel, flags: Int) {
+      parcel.writeByteArray(value.toByteArray())
+    }
+  }
+  ```
+- Project-level `TypeAdapter` can be registered using `@GlobalAdapter` annotation:
+
+  ```kotlin
+  @GlobalAdapter
+  object BigIntegerTypeAdapter : TypeAdapter<BigInteger> {
+    ...
+  }
+  ```
+- Class-level `TypeAdapter` can be registered using `@LocalAdapter` annotation:
+
+  ```kotlin
+  @LocalAdapter(BigIntegerTypeAdapter::class, CalendarTypeAdapter::class)
+  data class Local(
+      val integer: BigInteger,
+      val calendar: Calendar
+  ) : AutoParcelable
+  ```
+- Custom `TypeAdapter` can be defined both as `class` or `object`
+- `TypeAdapter` defined as `class` must have a public no-args constructor
+
 # Known limitations
 - Only data classes are supported
 - Data classes with type parameters aren't supported at the moment
 - Lists, Maps and Arrays with bounded type parameters aren't supported at the moment
-- Custom type adapters aren't supported at the moment
 
 # What does "Smuggler" mean?
 A smuggler was an individual who dealt with the secret exchanged shipment of goods to block restrictions or tax fees. The items shipped were often considered contraband, and highly illegal. Notable smugglers included Han Solo, Chewbacca, and Lando Calrissian. © [http://starwars.wikia.com](http://starwars.wikia.com/wiki/Smuggler)
