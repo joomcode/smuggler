@@ -51,23 +51,21 @@ internal data class ClassSpec(
   }
 
   fun getConstructor(vararg args: Type): MethodSpec? {
-    return getDeclaredMethod("<init>", *args)
+    return getDeclaredMethod("<init>", Types.VOID, *args)
   }
 
-  fun getDeclaredMethod(name: String, descriptor: String): MethodSpec? {
-    return methods.firstOrNull {
-      it.name == name && it.type.descriptor == descriptor
-    }
+  fun getDeclaredMethod(name: String): MethodSpec? {
+    return methods.singleOrNull { it.name == name }
   }
 
-  fun getDeclaredMethod(name: String, vararg args: Type): MethodSpec? {
-    return methods.firstOrNull {
-      it.name == name && Arrays.equals(it.arguments, args)
+  fun getDeclaredMethod(name: String, returns: Type, vararg args: Type): MethodSpec? {
+    return methods.singleOrNull {
+      it.name == name && it.returns == returns && Arrays.equals(it.arguments, args)
     }
   }
 
   fun getDeclaredField(name: String): FieldSpec? {
-    return fields.firstOrNull {
+    return fields.singleOrNull {
       it.name == name
     }
   }
