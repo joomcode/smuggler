@@ -455,6 +455,7 @@ internal class CollectionValueAdapter(
 }
 
 internal class MapValueAdapter(
+    private val collection: Type,
     private val implementation: Type,
     private val key: ValueAdapter,
     private val value: ValueAdapter
@@ -467,7 +468,7 @@ internal class MapValueAdapter(
 
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
-    val elements = adapter.newLocal(Types.MAP)
+    val elements = adapter.newLocal(collection)
 
     val begin = adapter.newLabel()
     val body = adapter.newLabel()
