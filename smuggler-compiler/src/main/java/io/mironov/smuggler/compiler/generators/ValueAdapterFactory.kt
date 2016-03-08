@@ -161,60 +161,26 @@ internal class ValueAdapterFactory private constructor(
     return adapters[generic.asAsmType()] ?: run {
       val type = generic.asAsmType()
 
+      when (type) {
+        Types.MAP -> return createMap(Types.MAP, Types.LINKED_MAP, spec, property, generic)
+        Types.LINKED_MAP -> return createMap(Types.LINKED_MAP, Types.LINKED_MAP, spec, property, generic)
+        Types.HASH_MAP -> return createMap(Types.HASH_MAP, Types.HASH_MAP, spec, property, generic)
+        Types.SORTED_MAP -> return createMap(Types.SORTED_MAP, Types.TREE_MAP, spec, property, generic)
+        Types.TREE_MAP -> return createMap(Types.TREE_MAP, Types.TREE_MAP, spec, property, generic)
+
+        Types.SET -> return createCollection(Types.SET, Types.LINKED_SET, spec, property, generic)
+        Types.LINKED_SET -> return createCollection(Types.LINKED_SET, Types.LINKED_SET, spec, property, generic)
+        Types.HASH_SET -> return createCollection(Types.HASH_SET, Types.HASH_SET, spec, property, generic)
+        Types.SORTED_SET -> return createCollection(Types.SORTED_SET, Types.TREE_SET, spec, property, generic)
+        Types.TREE_SET -> createCollection(Types.TREE_SET, Types.TREE_SET, spec, property, generic)
+
+        Types.LIST -> return createCollection(Types.LIST, Types.ARRAY_LIST, spec, property, generic)
+        Types.LINKED_LIST -> return createCollection(Types.LINKED_LIST, Types.LINKED_LIST, spec, property, generic)
+        Types.ARRAY_LIST -> return createCollection(Types.ARRAY_LIST, Types.ARRAY_LIST, spec, property, generic)
+      }
+
       if (registry.isSubclassOf(type, Types.ENUM)) {
         return EnumValueAdapter
-      }
-
-      if (type == Types.MAP) {
-        return createMap(Types.MAP, Types.LINKED_MAP, spec, property, generic)
-      }
-
-      if (type == Types.LINKED_MAP) {
-        return createMap(Types.LINKED_MAP, Types.LINKED_MAP, spec, property, generic)
-      }
-
-      if (type == Types.HASH_MAP) {
-        return createMap(Types.HASH_MAP, Types.HASH_MAP, spec, property, generic)
-      }
-
-      if (type == Types.SORTED_MAP) {
-        return createMap(Types.SORTED_MAP, Types.TREE_MAP, spec, property, generic)
-      }
-
-      if (type == Types.TREE_MAP) {
-        return createMap(Types.TREE_MAP, Types.TREE_MAP, spec, property, generic)
-      }
-
-      if (type == Types.SET) {
-        return createCollection(Types.SET, Types.LINKED_SET, spec, property, generic)
-      }
-
-      if (type == Types.LINKED_SET) {
-        return createCollection(Types.LINKED_SET, Types.LINKED_SET, spec, property, generic)
-      }
-
-      if (type == Types.HASH_SET) {
-        return createCollection(Types.HASH_SET, Types.HASH_SET, spec, property, generic)
-      }
-
-      if (type == Types.SORTED_SET) {
-        return createCollection(Types.SORTED_SET, Types.TREE_SET, spec, property, generic)
-      }
-
-      if (type == Types.TREE_SET) {
-        return createCollection(Types.TREE_SET, Types.TREE_SET, spec, property, generic)
-      }
-
-      if (type == Types.LIST) {
-        return createCollection(Types.LIST, Types.ARRAY_LIST, spec, property, generic)
-      }
-
-      if (type == Types.ARRAY_LIST) {
-        return createCollection(Types.ARRAY_LIST, Types.ARRAY_LIST, spec, property, generic)
-      }
-
-      if (type == Types.LINKED_LIST) {
-        return createCollection(Types.LINKED_LIST, Types.LINKED_LIST, spec, property, generic)
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
