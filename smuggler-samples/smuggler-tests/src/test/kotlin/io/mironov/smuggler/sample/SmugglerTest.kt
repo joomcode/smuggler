@@ -18,6 +18,10 @@ import java.io.Serializable
 import java.math.BigInteger
 import java.util.Calendar
 import java.util.Date
+import java.util.HashMap
+import java.util.LinkedHashMap
+import java.util.SortedMap
+import java.util.TreeMap
 
 @Suppress("EqualsOrHashCode")
 @RunWith(AndroidJUnit4::class)
@@ -594,6 +598,26 @@ class SmugglerTest {
                 }
               }
           )
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithMapSubclasses() {
+    data class Maps(
+        val base: Map<String, String>,
+        val hash: HashMap<String, String>,
+        val linked: LinkedHashMap<String, String>,
+        val sorted: SortedMap<String, String>,
+        val tree: TreeMap<String, String>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Maps>() {
+      Maps(
+          base = generator.nextMap({ LinkedHashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
+          hash = generator.nextMap({ HashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
+          linked = generator.nextMap({ LinkedHashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
+          sorted = generator.nextMap({ TreeMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
+          tree = generator.nextMap({ TreeMap<String, String>() }, { generator.nextString() }, { generator.nextString() })
       )
     }
   }
