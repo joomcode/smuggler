@@ -185,12 +185,28 @@ internal class ValueAdapterFactory private constructor(
         return createMap(Types.TREE_MAP, spec, property, generic)
       }
 
-      if (type == Types.LIST) {
-        return createCollection(Types.LIST, Types.ARRAY_LIST, spec, property, generic)
-      }
-
       if (type == Types.SET) {
         return createCollection(Types.SET, Types.LINKED_SET, spec, property, generic)
+      }
+
+      if (type == Types.LINKED_SET) {
+        return createCollection(Types.SET, Types.LINKED_SET, spec, property, generic)
+      }
+
+      if (type == Types.HASH_SET) {
+        return createCollection(Types.SET, Types.HASH_SET, spec, property, generic)
+      }
+
+      if (type == Types.SORTED_SET) {
+        return createCollection(Types.SET, Types.TREE_SET, spec, property, generic)
+      }
+
+      if (type == Types.TREE_SET) {
+        return createCollection(Types.SET, Types.TREE_SET, spec, property, generic)
+      }
+
+      if (type == Types.LIST) {
+        return createCollection(Types.LIST, Types.ARRAY_LIST, spec, property, generic)
       }
 
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
