@@ -29,6 +29,7 @@ internal object Types {
 
   val ITERATOR = getType<java.util.Iterator<*>>()
   val COLLECTION = getType<java.util.Collection<*>>()
+  val ENTRY = getType<java.util.Map.Entry<*, *>>()
 
   val LIST = getType<java.util.List<*>>()
   val ARRAY_LIST = getType<java.util.ArrayList<*>>()
@@ -40,9 +41,9 @@ internal object Types {
   val TREE_SET = getType<java.util.TreeSet<*>>()
 
   val MAP = getType<java.util.Map<*, *>>()
-  val ENTRY = getType<java.util.Map.Entry<*, *>>()
   val HASH_MAP = getType<java.util.HashMap<*, *>>()
   val LINKED_MAP = getType<java.util.LinkedHashMap<*, *>>()
+  val SORTED_MAP = getType<java.util.SortedMap<*, *>>()
   val TREE_MAP = getType<java.util.TreeMap<*, *>>()
 
   val BYTE = Type.BYTE_TYPE

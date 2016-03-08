@@ -455,6 +455,7 @@ internal class CollectionValueAdapter(
 }
 
 internal class MapValueAdapter(
+    private val implementation: Type,
     private val key: ValueAdapter,
     private val value: ValueAdapter
 ) : OptionalValueAdapter() {
@@ -476,7 +477,7 @@ internal class MapValueAdapter(
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
     adapter.storeLocal(length)
 
-    adapter.newInstance(Types.LINKED_MAP, Methods.getConstructor())
+    adapter.newInstance(implementation, Methods.getConstructor())
     adapter.storeLocal(elements)
 
     adapter.push(0)

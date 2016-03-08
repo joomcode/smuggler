@@ -166,7 +166,23 @@ internal class ValueAdapterFactory private constructor(
       }
 
       if (type == Types.MAP) {
-        return createMap(spec, property, generic)
+        return createMap(Types.LINKED_MAP, spec, property, generic)
+      }
+
+      if (type == Types.LINKED_MAP) {
+        return createMap(Types.LINKED_MAP, spec, property, generic)
+      }
+
+      if (type == Types.HASH_MAP) {
+        return createMap(Types.HASH_MAP, spec, property, generic)
+      }
+
+      if (type == Types.SORTED_MAP) {
+        return createMap(Types.TREE_MAP, spec, property, generic)
+      }
+
+      if (type == Types.TREE_MAP) {
+        return createMap(Types.TREE_MAP, spec, property, generic)
       }
 
       if (type == Types.LIST) {
@@ -211,14 +227,14 @@ internal class ValueAdapterFactory private constructor(
     return CollectionValueAdapter(collection, implementation, adapters[0])
   }
 
-  private fun createMap(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+  private fun createMap(implementation: Type, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
     val adapters = createAdaptersForParameterizedType(spec, property, generic)
 
     if (adapters.size != 2) {
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly two type arguments", property.name)
     }
 
-    return MapValueAdapter(adapters[0], adapters[1])
+    return MapValueAdapter(implementation, adapters[0], adapters[1])
   }
 
   private fun createSparseArray(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
