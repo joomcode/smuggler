@@ -19,9 +19,13 @@ import java.math.BigInteger
 import java.util.Calendar
 import java.util.Date
 import java.util.HashMap
+import java.util.HashSet
 import java.util.LinkedHashMap
+import java.util.LinkedHashSet
 import java.util.SortedMap
+import java.util.SortedSet
 import java.util.TreeMap
+import java.util.TreeSet
 
 @Suppress("EqualsOrHashCode")
 @RunWith(AndroidJUnit4::class)
@@ -528,6 +532,26 @@ class SmugglerTest {
           three = generator.nextSet { generator.nextList { generator.nextBoolean() } },
           four = generator.nextArray { generator.nextSet { generator.nextBoolean() } },
           five = generator.nextList { generator.nextSet { generator.nextBoolean() } }
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithSetSubclasses() {
+    data class Sets(
+        val base: Set<String>,
+        val hash: HashSet<String>,
+        val linked: LinkedHashSet<String>,
+        val sorted: SortedSet<String>,
+        val tree: TreeSet<String>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Sets>() {
+      Sets(
+          base = generator.nextSet({ LinkedHashSet<String>() }, { generator.nextString() }),
+          hash = generator.nextSet({ HashSet<String>() }, { generator.nextString() }),
+          linked = generator.nextSet({ LinkedHashSet<String>() }, { generator.nextString() }),
+          sorted = generator.nextSet({ TreeSet<String>() }, { generator.nextString() }),
+          tree = generator.nextSet({ TreeSet<String>() }, { generator.nextString() })
       )
     }
   }
