@@ -38,6 +38,7 @@ internal object Types {
   val SET = getType<java.util.Set<*>>()
   val HASH_SET = getType<java.util.HashSet<*>>()
   val LINKED_SET = getType<java.util.LinkedHashSet<*>>()
+  val SORTED_SET = getType<java.util.SortedSet<*>>()
   val TREE_SET = getType<java.util.TreeSet<*>>()
 
   val MAP = getType<java.util.Map<*, *>>()
