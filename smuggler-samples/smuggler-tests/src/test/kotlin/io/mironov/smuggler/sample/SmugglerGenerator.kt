@@ -23,8 +23,11 @@ class SmugglerGenerator(private val seed: Long) {
   inline fun <reified T : Any> nextSet(factory: (Int) -> T) = createSet(factory)
   inline fun <reified T : Any> nextNullableSet(factory: (Int) -> T) = nextNullableValue { nextSet(factory) }
 
-  inline fun <reified K : Any, reified V : Any> nextMap(key: (Int) -> K, value: (Int) -> V) = createMap(key, value)
+  inline fun <reified K : Any, reified V : Any> nextMap(key: (Int) -> K, value: (Int) -> V) = createMap({ LinkedHashMap<K, V>() }, key, value)
   inline fun <reified K : Any, reified V : Any> nextNullableMap(key: (Int) -> K, value: (Int) -> V) = nextNullableValue { nextMap(key, value) }
+
+  inline fun <reified M : MutableMap<K, V>, reified K : Any, reified V : Any> nextMap(factory: (Int) -> M, key: (Int) -> K, value: (Int) -> V) = createMap(factory, key, value)
+  inline fun <reified M : MutableMap<K, V>, reified K : Any, reified V : Any> nextNullableMap(factory: (Int) -> M, key: (Int) -> K, value: (Int) -> V) = nextNullableValue { nextMap(key, value) }
 
   fun nextArraySize() = random.nextInt(MAX_ARRAY_SIZE)
   fun nextNullableProbability() = random.nextInt(3) == 0
@@ -114,8 +117,8 @@ class SmugglerGenerator(private val seed: Long) {
     }
   }
 
-  inline fun <reified K, reified V> createMap(key: (Int) -> K, value: (Int) -> V): Map<K, V> {
-    return LinkedHashMap<K, V>().apply {
+  inline fun <reified M : MutableMap<K, V>, reified K, reified V> createMap(factory: (Int) -> M, key: (Int) -> K, value: (Int) -> V): M {
+    return factory(0).apply {
       for (index in 0..nextArraySize() - 1) {
         put(key(index), value(index))
       }
