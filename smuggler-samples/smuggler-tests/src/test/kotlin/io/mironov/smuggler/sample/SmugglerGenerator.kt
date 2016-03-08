@@ -17,20 +17,23 @@ class SmugglerGenerator(private val seed: Long) {
   inline fun <reified T : Any> nextArray(factory: (Int) -> T) = Array(nextArraySize()) { factory(it) }
   inline fun <reified T : Any> nextNullableArray(factory: (Int) -> T) = nextNullableValue { nextArray(factory) }
 
-  inline fun <reified T : Any> nextList(factory: (Int) -> T) = createList(factory)
-  inline fun <reified T : Any> nextNullableList(factory: (Int) -> T) = nextNullableValue { nextList(factory) }
+  inline fun <reified T : Any> nextList(element: (Int) -> T): List<T> = createList({ ArrayList<T>() }, element)
+  inline fun <reified T : Any> nextNullableList(element: (Int) -> T): List<T>? = nextNullableValue { nextList(element) }
 
-  inline fun <reified T : Any> nextSet(element: (Int) -> T) = createSet({ LinkedHashSet<T>() }, element)
-  inline fun <reified T : Any> nextNullableSet(element: (Int) -> T) = nextNullableValue { nextSet(element) }
+  inline fun <reified T : Any> nextSet(element: (Int) -> T): Set<T> = createSet({ LinkedHashSet<T>() }, element)
+  inline fun <reified T : Any> nextNullableSet(element: (Int) -> T): Set<T>? = nextNullableValue { nextSet(element) }
 
-  inline fun <reified S : MutableSet<T>, reified T : Any> nextSet(factory: (Int) -> S, element: (Int) -> T) = createSet(factory, element)
-  inline fun <reified S : MutableSet<T>, reified T : Any> nextNullableSet(factory: (Int) -> S, element: (Int) -> T) = nextNullableValue { nextSet(factory, element) }
+  inline fun <reified K : Any, reified V : Any> nextMap(key: (Int) -> K, value: (Int) -> V): Map<K, V> = createMap({ LinkedHashMap<K, V>() }, key, value)
+  inline fun <reified K : Any, reified V : Any> nextNullableMap(key: (Int) -> K, value: (Int) -> V): Map<K, V>? = nextNullableValue { nextMap(key, value) }
 
-  inline fun <reified K : Any, reified V : Any> nextMap(key: (Int) -> K, value: (Int) -> V) = createMap({ LinkedHashMap<K, V>() }, key, value)
-  inline fun <reified K : Any, reified V : Any> nextNullableMap(key: (Int) -> K, value: (Int) -> V) = nextNullableValue { nextMap(key, value) }
+  inline fun <reified L : MutableList<T>, reified T : Any> nextList(factory: (Int) -> L, element: (Int) -> T): L = createList(factory, element)
+  inline fun <reified L : MutableList<T>, reified T : Any> nextNullableList(factory: (Int) -> L, element: (Int) -> T): L? = nextNullableValue { nextList(factory, element) }
 
-  inline fun <reified M : MutableMap<K, V>, reified K : Any, reified V : Any> nextMap(factory: (Int) -> M, key: (Int) -> K, value: (Int) -> V) = createMap(factory, key, value)
-  inline fun <reified M : MutableMap<K, V>, reified K : Any, reified V : Any> nextNullableMap(factory: (Int) -> M, key: (Int) -> K, value: (Int) -> V) = nextNullableValue { nextMap(factory, key, value) }
+  inline fun <reified M : MutableMap<K, V>, reified K : Any, reified V : Any> nextMap(factory: (Int) -> M, key: (Int) -> K, value: (Int) -> V): M = createMap(factory, key, value)
+  inline fun <reified M : MutableMap<K, V>, reified K : Any, reified V : Any> nextNullableMap(factory: (Int) -> M, key: (Int) -> K, value: (Int) -> V): M? = nextNullableValue { nextMap(factory, key, value) }
+
+  inline fun <reified S : MutableSet<T>, reified T : Any> nextSet(factory: (Int) -> S, element: (Int) -> T): S = createSet(factory, element)
+  inline fun <reified S : MutableSet<T>, reified T : Any> nextNullableSet(factory: (Int) -> S, element: (Int) -> T): S? = nextNullableValue { nextSet(factory, element) }
 
   fun nextArraySize() = random.nextInt(MAX_ARRAY_SIZE)
   fun nextNullableProbability() = random.nextInt(3) == 0
@@ -104,10 +107,10 @@ class SmugglerGenerator(private val seed: Long) {
   inline fun <reified T> nextSparseArrayArray(factory: (Int) -> T) = nextArray { createSparseArray(factory) }
   inline fun <reified T> nextNullableSparseArrayArray(factory: (Int) -> T) = nextNullableValue { nextSparseArrayArray(factory) }
 
-  inline fun <reified T> createList(factory: (Int) -> T): List<T> {
-    return ArrayList<T>().apply {
+  inline fun <reified L : MutableList<T>, reified T> createList(factory: (Int) -> L, element: (Int) -> T): L {
+    return factory(0).apply {
       for (index in 0..nextArraySize() - 1) {
-        add(factory(index))
+        add(element(index))
       }
     }
   }
