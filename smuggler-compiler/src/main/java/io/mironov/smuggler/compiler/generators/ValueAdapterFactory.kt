@@ -209,6 +209,14 @@ internal class ValueAdapterFactory private constructor(
         return createCollection(Types.LIST, Types.ARRAY_LIST, spec, property, generic)
       }
 
+      if (type == Types.ARRAY_LIST) {
+        return createCollection(Types.ARRAY_LIST, Types.ARRAY_LIST, spec, property, generic)
+      }
+
+      if (type == Types.LINKED_LIST) {
+        return createCollection(Types.LINKED_LIST, Types.LINKED_LIST, spec, property, generic)
+      }
+
       if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
         return createSparseArray(spec, property)
       }
