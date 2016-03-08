@@ -12,14 +12,16 @@ import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.isAbstract
 import io.mironov.smuggler.compiler.common.isInterface
 import io.mironov.smuggler.compiler.common.isPublic
+import io.mironov.smuggler.compiler.common.isSynthetic
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import io.mironov.smuggler.compiler.reflect.ClassReference
 import io.mironov.smuggler.compiler.reflect.ClassSpec
 import io.mironov.smuggler.compiler.signature.ClassSignatureMirror
 import io.mironov.smuggler.compiler.signature.GenericType
+import io.mironov.smuggler.compiler.signature.MethodSignatureMirror
 import org.objectweb.asm.Type
-import java.util.HashMap
+import java.util.Arrays
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
@@ -29,31 +31,31 @@ internal class ValueAdapterFactory private constructor(
     private val adapters: Map<Type, ValueAdapter>
 ) {
   companion object {
-    private val ADAPTERS = HashMap<Type, ValueAdapter>().apply {
-      put(Types.BOOLEAN, BooleanValueAdapter)
-      put(Types.BYTE, ByteValueAdapter)
-      put(Types.CHAR, CharValueAdapter)
-      put(Types.DOUBLE, DoubleValueAdapter)
-      put(Types.FLOAT, FloatValueAdapter)
-      put(Types.INT, IntValueAdapter)
-      put(Types.LONG, LongValueAdapter)
-      put(Types.SHORT, ShortValueAdapter)
+    private val ADAPTERS = hashMapOf(
+        Types.BOOLEAN to BooleanValueAdapter,
+        Types.BYTE to ByteValueAdapter,
+        Types.CHAR to CharValueAdapter,
+        Types.DOUBLE to DoubleValueAdapter,
+        Types.FLOAT to FloatValueAdapter,
+        Types.INT to IntValueAdapter,
+        Types.LONG to LongValueAdapter,
+        Types.SHORT to ShortValueAdapter,
 
-      put(Types.BOXED_BOOLEAN, BoxedBooleanValueAdapter)
-      put(Types.BOXED_BYTE, BoxedByteValueAdapter)
-      put(Types.BOXED_CHAR, BoxedCharValueAdapter)
-      put(Types.BOXED_DOUBLE, BoxedDoubleValueAdapter)
-      put(Types.BOXED_FLOAT, BoxedFloatValueAdapter)
-      put(Types.BOXED_INT, BoxedIntValueAdapter)
-      put(Types.BOXED_LONG, BoxedLongValueAdapter)
-      put(Types.BOXED_SHORT, BoxedShortValueAdapter)
+        Types.BOXED_BOOLEAN to BoxedBooleanValueAdapter,
+        Types.BOXED_BYTE to BoxedByteValueAdapter,
+        Types.BOXED_CHAR to BoxedCharValueAdapter,
+        Types.BOXED_DOUBLE to BoxedDoubleValueAdapter,
+        Types.BOXED_FLOAT to BoxedFloatValueAdapter,
+        Types.BOXED_INT to BoxedIntValueAdapter,
+        Types.BOXED_LONG to BoxedLongValueAdapter,
+        Types.BOXED_SHORT to BoxedShortValueAdapter,
 
-      put(Types.STRING, StringValueAdapter)
-      put(Types.DATE, DateValueAdapter)
+        Types.STRING to StringValueAdapter,
+        Types.DATE to DateValueAdapter,
 
-      put(Types.ANDROID_SPARSE_BOOLEAN_ARRAY, SparseBooleanArrayValueAdapter)
-      put(Types.ANDROID_BUNDLE, BundleValueAdapter)
-    }
+        Types.ANDROID_SPARSE_BOOLEAN_ARRAY to SparseBooleanArrayValueAdapter,
+        Types.ANDROID_BUNDLE to BundleValueAdapter
+    )
 
     fun from(registry: ClassRegistry): ValueAdapterFactory {
       val adapters = findTypeAdapterClasses(registry).map { registry.resolve(it) }
@@ -80,14 +82,21 @@ internal class ValueAdapterFactory private constructor(
     }
 
     private fun createAssistedValueAdapter(spec: ClassSpec, registry: ClassRegistry): Pair<Type, ValueAdapter> {
-      val constructor = spec.getConstructor()
-
-      val assisted = createAssistedTypeForTypeAdapter(spec, registry)
-      val metadata = spec.getAnnotation<Metadata>()
-
       if (!registry.isSubclassOf(spec.type, Types.SMUGGLER_ADAPTER)) {
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must implement TypeAdapter interface")
       }
+
+      if (!spec.isPublic) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public visibility")
+      }
+
+      if (spec.isAbstract) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be not abstract")
+      }
+
+      val constructor = spec.getConstructor()
+      val assisted = createAssistedTypeForTypeAdapter(spec, registry)
+      val metadata = spec.getAnnotation<Metadata>()
 
       if (metadata != null) {
         val proto = JvmProtoBufUtil.readClassDataFrom(metadata.data, metadata.strings)
@@ -106,50 +115,42 @@ internal class ValueAdapterFactory private constructor(
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public no args constructor")
       }
 
-      if (spec.isAbstract) {
-        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be not abstract")
-      }
-
-      if (!spec.isPublic) {
-        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public visibility")
-      }
-
       return assisted to AssistedValueAdapter.fromClass(spec.type, assisted)
     }
 
-    @Suppress("IfNullToElvis")
     private fun createAssistedTypeForTypeAdapter(spec: ClassSpec, registry: ClassRegistry): Type {
-      val signature = ClassSignatureMirror.read(spec.signature ?: run {
-        throw InvalidTypeAdapterException(spec.type, "Unable to extract signature from TypeAdapter")
-      })
+      val assisted = resolveAssistedType(spec.type, spec.type, registry)
 
-      if (!signature.typeParameters.isEmpty()) {
+      if (spec.signature != null && !ClassSignatureMirror.read(spec.signature).typeParameters.isEmpty()) {
         throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can't have any type parameters")
       }
 
-      val adapter = signature.interfaces.singleOrNull {
-        it.asAsmType() == Types.SMUGGLER_ADAPTER
+      if (assisted !is GenericType.RawType) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be parameterized with a raw type")
       }
 
-      if (adapter == null) {
-        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be a direct child of the TypeAdapter interface")
+      return assisted.type
+    }
+
+    private fun resolveAssistedType(adapter: Type, current: Type, registry: ClassRegistry): GenericType {
+      val spec = registry.resolve(current, false)
+      val method = spec.methods.singleOrNull {
+        !it.isSynthetic && it.name == "fromParcel" && Arrays.equals(it.arguments, arrayOf(Types.ANDROID_PARCEL))
       }
 
-      if (adapter !is GenericType.ParameterizedType) {
-        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must provide a type argument for TypeAdapter interface")
+      if (method != null && method.signature != null) {
+        return MethodSignatureMirror.read(method.signature).returnType
       }
 
-      if (adapter.typeArguments.size != 1) {
-        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must provide exactly one type argument for TypeAdapter interface")
+      if (method != null && method.signature == null) {
+        return GenericType.RawType(method.returns)
       }
 
-      val argument = adapter.typeArguments[0]
-
-      if (argument !is GenericType.RawType) {
-        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must parameterize TypeAdapter interface with a raw type")
+      if (spec.parent == Types.OBJECT) {
+        throw InvalidTypeAdapterException(adapter, "Unable to extract assisted type information")
       }
 
-      return argument.type
+      return resolveAssistedType(adapter, spec.parent, registry)
     }
   }
 
