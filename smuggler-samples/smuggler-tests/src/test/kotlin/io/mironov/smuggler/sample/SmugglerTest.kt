@@ -16,12 +16,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.Serializable
 import java.math.BigInteger
+import java.util.ArrayList
 import java.util.Calendar
 import java.util.Date
 import java.util.HashMap
 import java.util.HashSet
 import java.util.LinkedHashMap
 import java.util.LinkedHashSet
+import java.util.LinkedList
 import java.util.SortedMap
 import java.util.SortedSet
 import java.util.TreeMap
@@ -456,6 +458,22 @@ class SmugglerTest {
           booleans = generator.nextList { generator.nextBoolean() },
           strings = generator.nextList { generator.nextString() },
           longs = generator.nextList { generator.nextLong() }
+      )
+    }
+  }
+
+  @Test fun shouldWorkWithListSubclasses() {
+    data class Lists(
+        val base: List<String>,
+        val array: ArrayList<String>,
+        val linked: LinkedList<String>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Lists>() {
+      Lists(
+          base = generator.nextList { generator.nextString() },
+          array = generator.nextList({ ArrayList<String>() }, { generator.nextString() }),
+          linked = generator.nextList({ LinkedList<String>() }, { generator.nextString() })
       )
     }
   }
