@@ -33,12 +33,4 @@ internal object Methods {
   fun getStaticConstructor(): Method {
     return Method("<clinit>", Type.VOID_TYPE, emptyArray())
   }
-
-  fun asJavaDeclaration(spec: MethodSpec): String {
-    return "${spec.name}(${spec.arguments.map { it.className }.joinToString(", ")})"
-  }
-
-  fun equalsByJavaDeclaration(left: MethodSpec, right: MethodSpec): Boolean {
-    return left.name == right.name && left.type.descriptor == right.type.descriptor
-  }
 }
