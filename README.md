@@ -89,6 +89,18 @@ Some **important** notes:
       val calendar: Calendar
   ) : AutoParcelable
   ```
+- Defining `TypeAdapter` for a particular type automatically allows to use this type with `Lists`, `Maps`, `Sets` and `Arrays`:
+
+  ```kotlin
+  data class BigIntegerExample(
+      val single: BigInteger,
+      val array: Array<BigInteger>,
+      val multidimensional: Array<Array<BigInteger>>,
+      val list: List<BigInteger>,
+      val set: Set<BigInteger>,
+      val map: Map<String, BigInteger>
+  ) : AutoParcelable
+  ```
 - Custom `TypeAdapter` can be defined both as `class` or `object`
 - `TypeAdapter` defined as `class` must have a public no-args constructor
 
