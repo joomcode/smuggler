@@ -12,6 +12,18 @@ object SmugglerEquivalence {
     val leftClass = left.javaClass
     val rightClass = right.javaClass
 
+    if (leftClass.isSubclassOf<Map<*, *>>() && rightClass.isSubclassOf<Map<*, *>>()) {
+      return equals(left as Map<*, *>, right as Map<*, *>)
+    }
+
+    if (leftClass.isSubclassOf<List<*>>() && rightClass.isSubclassOf<List<*>>()) {
+      return equals(left as List<*>, right as List<*>)
+    }
+
+    if (leftClass.isSubclassOf<Set<*>>() && rightClass.isSubclassOf<Set<*>>()) {
+      return equals(left as Set<*>, right as Set<*>)
+    }
+
     if (leftClass != rightClass) {
       return false
     }
@@ -38,18 +50,6 @@ object SmugglerEquivalence {
       }
     }
 
-    if (Map::class.java.isAssignableFrom(leftClass)) {
-      return equals(left as Map<*, *>, right as Map<*, *>)
-    }
-
-    if (List::class.java.isAssignableFrom(leftClass)) {
-      return equals(left as List<*>, right as List<*>)
-    }
-
-    if (Set::class.java.isAssignableFrom(leftClass)) {
-      return equals(left as Set<*>, right as Set<*>)
-    }
-
     if (leftClass == SparseBooleanArray::class.java) {
       return equals(left as SparseBooleanArray, right as SparseBooleanArray)
     }
@@ -58,7 +58,7 @@ object SmugglerEquivalence {
       return equals(left as SparseArray<*>, right as SparseArray<*>)
     }
 
-    if (AutoParcelable::class.java.isAssignableFrom(leftClass)) {
+    if (leftClass.isSubclassOf<AutoParcelable>()) {
       return equals(left as AutoParcelable, right as AutoParcelable)
     }
 
@@ -82,15 +82,15 @@ object SmugglerEquivalence {
       }
     }
 
-    if (Map::class.java.isAssignableFrom(clazz)) {
+    if (clazz.isSubclassOf<Map<*, *>>()) {
       return hashCode(value as Map<*, *>)
     }
 
-    if (List::class.java.isAssignableFrom(clazz)) {
+    if (clazz.isSubclassOf<List<*>>()) {
       return hashCode(value as List<*>)
     }
 
-    if (Set::class.java.isAssignableFrom(clazz)) {
+    if (clazz.isSubclassOf<Set<*>>()) {
       return hashCode(value as Set<*>)
     }
 
@@ -102,7 +102,7 @@ object SmugglerEquivalence {
       return hashCode(value as SparseArray<*>)
     }
 
-    if (AutoParcelable::class.java.isAssignableFrom(clazz)) {
+    if (clazz.isSubclassOf<AutoParcelable>()) {
       return hashCode(value as AutoParcelable)
     }
 
@@ -211,7 +211,11 @@ object SmugglerEquivalence {
     override fun hashCode(): Int = hashCode(value)
   }
 
-  private inline fun <T> Array<T>.each(action: (T) -> Unit): Array<T> = apply {
+  private inline fun <reified T> Array<T>.each(action: (T) -> Unit): Array<T> = apply {
     forEach(action)
+  }
+
+  private inline fun <reified T : Any> Class<*>.isSubclassOf(): Boolean {
+    return T::class.java.isAssignableFrom(this)
   }
 }
