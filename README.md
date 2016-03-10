@@ -108,6 +108,7 @@ Some **important** notes:
 - Only data classes are supported
 - Data classes with type parameters aren't supported at the moment
 - Lists, Maps and Arrays with bounded type parameters aren't supported at the moment
+- Jack&Jill toolchain isn't supported at the moment
 
 # What does "Smuggler" mean?
 A smuggler was an individual who dealt with the secret exchanged shipment of goods to block restrictions or tax fees. The items shipped were often considered contraband, and highly illegal. Notable smugglers included Han Solo, Chewbacca, and Lando Calrissian. © [http://starwars.wikia.com](http://starwars.wikia.com/wiki/Smuggler)
