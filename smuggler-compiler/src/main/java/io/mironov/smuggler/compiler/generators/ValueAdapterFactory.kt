@@ -178,6 +178,8 @@ internal class ValueAdapterFactory private constructor(
         Types.LIST -> return createCollection(Types.LIST, Types.ARRAY_LIST, spec, property, generic)
         Types.LINKED_LIST -> return createCollection(Types.LINKED_LIST, Types.LINKED_LIST, spec, property, generic)
         Types.ARRAY_LIST -> return createCollection(Types.ARRAY_LIST, Types.ARRAY_LIST, spec, property, generic)
+
+        Types.COLLECTION -> return createCollection(Types.COLLECTION, Types.ARRAY_LIST, spec, property, generic)
       }
 
       if (registry.isSubclassOf(type, Types.ENUM)) {
