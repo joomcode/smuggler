@@ -483,7 +483,8 @@ class SmugglerTest {
         val one: List<List<List<Long>>>,
         val two: List<Array<List<Boolean>>>,
         val three: List<Array<Array<Boolean>>>,
-        val four: Array<List<Array<Boolean>>>
+        val four: Array<List<Array<Boolean>>>,
+        val five: Collection<Collection<String>>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<ComplexArraysAndLists>() {
@@ -491,7 +492,8 @@ class SmugglerTest {
           one = generator.nextList { generator.nextList { generator.nextList { generator.nextLong() } } },
           two = generator.nextList { generator.nextArray { generator.nextList { generator.nextBoolean() } } },
           three = generator.nextList { generator.nextArray { generator.nextArray { generator.nextBoolean() } } },
-          four = generator.nextArray { generator.nextList { generator.nextArray { generator.nextBoolean() } } }
+          four = generator.nextArray { generator.nextList { generator.nextArray { generator.nextBoolean() } } },
+          five = generator.nextList { generator.nextList { generator.nextString() } }
       )
     }
   }
