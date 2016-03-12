@@ -31,15 +31,15 @@ public class SmugglerTransform extends Transform {
     final def application = project.extensions.findByType(AppExtension)
     final def library = project.extensions.findByType(LibraryExtension)
 
-    final def libs = new ArrayList<File>()
     final def classes = new ArrayList<File>()
+    final def classpath = new ArrayList<File>()
 
     if (application != null) {
-      libs.addAll(application.bootClasspath)
+      classpath.addAll(application.bootClasspath)
     }
 
     if (library != null) {
-      libs.addAll(library.bootClasspath)
+      classpath.addAll(library.bootClasspath)
     }
 
     inputs.each {
@@ -48,13 +48,13 @@ public class SmugglerTransform extends Transform {
     }
 
     references.each {
-      libs.addAll(it.directoryInputs*.file)
-      libs.addAll(it.jarInputs*.file)
+      classpath.addAll(it.directoryInputs*.file)
+      classpath.addAll(it.jarInputs*.file)
     }
 
     compiler.compile(new SmugglerOptions.Builder(output)
-        .inputs(classes)
-        .libs(libs)
+        .classes(classes)
+        .classpath(classpath)
         .build()
     )
   }

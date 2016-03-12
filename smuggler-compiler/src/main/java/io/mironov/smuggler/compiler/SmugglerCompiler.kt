@@ -14,7 +14,7 @@ class SmugglerCompiler {
     val environment = GenerationEnvironment(registry)
     val factory = ValueAdapterFactory.from(registry)
 
-    options.inputs.forEach {
+    options.classes.forEach {
       it.copyRecursively(options.output, true)
     }
 
@@ -29,7 +29,7 @@ class SmugglerCompiler {
   }
 
   private fun findAutoParcelableClasses(registry: ClassRegistry): Collection<ClassReference> {
-    return registry.inputs.filter {
+    return registry.classes.filter {
       !it.isInterface && registry.isSubclassOf(it.type, Types.SMUGGLER_PARCELABLE)
     }
   }

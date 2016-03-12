@@ -17,8 +17,8 @@ internal object ClassRegistryFactory {
 
   fun create(options: SmugglerOptions): ClassRegistry {
     return ClassRegistry.Builder()
-        .inputs(createClassReferences(options.inputs))
-        .references(createClassReferences(options.libs))
+        .classes(createClassReferences(options.classes))
+        .classpath(createClassReferences(options.classpath))
         .build()
   }
 

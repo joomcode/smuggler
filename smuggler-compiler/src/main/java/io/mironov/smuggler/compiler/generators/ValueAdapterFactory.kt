@@ -76,7 +76,7 @@ internal class ValueAdapterFactory private constructor(
     }
 
     private fun findTypeAdapterClasses(registry: ClassRegistry): Collection<ClassReference> {
-      return registry.inputs.filter {
+      return registry.classes.filter {
         !it.isInterface && registry.isSubclassOf(it.type, Types.SMUGGLER_ADAPTER)
       }
     }

@@ -7,47 +7,47 @@ import org.objectweb.asm.Type
 import java.util.HashMap
 import java.util.LinkedHashSet
 
-internal class ClassRegistry(
-    val references: Collection<ClassReference>,
-    val inputs: Collection<ClassReference>
+internal class ClassRegistry private constructor(
+    val classpath: Collection<ClassReference>,
+    val classes: Collection<ClassReference>
 ) {
-  private val refs = HashMap<Type, ClassReference>(references.size)
   private val specs = HashMap<Type, ClassSpec>()
+  private val references = HashMap<Type, ClassReference>(classpath.size)
 
   init {
-    references.forEach {
-      refs.put(it.type, it)
+    classpath.forEach {
+      references.put(it.type, it)
     }
 
-    inputs.forEach {
-      refs.put(it.type, it)
+    classes.forEach {
+      references.put(it.type, it)
     }
   }
 
   internal class Builder() {
-    private val references = LinkedHashSet<ClassReference>()
-    private val inputs = LinkedHashSet<ClassReference>()
+    private val classes = LinkedHashSet<ClassReference>()
+    private val classpath = LinkedHashSet<ClassReference>()
 
-    fun references(values: Collection<ClassReference>): Builder = apply {
-      references.addAll(values)
+    fun classes(values: Collection<ClassReference>): Builder = apply {
+      classpath.addAll(values)
+      classes.addAll(values)
     }
 
-    fun inputs(values: Collection<ClassReference>): Builder = apply {
-      references.addAll(values)
-      inputs.addAll(values)
+    fun classpath(values: Collection<ClassReference>): Builder = apply {
+      classpath.addAll(values)
     }
 
     fun build(): ClassRegistry {
-      return ClassRegistry(references, inputs)
+      return ClassRegistry(classpath, classes)
     }
   }
 
   fun contains(type: Type): Boolean {
-    return type in refs
+    return type in references
   }
 
   fun reference(type: Type): ClassReference {
-    return refs[type] ?: throw SmugglerException("Unable to find \"${type.className}\" class. Make sure it is present in application classpath.")
+    return references[type] ?: throw SmugglerException("Unable to find \"${type.className}\" class. Make sure it is present in application classpath.")
   }
 
   fun resolve(reference: ClassReference, cacheable: Boolean = true): ClassSpec {
