@@ -4,7 +4,7 @@ Makes your data classes Parcelable. Just add `AutoParceable` to the class declar
 ```kotlin
 data class User(
   val firstName: String,
-  val userName: String
+  val lastName: String
 ) : AutoParcelable
 
 data class Message(
@@ -30,7 +30,7 @@ buildscript {
   dependencies {
   	classpath "com.android.tools.build:gradle:1.5.0"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0"
-    classpath "io.mironov.smuggler:smuggler-plugin:0.11.1"
+    classpath "io.mironov.smuggler:smuggler-plugin:0.11.2"
   }
 }
 
@@ -44,7 +44,7 @@ apply plugin: "io.mironov.smuggler"
 ```
 Some **important** notes:
 - Only android gradle plugin 1.5.0 and up is supported.
-- In case you are using android gradle plugin 2.0.0, you have to use an experimental version of smuggler plugin: `io.mironov.smuggler:smuggler-plugin-experimental:0.11.1`
+- In case you are using android gradle plugin 2.0.0, you have to use an experimental version of smuggler plugin: `io.mironov.smuggler:smuggler-plugin-experimental:0.11.2`
 - In case you have a mutli-module project and want to use `AutoParceable`, you have to add `smuggler-plugin` to each module.
 - Smuggler plugin must be applied **after** android plugin.
 - Experimental plugin has the same id, so you don't need to add `-experimental` suffix when applying plugin.
@@ -98,7 +98,8 @@ Some **important** notes:
       val multidimensional: Array<Array<BigInteger>>,
       val list: List<BigInteger>,
       val set: Set<BigInteger>,
-      val map: Map<String, BigInteger>
+      val map: Map<String, BigInteger>,
+      val complex: Map<Set<BigInteger>, Array<List<BigInteger>>>
   ) : AutoParcelable
   ```
 - Custom `TypeAdapter` can be defined both as `class` or `object`
