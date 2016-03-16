@@ -574,7 +574,7 @@ internal class AssistedValueAdapter(
     private val METHOD_FROM_PARCEL = Methods.get("fromParcel", Types.OBJECT, Types.ANDROID_PARCEL)
 
     fun fromObject(assistant: Type, element: Type): ValueAdapter {
-      return AssistedValueAdapter(Assistant.Object(assistant), element)
+      return AssistedValueAdapter(Assistant.Object(assistant, "INSTANCE"), element)
     }
 
     fun fromClass(assistant: Type, element: Type): ValueAdapter {
@@ -584,7 +584,8 @@ internal class AssistedValueAdapter(
 
   sealed class Assistant {
     class Class(val type: Type) : Assistant()
-    class Object(val type: Type) : Assistant()
+    class Companion(val type: Type, val owner: Type, val name: String) : Assistant()
+    class Object(val type: Type, val name: String) : Assistant()
   }
 
   override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
@@ -605,7 +606,8 @@ internal class AssistedValueAdapter(
   private fun GeneratorAdapter.loadAssistant(assistant: Assistant) {
     when (assistant) {
       is Assistant.Class -> newInstance(assistant.type, Methods.getConstructor())
-      is Assistant.Object -> getStatic(assistant.type, "INSTANCE", assistant.type)
+      is Assistant.Companion -> getStatic(assistant.owner, assistant.name, assistant.type)
+      is Assistant.Object -> getStatic(assistant.type, assistant.name, assistant.type)
     }
   }
 }
