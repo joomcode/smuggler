@@ -32,7 +32,7 @@ ext {
   androidToolsBetaVersion = "2.0.0-beta6"
   androidToolsStableVersion = "1.5.0"
 
-  kotlinVersion = "1.0.0"
+  kotlinVersion = "1.0.1"
   bintrayVersion = "1.4"
 
   asmVersion = "5.0.4"
