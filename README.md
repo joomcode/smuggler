@@ -44,10 +44,8 @@ apply plugin: "io.mironov.smuggler"
 ```
 Some **important** notes:
 - Only android gradle plugin 1.5.0 and up is supported.
-- In case you are using android gradle plugin 2.0.0, you have to use an experimental version of smuggler plugin: `io.mironov.smuggler:smuggler-plugin-experimental:0.11.2`
 - In case you have a mutli-module project and want to use `AutoParceable`, you have to add `smuggler-plugin` to each module.
 - Smuggler plugin must be applied **after** android plugin.
-- Experimental plugin has the same id, so you don't need to add `-experimental` suffix when applying plugin.
 
 # Supported types
 - Primitive types: `boolean`, `byte`, `char`, `double`, `float`, `int`, `long`, `short`
