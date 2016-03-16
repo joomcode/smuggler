@@ -778,6 +778,26 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithPolymorphicCollections() {
+    data class Foo(override val value: String) : Wrapper
+    data class Bar(override val value: String) : Wrapper
+
+    data class Collection(
+        val values: List<Wrapper>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Collection> {
+      Collection(listOf(
+          Foo(generator.nextString()),
+          Bar(generator.nextString())
+      ))
+    }
+  }
+
+  interface Wrapper : AutoParcelable {
+    val value: String
+  }
+
   @GlobalAdapter
   object BigIntegerTypeAdapter : TypeAdapter<BigInteger> {
     override fun fromParcel(parcel: Parcel): BigInteger {
