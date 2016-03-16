@@ -12,6 +12,7 @@ public class SmugglerPlugin implements Plugin<Project> {
 
   private static void onPrepareDependencies(final Project project) {
     project.dependencies.add("compile", "io.mironov.smuggler:smuggler-runtime:${BuildConfig.VERSION}@aar")
+    project.dependencies.add("androidTestCompile", "io.mironov.smuggler:smuggler-runtime:${BuildConfig.VERSION}@aar")
   }
 
   private static void onPrepareTransforms(final Project project) {
