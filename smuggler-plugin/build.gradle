@@ -70,6 +70,16 @@ publishing {
       artifact sourceJar
       artifact javadocJar
 
+      pom.withXml {
+        asNode().dependencies.'*'.findAll {
+          it.scope.text() == 'runtime' && project.configurations.compile.allDependencies.find { dep ->
+            dep.name == it.artifactId.text()
+          }
+        } each {
+          it.scope*.value = 'compile'
+        }
+      }
+
       from components.java
     }
   }
