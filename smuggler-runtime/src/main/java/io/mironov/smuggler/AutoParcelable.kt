@@ -2,23 +2,42 @@ package io.mironov.smuggler
 
 import android.os.Parcel
 import android.os.Parcelable
+import java.lang.reflect.Modifier
 import java.util.IdentityHashMap
 
 interface AutoParcelable : Parcelable {
   companion object {
     private val CREATORS = IdentityHashMap<Class<*>, Parcelable.Creator<*>>()
 
+    inline fun <reified S : AutoParcelable> creator(): Parcelable.Creator<S> {
+      return creator(S::class.java)
+    }
+
     @Suppress("UNCHECKED_CAST")
     fun <S : AutoParcelable> creator(clazz: Class<S>): Parcelable.Creator<S> {
       return synchronized(CREATORS) {
         CREATORS.getOrPut(clazz) {
-          Parcelable.Creator::class.java.cast(clazz.getDeclaredField("CREATOR").get(null))
+          val creator = try {
+            clazz.getField("CREATOR")
+          } catch (exception: NoSuchFieldException) {
+            throw AssertionError("Parcelable protocol requires a Parcelable.Creator object called CREATOR on class ${clazz.name}")
+          }
+
+          if (!Modifier.isStatic(creator.modifiers)) {
+            throw AssertionError("Parcelable protocol requires the CREATOR object to be static on class ${clazz.name}")
+          }
+
+          if (!Modifier.isPublic(creator.modifiers)) {
+            throw AssertionError("Parcelable protocol requires the CREATOR object to be public on class ${clazz.name}")
+          }
+
+          if (!Parcelable.Creator::class.java.isAssignableFrom(creator.type)) {
+            throw AssertionError("Parcelable protocol requires a Parcelable.Creator object called CREATOR on class ${clazz.name}")
+          }
+
+          creator.get(null) as Parcelable.Creator<*>
         }
       } as Parcelable.Creator<S>
-    }
-
-    inline fun <reified S : AutoParcelable> creator(): Parcelable.Creator<S> {
-      return creator(S::class.java)
     }
   }
 
