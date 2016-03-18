@@ -47,21 +47,21 @@ public class SmugglerTransform extends Transform {
 
     inputs.each {
       it.directoryInputs.forEach {
-        logger.error("[CLASSES] ${it.scopes} ${it.file}")
+        logger.debug("[CLASSES] ${it.scopes} ${it.file}")
       }
 
       it.jarInputs.forEach {
-        logger.error("[CLASSES] ${it.scopes} ${it.file}")
+        logger.debug("[CLASSES] ${it.scopes} ${it.file}")
       }
     }
 
     references.each {
       it.directoryInputs.forEach {
-        logger.error("[CLASSPATH] ${it.scopes} ${it.file}")
+        logger.debug("[CLASSPATH] ${it.scopes} ${it.file}")
       }
 
       it.jarInputs.forEach {
-        logger.error("[CLASSPATH] ${it.scopes} ${it.file}")
+        logger.debug("[CLASSPATH] ${it.scopes} ${it.file}")
       }
     }
 
