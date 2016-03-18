@@ -1,8 +1,8 @@
 package io.mironov.smuggler.compiler.common
 
-import io.mironov.smuggler.compiler.reflect.ClassSpec
-import io.mironov.smuggler.compiler.reflect.FieldSpec
-import io.mironov.smuggler.compiler.reflect.MethodSpec
+import io.michaelrocks.grip.mirrors.ClassMirror
+import io.michaelrocks.grip.mirrors.FieldMirror
+import io.michaelrocks.grip.mirrors.MethodMirror
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -21,63 +21,63 @@ internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapte
     visitInsn(type.getOpcode(Opcodes.IADD))
   }
 
-  fun checkCast(spec: ClassSpec) {
+  fun checkCast(spec: ClassMirror) {
     checkCast(spec.type)
   }
 
-  fun getField(owner: ClassSpec, field: FieldSpec) {
+  fun getField(owner: ClassMirror, field: FieldMirror) {
     getField(owner.type, field.name, field.type)
   }
 
-  fun getField(owner: ClassSpec, name: String, type: ClassSpec) {
+  fun getField(owner: ClassMirror, name: String, type: ClassMirror) {
     getField(owner.type, name, type.type)
   }
 
-  fun getField(owner: ClassSpec, name: String, type: Type) {
+  fun getField(owner: ClassMirror, name: String, type: Type) {
     getField(owner.type, name, type)
   }
 
-  fun putField(owner: ClassSpec, field: FieldSpec) {
+  fun putField(owner: ClassMirror, field: FieldMirror) {
     putField(owner.type, field.name, field.type)
   }
 
-  fun putField(owner: ClassSpec, name: String, type: ClassSpec) {
+  fun putField(owner: ClassMirror, name: String, type: ClassMirror) {
     putField(owner.type, name, type.type)
   }
 
-  fun putField(owner: ClassSpec, name: String, type: Type) {
+  fun putField(owner: ClassMirror, name: String, type: Type) {
     putField(owner.type, name, type)
   }
 
-  fun invokeStatic(owner: ClassSpec, method: Method) {
+  fun invokeStatic(owner: ClassMirror, method: Method) {
     invokeStatic(owner.type, method)
   }
 
-  fun invokeStatic(owner: ClassSpec, method: MethodSpec) {
+  fun invokeStatic(owner: ClassMirror, method: MethodMirror) {
     invokeStatic(owner.type, Methods.get(method))
   }
 
-  fun invokeVirtual(owner: ClassSpec, method: Method) {
+  fun invokeVirtual(owner: ClassMirror, method: Method) {
     invokeVirtual(owner.type, method)
   }
 
-  fun invokeVirtual(owner: ClassSpec, method: MethodSpec) {
+  fun invokeVirtual(owner: ClassMirror, method: MethodMirror) {
     invokeVirtual(owner.type, Methods.get(method))
   }
 
-  fun invokeVirtual(owner: Type, method: MethodSpec) {
+  fun invokeVirtual(owner: Type, method: MethodMirror) {
     invokeVirtual(owner, Methods.get(method))
   }
 
-  fun invokeSpecial(owner: ClassSpec, method: Method) {
+  fun invokeSpecial(owner: ClassMirror, method: Method) {
     visitMethodInsn(Opcodes.INVOKESPECIAL, owner.type.internalName, method.name, method.descriptor, false)
   }
 
-  fun invokeSpecial(owner: ClassSpec, method: MethodSpec) {
+  fun invokeSpecial(owner: ClassMirror, method: MethodMirror) {
     visitMethodInsn(Opcodes.INVOKESPECIAL, owner.type.internalName, method.name, method.type.descriptor, false)
   }
 
-  fun invokeSpecial(owner: Type, method: MethodSpec) {
+  fun invokeSpecial(owner: Type, method: MethodMirror) {
     visitMethodInsn(Opcodes.INVOKESPECIAL, owner.internalName, method.name, method.type.descriptor, false)
   }
 

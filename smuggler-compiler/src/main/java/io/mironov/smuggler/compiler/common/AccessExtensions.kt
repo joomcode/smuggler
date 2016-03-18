@@ -1,108 +1,82 @@
 package io.mironov.smuggler.compiler.common
 
-import io.mironov.smuggler.compiler.reflect.ClassReference
-import io.mironov.smuggler.compiler.reflect.ClassSpec
-import io.mironov.smuggler.compiler.reflect.FieldSpec
-import io.mironov.smuggler.compiler.reflect.MethodSpec
+import io.michaelrocks.grip.mirrors.ClassMirror
+import io.michaelrocks.grip.mirrors.FieldMirror
+import io.michaelrocks.grip.mirrors.MethodMirror
 import org.objectweb.asm.Opcodes
 
-internal val ClassReference.isPublic: Boolean
+internal val ClassMirror.isPublic: Boolean
   get() = access and Opcodes.ACC_PUBLIC != 0
 
-internal val ClassReference.isPrivate: Boolean
+internal val ClassMirror.isPrivate: Boolean
   get() = access and Opcodes.ACC_PRIVATE != 0
 
-internal val ClassReference.isProtected: Boolean
+internal val ClassMirror.isProtected: Boolean
   get() = access and Opcodes.ACC_PROTECTED != 0
 
-internal val ClassReference.isInterface: Boolean
+internal val ClassMirror.isInterface: Boolean
   get() = access and Opcodes.ACC_INTERFACE != 0
 
-internal val ClassReference.isAnnotation: Boolean
+internal val ClassMirror.isAnnotation: Boolean
   get() = access and Opcodes.ACC_ANNOTATION != 0
 
-internal val ClassReference.isAbstract: Boolean
+internal val ClassMirror.isAbstract: Boolean
   get() = access and Opcodes.ACC_ABSTRACT != 0
 
-internal val ClassReference.isSynthetic: Boolean
+internal val ClassMirror.isSynthetic: Boolean
   get() = access and Opcodes.ACC_SYNTHETIC != 0
 
-internal val ClassReference.isStatic: Boolean
+internal val ClassMirror.isStatic: Boolean
   get() = access and Opcodes.ACC_STATIC != 0
 
 
-internal val ClassSpec.isPublic: Boolean
+internal val MethodMirror.isPublic: Boolean
   get() = access and Opcodes.ACC_PUBLIC != 0
 
-internal val ClassSpec.isPrivate: Boolean
+internal val MethodMirror.isPrivate: Boolean
   get() = access and Opcodes.ACC_PRIVATE != 0
 
-internal val ClassSpec.isProtected: Boolean
+internal val MethodMirror.isProtected: Boolean
   get() = access and Opcodes.ACC_PROTECTED != 0
 
-internal val ClassSpec.isInterface: Boolean
+internal val MethodMirror.isInterface: Boolean
   get() = access and Opcodes.ACC_INTERFACE != 0
 
-internal val ClassSpec.isAnnotation: Boolean
+internal val MethodMirror.isAnnotation: Boolean
   get() = access and Opcodes.ACC_ANNOTATION != 0
 
-internal val ClassSpec.isAbstract: Boolean
+internal val MethodMirror.isAbstract: Boolean
   get() = access and Opcodes.ACC_ABSTRACT != 0
 
-internal val ClassSpec.isSynthetic: Boolean
+internal val MethodMirror.isSynthetic: Boolean
   get() = access and Opcodes.ACC_SYNTHETIC != 0
 
-internal val ClassSpec.isStatic: Boolean
+internal val MethodMirror.isStatic: Boolean
   get() = access and Opcodes.ACC_STATIC != 0
 
 
-internal val MethodSpec.isPublic: Boolean
+internal val FieldMirror.isPublic: Boolean
   get() = access and Opcodes.ACC_PUBLIC != 0
 
-internal val MethodSpec.isPrivate: Boolean
+internal val FieldMirror.isPrivate: Boolean
   get() = access and Opcodes.ACC_PRIVATE != 0
 
-internal val MethodSpec.isProtected: Boolean
+internal val FieldMirror.isProtected: Boolean
   get() = access and Opcodes.ACC_PROTECTED != 0
 
-internal val MethodSpec.isInterface: Boolean
+internal val FieldMirror.isInterface: Boolean
   get() = access and Opcodes.ACC_INTERFACE != 0
 
-internal val MethodSpec.isAnnotation: Boolean
+internal val FieldMirror.isAnnotation: Boolean
   get() = access and Opcodes.ACC_ANNOTATION != 0
 
-internal val MethodSpec.isAbstract: Boolean
+internal val FieldMirror.isAbstract: Boolean
   get() = access and Opcodes.ACC_ABSTRACT != 0
 
-internal val MethodSpec.isSynthetic: Boolean
+internal val FieldMirror.isSynthetic: Boolean
   get() = access and Opcodes.ACC_SYNTHETIC != 0
 
-internal val MethodSpec.isStatic: Boolean
-  get() = access and Opcodes.ACC_STATIC != 0
-
-
-internal val FieldSpec.isPublic: Boolean
-  get() = access and Opcodes.ACC_PUBLIC != 0
-
-internal val FieldSpec.isPrivate: Boolean
-  get() = access and Opcodes.ACC_PRIVATE != 0
-
-internal val FieldSpec.isProtected: Boolean
-  get() = access and Opcodes.ACC_PROTECTED != 0
-
-internal val FieldSpec.isInterface: Boolean
-  get() = access and Opcodes.ACC_INTERFACE != 0
-
-internal val FieldSpec.isAnnotation: Boolean
-  get() = access and Opcodes.ACC_ANNOTATION != 0
-
-internal val FieldSpec.isAbstract: Boolean
-  get() = access and Opcodes.ACC_ABSTRACT != 0
-
-internal val FieldSpec.isSynthetic: Boolean
-  get() = access and Opcodes.ACC_SYNTHETIC != 0
-
-internal val FieldSpec.isStatic: Boolean
+internal val FieldMirror.isStatic: Boolean
   get() = access and Opcodes.ACC_STATIC != 0
 
 

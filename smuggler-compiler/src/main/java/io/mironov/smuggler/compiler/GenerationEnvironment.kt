@@ -1,8 +1,8 @@
 package io.mironov.smuggler.compiler
 
-internal class GenerationEnvironment(
-    val registry: ClassRegistry
-) {
+import io.michaelrocks.grip.Grip
+
+internal class GenerationEnvironment(val grip: Grip) {
   fun newClassWriter(): ClassWriter {
     return ClassWriter(this)
   }

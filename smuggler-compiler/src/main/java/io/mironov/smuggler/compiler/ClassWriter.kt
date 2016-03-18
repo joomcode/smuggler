@@ -1,9 +1,9 @@
 package io.mironov.smuggler.compiler
 
+import io.michaelrocks.grip.mirrors.MethodMirror
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
-import io.mironov.smuggler.compiler.reflect.MethodSpec
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.Opcodes.V1_6
@@ -32,8 +32,8 @@ internal class ClassWriter(private val environment: GenerationEnvironment) : Cla
     }
   }
 
-  fun newMethod(access: Int, method: MethodSpec, body: GeneratorAdapter.() -> Unit) {
-    GeneratorAdapter(this, access, Methods.get(method), method.signature).apply {
+  fun newMethod(access: Int, method: MethodMirror, body: GeneratorAdapter.() -> Unit) {
+    GeneratorAdapter(this, access, Methods.get(method), null).apply {
       body().apply {
         returnValue()
         endMethod()
@@ -41,7 +41,7 @@ internal class ClassWriter(private val environment: GenerationEnvironment) : Cla
     }
   }
 
-  fun newMethod(method: MethodSpec, body: GeneratorAdapter.() -> Unit) {
+  fun newMethod(method: MethodMirror, body: GeneratorAdapter.() -> Unit) {
     newMethod(method.access, method, body)
   }
 }

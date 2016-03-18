@@ -1,5 +1,6 @@
 package io.mironov.smuggler.compiler.generators
 
+import io.michaelrocks.grip.mirrors.MethodMirror
 import io.mironov.smuggler.compiler.ContentGenerator
 import io.mironov.smuggler.compiler.GeneratedContent
 import io.mironov.smuggler.compiler.GenerationEnvironment
@@ -10,9 +11,10 @@ import io.mironov.smuggler.compiler.common.asAsmType
 import io.mironov.smuggler.compiler.common.given
 import io.mironov.smuggler.compiler.common.isPrivate
 import io.mironov.smuggler.compiler.common.isStatic
+import io.mironov.smuggler.compiler.common.Signature
+import io.mironov.smuggler.compiler.common.cast
+import io.mironov.smuggler.compiler.common.getStaticInitializer
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
-import io.mironov.smuggler.compiler.reflect.MethodSpec
-import io.mironov.smuggler.compiler.reflect.Signature
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
@@ -92,7 +94,13 @@ internal class ParcelableContentGenerator(
 
   private fun onCreatePatchedClassGeneratedContent(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(spec.clazz.type, emptyMap(), environment.newClass {
-      ClassReader(spec.clazz.opener.open()).accept(object : ClassVisitor(ASM5, this) {
+      val classes = environment.grip.classRegistry.javaClass.getDeclaredField("fileRegistry")
+      val registry = classes.apply { isAccessible = true }.get(environment.grip.classRegistry)
+
+      val reader = registry.javaClass.getMethod("readClass", Type::class.java)
+      val bytes = reader.invoke(registry, spec.clazz.type).cast<ByteArray>()
+
+      ClassReader(bytes).accept(object : ClassVisitor(ASM5, this) {
         override fun visit(version: Int, access: Int, name: String, signature: String?, parent: String?, exceptions: Array<out String>?) {
           super.visit(version, access, name, signature, parent, exceptions)
           visitField(ACC_PUBLIC + ACC_STATIC + ACC_FINAL, "CREATOR", Types.ANDROID_CREATOR, creatorFieldSignatureFrom(spec))
@@ -111,7 +119,7 @@ internal class ParcelableContentGenerator(
         }
       }, ClassReader.SKIP_FRAMES)
 
-      if (spec.clazz.getDeclaredMethod("<clinit>", Types.VOID) == null) {
+      if (spec.clazz.getStaticInitializer() == null) {
         newMethod(ACC_PUBLIC + ACC_STATIC, Methods.getStaticConstructor()) {
           newInstance(creatorTypeFrom(spec), Methods.getConstructor())
           putStatic(spec.clazz.type, "CREATOR", Types.ANDROID_CREATOR)
@@ -175,28 +183,32 @@ internal class ParcelableContentGenerator(
     return Signature.generic(Types.ANDROID_CREATOR, spec.clazz.type).toString()
   }
 
-  private fun createMethodSpecForNewArrayMethod(spec: AutoParcelableClassSpec, bridge: Boolean): MethodSpec {
-    val flags = if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT
-    val returns = if (bridge) Types.OBJECT else spec.clazz.type
-    val method = Type.getMethodType(Types.getArrayType(returns), Types.INT)
-
-    return MethodSpec(flags, "newArray", method)
+  private fun createMethodSpecForNewArrayMethod(spec: AutoParcelableClassSpec, bridge: Boolean): MethodMirror {
+    return MethodMirror.Builder().name("newArray")
+        .type(Type.getMethodType(Types.getArrayType(if (bridge) Types.OBJECT else spec.clazz.type), Types.INT))
+        .access(if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT)
+        .build()
   }
 
-  private fun createMethodSpecForCreateFromParcelMethod(spec: AutoParcelableClassSpec, bridge: Boolean): MethodSpec {
-    val flags = if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT
-    val returns = if (bridge) Types.OBJECT else spec.clazz.type
-    val method = Type.getMethodType(returns, Types.ANDROID_PARCEL)
-
-    return MethodSpec(flags, "createFromParcel", method)
+  private fun createMethodSpecForCreateFromParcelMethod(spec: AutoParcelableClassSpec, bridge: Boolean): MethodMirror {
+    return MethodMirror.Builder().name("createFromParcel")
+        .type(Type.getMethodType(if (bridge) Types.OBJECT else spec.clazz.type, Types.ANDROID_PARCEL))
+        .access(if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT)
+        .build()
   }
 
-  private fun createMethodSpecForDescribeContentsMethod(spec: AutoParcelableClassSpec): MethodSpec {
-    return MethodSpec(ACC_METHOD_DEFAULT, "describeContents", Type.getMethodType(Types.INT))
+  private fun createMethodSpecForDescribeContentsMethod(spec: AutoParcelableClassSpec): MethodMirror {
+    return MethodMirror.Builder().name("describeContents")
+        .type(Type.getMethodType(Types.INT))
+        .access(ACC_METHOD_DEFAULT)
+        .build()
   }
 
-  private fun createMethodSpecForWriteToParcelMethod(spec: AutoParcelableClassSpec): MethodSpec {
-    return MethodSpec(ACC_METHOD_DEFAULT, "writeToParcel", Type.getMethodType(Types.VOID, Types.ANDROID_PARCEL, Types.INT))
+  private fun createMethodSpecForWriteToParcelMethod(spec: AutoParcelableClassSpec): MethodMirror {
+    return MethodMirror.Builder().name("writeToParcel")
+        .type(Type.getMethodType(Types.VOID, Types.ANDROID_PARCEL, Types.INT))
+        .access(ACC_METHOD_DEFAULT)
+        .build()
   }
 
   private fun shouldExcludeFieldFromParcelableClass(access: Int, name: String, description: String, signature: String?): Boolean {

@@ -1,12 +1,12 @@
 package io.mironov.smuggler.compiler.common
 
-import io.mironov.smuggler.compiler.reflect.ClassSpec
-import io.mironov.smuggler.compiler.reflect.MethodSpec
+import io.michaelrocks.grip.mirrors.ClassMirror
+import io.michaelrocks.grip.mirrors.MethodMirror
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.Method
 
 internal object Methods {
-  fun get(spec: MethodSpec): Method {
+  fun get(spec: MethodMirror): Method {
     return Method(spec.name, spec.type.descriptor)
   }
 
@@ -26,8 +26,8 @@ internal object Methods {
     return Method("<init>", Type.VOID_TYPE, arrayOf(first) + args)
   }
 
-  fun getConstructor(first: ClassSpec, vararg args: ClassSpec): Method {
-    return Method("<init>", Type.VOID_TYPE, arrayOf(first.type) + args.map { it.type })
+  fun getConstructor(first: ClassMirror, vararg args: ClassMirror): Method {
+    return Method("<init>", Type.VOID_TYPE, arrayOf(first.type) + args.map(ClassMirror::type))
   }
 
   fun getStaticConstructor(): Method {

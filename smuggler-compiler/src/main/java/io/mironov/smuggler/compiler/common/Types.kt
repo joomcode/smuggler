@@ -75,6 +75,8 @@ internal object Types {
   val ANDROID_SPARSE_ARRAY = Type.getObjectType("android/util/SparseArray")
 
   val SMUGGLER_PARCELABLE = Type.getObjectType("io/mironov/smuggler/AutoParcelable")
+  val SMUGGLER_GLOBAL_ADAPTER = Type.getObjectType("io/mironov/smuggler/GlobalAdapter")
+  val SMUGGLER_LOCAL_ADAPTER = Type.getObjectType("io/mironov/smuggler/LocalAdapter")
   val SMUGGLER_ADAPTER = Type.getObjectType("io/mironov/smuggler/TypeAdapter")
 
   inline fun <reified T : Any> getType(): Type {

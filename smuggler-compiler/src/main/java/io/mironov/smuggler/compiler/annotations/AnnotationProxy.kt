@@ -1,7 +1,7 @@
 package io.mironov.smuggler.compiler.annotations
 
+import io.michaelrocks.grip.mirrors.AnnotationMirror
 import io.mironov.smuggler.compiler.common.cast
-import io.mironov.smuggler.compiler.reflect.AnnotationSpec
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
@@ -9,7 +9,7 @@ import java.util.ArrayList
 import java.util.HashMap
 
 internal object AnnotationProxy {
-  fun <A> create(clazz: Class<A>, spec: AnnotationSpec): A {
+  fun <A> create(clazz: Class<A>, spec: AnnotationMirror): A {
     return clazz.cast(Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), object : InvocationHandler {
       private val cache = HashMap<String, Any?>()
 
@@ -19,12 +19,10 @@ internal object AnnotationProxy {
 
       init {
         for ((key, value) in spec.values) {
-          if (value != null) {
-            try {
-              cache.put(key, AnnotationProxy.resolve(clazz.getMethod(key).returnType, value))
-            } catch (exception: NoSuchMethodException) {
-              // just ignore
-            }
+          try {
+            cache.put(key, AnnotationProxy.resolve(clazz.getMethod(key).returnType, value))
+          } catch (exception: NoSuchMethodException) {
+            // just ignore
           }
         }
       }
@@ -62,11 +60,15 @@ internal object AnnotationProxy {
   private fun resolveArray(type: Class<*>, value: Any): Any {
     val array = java.lang.reflect.Array.newInstance(type, 0).cast<Array<Any?>>()
 
-    val list = value.cast<Array<Any>>().orEmpty().map {
-      AnnotationProxy.resolve(type, it)
+    if (value is Array<*>) {
+      return value.cast<Array<Any>>().mapTo(ArrayList()) { AnnotationProxy.resolve(type, it) }.toArray(array)
     }
 
-    return ArrayList(list).toArray(array)
+    if (value is Collection<*>) {
+      return value.cast<Collection<Any>>().mapTo(ArrayList()) { AnnotationProxy.resolve(type, it) }.toArray(array)
+    }
+
+    throw IllegalArgumentException()
   }
 
   private fun resolveAnnotation(type: Class<*>, value: Any): Any {

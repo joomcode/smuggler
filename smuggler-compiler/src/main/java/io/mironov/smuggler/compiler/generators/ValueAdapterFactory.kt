@@ -1,34 +1,40 @@
 package io.mironov.smuggler.compiler.generators
 
+import io.michaelrocks.grip.Grip
+import io.michaelrocks.grip.and
+import io.michaelrocks.grip.annotatedWith
+import io.michaelrocks.grip.classes
+import io.michaelrocks.grip.isInterface
+import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.signature.GenericType
-import io.mironov.smuggler.compiler.ClassRegistry
+import io.michaelrocks.grip.not
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.InvalidTypeAdapterException
-import io.mironov.smuggler.compiler.annotations.GlobalAdapter
 import io.mironov.smuggler.compiler.annotations.LocalAdapter
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
-import io.mironov.smuggler.compiler.common.GripInvider
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.asAsmType
 import io.mironov.smuggler.compiler.common.asRawType
+import io.mironov.smuggler.compiler.common.getAnnotation
+import io.mironov.smuggler.compiler.common.getDeclaredConstructor
 import io.mironov.smuggler.compiler.common.isAbstract
-import io.mironov.smuggler.compiler.common.isInterface
 import io.mironov.smuggler.compiler.common.isPublic
+import io.mironov.smuggler.compiler.common.isSubclass
+import io.mironov.smuggler.compiler.common.isSubclassOf
 import io.mironov.smuggler.compiler.common.isSynthetic
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
-import io.mironov.smuggler.compiler.reflect.ClassReference
-import io.mironov.smuggler.compiler.reflect.ClassSpec
 import org.objectweb.asm.Type
+import java.io.File
 import java.util.Arrays
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
 
 internal class ValueAdapterFactory private constructor(
-    private val registry: ClassRegistry,
+    private val grip: Grip,
     private val adapters: Map<Type, ValueAdapter>
 ) {
   companion object {
@@ -58,32 +64,26 @@ internal class ValueAdapterFactory private constructor(
         Types.ANDROID_BUNDLE to BundleValueAdapter
     )
 
-    fun from(registry: ClassRegistry): ValueAdapterFactory {
-      val adapters = findTypeAdapterClasses(registry).map { registry.resolve(it) }
-      val global = adapters.filter { it.getAnnotation<GlobalAdapter>() != null }
-
-      return ValueAdapterFactory(registry, ADAPTERS + global.associate {
-        createAssistedValueAdapter(it, registry)
-      })
+    fun from(grip: Grip, inputs: Collection<File>): ValueAdapterFactory {
+      return ValueAdapterFactory(grip, ADAPTERS + grip.select(classes)
+          .from(inputs.toList())
+          .where(not(isInterface()) and isSubclass(Types.SMUGGLER_ADAPTER, grip) and annotatedWith(Types.SMUGGLER_GLOBAL_ADAPTER))
+          .execute().values
+          .associate { createAssistedValueAdapter(it, grip) }
+      )
     }
 
     fun from(factory: ValueAdapterFactory, spec: AutoParcelableClassSpec): ValueAdapterFactory {
       val locals = spec.clazz.getAnnotation<LocalAdapter>()
       val types = locals?.value().orEmpty()
 
-      return ValueAdapterFactory(factory.registry, factory.adapters + types.associate {
-        createAssistedValueAdapter(factory.registry.resolve(it), factory.registry)
+      return ValueAdapterFactory(factory.grip, factory.adapters + types.associate {
+        createAssistedValueAdapter(factory.grip.classRegistry.getClassMirror(it), factory.grip)
       })
     }
 
-    private fun findTypeAdapterClasses(registry: ClassRegistry): Collection<ClassReference> {
-      return registry.classes.filter {
-        !it.isInterface && registry.isSubclassOf(it.type, Types.SMUGGLER_ADAPTER)
-      }
-    }
-
-    private fun createAssistedValueAdapter(spec: ClassSpec, registry: ClassRegistry): Pair<Type, ValueAdapter> {
-      if (!registry.isSubclassOf(spec.type, Types.SMUGGLER_ADAPTER)) {
+    private fun createAssistedValueAdapter(spec: ClassMirror, grip: Grip): Pair<Type, ValueAdapter> {
+      if (!grip.isSubclassOf(spec.type, Types.SMUGGLER_ADAPTER)) {
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must implement TypeAdapter interface")
       }
 
@@ -95,8 +95,8 @@ internal class ValueAdapterFactory private constructor(
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be not abstract")
       }
 
-      val constructor = spec.getConstructor()
-      val assisted = createAssistedTypeForTypeAdapter(spec, registry)
+      val constructor = spec.getDeclaredConstructor()
+      val assisted = createAssistedTypeForTypeAdapter(spec, grip)
       val metadata = spec.getAnnotation<Metadata>()
 
       if (metadata != null) {
@@ -119,11 +119,12 @@ internal class ValueAdapterFactory private constructor(
       return assisted to AssistedValueAdapter.fromClass(spec.type, assisted)
     }
 
-    private fun createAssistedTypeForTypeAdapter(spec: ClassSpec, registry: ClassRegistry): Type {
-      val assisted = resolveAssistedType(spec.type, spec.type, registry)
+    private fun createAssistedTypeForTypeAdapter(spec: ClassMirror, grip: Grip): Type {
+      val assisted = resolveAssistedType(spec.type, spec.type, grip)
+      val signature = spec.signature
 
-      if (spec.signature != null && !GripInvider.readClassSignature(spec.signature).typeParameters.isEmpty()) {
-        throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can't have any type parameters")
+      if (signature != null && !signature.typeParameters.isEmpty()) {
+        throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can''t have any type parameters")
       }
 
       if (assisted !is GenericType.RawType) {
@@ -133,25 +134,23 @@ internal class ValueAdapterFactory private constructor(
       return assisted.type
     }
 
-    private fun resolveAssistedType(adapter: Type, current: Type, registry: ClassRegistry): GenericType {
-      val spec = registry.resolve(current, false)
+    private fun resolveAssistedType(adapter: Type, current: Type, grip: Grip): GenericType {
+      val spec = grip.classRegistry.getClassMirror(current)
+      val parent = spec.superType
+
       val method = spec.methods.singleOrNull {
-        !it.isSynthetic && it.name == "fromParcel" && Arrays.equals(it.arguments, arrayOf(Types.ANDROID_PARCEL))
+        !it.isSynthetic && it.name == "fromParcel" && Arrays.equals(it.type.argumentTypes, arrayOf(Types.ANDROID_PARCEL))
       }
 
-      if (method != null && method.signature != null) {
-        return GripInvider.readMethodSignature(method.signature).returnType
+      if (method != null) {
+        return method.signature.returnType
       }
 
-      if (method != null && method.signature == null) {
-        return GenericType.RawType(method.returns)
-      }
-
-      if (spec.parent == Types.OBJECT) {
+      if (parent == null) {
         throw InvalidTypeAdapterException(adapter, "Unable to extract assisted type information")
       }
 
-      return resolveAssistedType(adapter, spec.parent, registry)
+      return resolveAssistedType(adapter, parent, grip)
     }
   }
 
@@ -183,15 +182,15 @@ internal class ValueAdapterFactory private constructor(
         Types.COLLECTION -> return createCollection(Types.COLLECTION, Types.ARRAY_LIST, spec, property, generic)
       }
 
-      if (registry.isSubclassOf(type, Types.ENUM)) {
+      if (grip.isSubclassOf(type, Types.ENUM)) {
         return EnumValueAdapter
       }
 
-      if (registry.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
+      if (grip.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
         return createSparseArray(spec, property)
       }
 
-      if (registry.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
+      if (grip.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
         return ParcelableValueAdapter
       }
 
@@ -203,7 +202,7 @@ internal class ValueAdapterFactory private constructor(
         return ArrayPropertyAdapter(create(spec, property, GenericType.RawType(Types.getElementType(type))))
       }
 
-      if (registry.isSubclassOf(type, Types.SERIALIZABLE)) {
+      if (grip.isSubclassOf(type, Types.SERIALIZABLE)) {
         return SerializableValueAdapter
       }
 

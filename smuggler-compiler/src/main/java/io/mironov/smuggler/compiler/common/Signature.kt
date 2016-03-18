@@ -1,4 +1,4 @@
-package io.mironov.smuggler.compiler.reflect
+package io.mironov.smuggler.compiler.common
 
 import org.objectweb.asm.Type
 
