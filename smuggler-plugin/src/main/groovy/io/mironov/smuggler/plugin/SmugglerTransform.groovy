@@ -13,8 +13,11 @@ import com.google.common.collect.Iterables
 import io.mironov.smuggler.compiler.SmugglerCompiler
 import io.mironov.smuggler.compiler.SmugglerOptions
 import org.gradle.api.Project
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 public class SmugglerTransform extends Transform {
+  private final Logger logger = LoggerFactory.getLogger(SmugglerTransform.class)
   private final Project project
 
   public SmugglerTransform(final Project project) {
@@ -40,6 +43,26 @@ public class SmugglerTransform extends Transform {
 
     if (library != null) {
       classpath.addAll(library.bootClasspath)
+    }
+
+    inputs.each {
+      it.directoryInputs.forEach {
+        logger.error("[CLASSES] ${it.scopes} ${it.file}")
+      }
+
+      it.jarInputs.forEach {
+        logger.error("[CLASSES] ${it.scopes} ${it.file}")
+      }
+    }
+
+    references.each {
+      it.directoryInputs.forEach {
+        logger.error("[CLASSPATH] ${it.scopes} ${it.file}")
+      }
+
+      it.jarInputs.forEach {
+        logger.error("[CLASSPATH] ${it.scopes} ${it.file}")
+      }
     }
 
     inputs.each {
