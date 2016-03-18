@@ -1,7 +1,7 @@
 package io.mironov.smuggler.compiler.generators
 
+import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.mironov.smuggler.compiler.common.Types
-import io.mironov.smuggler.compiler.signature.GenericType
 import java.util.HashMap
 import java.util.NoSuchElementException
 

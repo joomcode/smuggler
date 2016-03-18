@@ -6,6 +6,7 @@ import io.mironov.smuggler.compiler.GenerationEnvironment
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.common.asAsmType
 import io.mironov.smuggler.compiler.common.given
 import io.mironov.smuggler.compiler.common.isPrivate
 import io.mironov.smuggler.compiler.common.isStatic

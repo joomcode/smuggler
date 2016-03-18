@@ -1,5 +1,6 @@
 package io.mironov.smuggler.compiler.generators
 
+import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.mironov.smuggler.compiler.ClassRegistry
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.InvalidTypeAdapterException
@@ -8,7 +9,10 @@ import io.mironov.smuggler.compiler.annotations.LocalAdapter
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
+import io.mironov.smuggler.compiler.common.GripInvider
 import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.common.asAsmType
+import io.mironov.smuggler.compiler.common.asRawType
 import io.mironov.smuggler.compiler.common.isAbstract
 import io.mironov.smuggler.compiler.common.isInterface
 import io.mironov.smuggler.compiler.common.isPublic
@@ -17,9 +21,6 @@ import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import io.mironov.smuggler.compiler.reflect.ClassReference
 import io.mironov.smuggler.compiler.reflect.ClassSpec
-import io.mironov.smuggler.compiler.signature.ClassSignatureMirror
-import io.mironov.smuggler.compiler.signature.GenericType
-import io.mironov.smuggler.compiler.signature.MethodSignatureMirror
 import org.objectweb.asm.Type
 import java.util.Arrays
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
@@ -121,7 +122,7 @@ internal class ValueAdapterFactory private constructor(
     private fun createAssistedTypeForTypeAdapter(spec: ClassSpec, registry: ClassRegistry): Type {
       val assisted = resolveAssistedType(spec.type, spec.type, registry)
 
-      if (spec.signature != null && !ClassSignatureMirror.read(spec.signature).typeParameters.isEmpty()) {
+      if (spec.signature != null && !GripInvider.readClassSignature(spec.signature).typeParameters.isEmpty()) {
         throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can't have any type parameters")
       }
 
@@ -139,7 +140,7 @@ internal class ValueAdapterFactory private constructor(
       }
 
       if (method != null && method.signature != null) {
-        return MethodSignatureMirror.read(method.signature).returnType
+        return GripInvider.readMethodSignature(method.signature).returnType
       }
 
       if (method != null && method.signature == null) {
@@ -194,7 +195,7 @@ internal class ValueAdapterFactory private constructor(
         return ParcelableValueAdapter
       }
 
-      if (generic is GenericType.ArrayType) {
+      if (generic is GenericType.GenericArrayType) {
         return ArrayPropertyAdapter(create(spec, property, generic.elementType))
       }
 
@@ -252,7 +253,7 @@ internal class ValueAdapterFactory private constructor(
     }
 
     generic.typeArguments.forEach {
-      if (it !is GenericType.RawType && it !is GenericType.ParameterizedType && it !is GenericType.ArrayType) {
+      if (it !is GenericType.RawType && it !is GenericType.ParameterizedType && it !is GenericType.GenericArrayType) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
       }
     }

@@ -1,9 +1,11 @@
 package io.mironov.smuggler.compiler.generators
 
+import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
-import io.mironov.smuggler.compiler.signature.GenericType
+import io.mironov.smuggler.compiler.common.asAsmType
+import io.mironov.smuggler.compiler.common.asParameterizedType
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 
@@ -336,7 +338,7 @@ internal class ArrayPropertyAdapter(
   }
 
   private fun ValueContext.asElementContext(): ValueContext {
-    return if (type !is GenericType.ArrayType) {
+    return if (type !is GenericType.GenericArrayType) {
       typed(GenericType.RawType(Types.getElementType(type.asAsmType())))
     } else {
       typed(type.elementType)

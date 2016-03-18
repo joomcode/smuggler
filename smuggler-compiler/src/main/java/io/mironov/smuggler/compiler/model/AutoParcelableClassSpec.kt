@@ -1,8 +1,8 @@
 package io.mironov.smuggler.compiler.model
 
+import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.mironov.smuggler.compiler.reflect.ClassSpec
 import io.mironov.smuggler.compiler.reflect.MethodSpec
-import io.mironov.smuggler.compiler.signature.GenericType
 
 internal data class AutoParcelableClassSpec(
     val clazz: ClassSpec,

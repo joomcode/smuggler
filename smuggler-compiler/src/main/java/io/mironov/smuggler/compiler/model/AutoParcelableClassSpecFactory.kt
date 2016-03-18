@@ -1,14 +1,14 @@
 package io.mironov.smuggler.compiler.model
 
+import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.mironov.smuggler.compiler.ClassRegistry
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
+import io.mironov.smuggler.compiler.common.GripInvider
 import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.reflect.ClassReference
-import io.mironov.smuggler.compiler.signature.GenericType
-import io.mironov.smuggler.compiler.signature.MethodSignatureMirror
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
@@ -50,7 +50,7 @@ internal object AutoParcelableClassSpecFactory {
       val getter = spec.getDeclaredMethod("component${index + 1}")!!
       val signature = getter.signature
 
-      val generic = if (signature != null) MethodSignatureMirror.read(signature) else null
+      val generic = if (signature != null) GripInvider.readMethodSignature(signature) else null
       val type = getter.returns
 
       AutoParcelablePropertySpec(name, generic?.returnType ?: GenericType.RawType(type), getter)
