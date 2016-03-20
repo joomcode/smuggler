@@ -72,8 +72,8 @@ internal fun Grip.isSubclassOf(type: Type, parent: Type): Boolean {
   return isSubclassOf(mirror.superType ?: return false, parent)
 }
 
-internal fun isSubclass(type: Type, grip: Grip): (ClassMirror) -> Boolean = {
-  grip.isSubclassOf(it.type, type)
+internal fun isSubclass(type: Type): (Grip, ClassMirror) -> Boolean = { grip, mirror ->
+  grip.isSubclassOf(mirror.type, type)
 }
 
 internal inline fun <reified A : Any> ClassMirror.getAnnotation(): A? {

@@ -19,11 +19,11 @@ class SmugglerCompiler {
     val grip = GripFactory.create(files)
 
     val environment = GenerationEnvironment(grip)
-    val factory = ValueAdapterFactory.from(grip, files)
+    val factory = ValueAdapterFactory.from(grip)
 
     val parcelables = grip.select(classes)
-        .from(options.classes.toList())
-        .where(not(isInterface()) and isSubclass(Types.SMUGGLER_PARCELABLE, grip))
+        .from(files)
+        .where(not(isInterface()) and isSubclass(Types.SMUGGLER_PARCELABLE))
 
     options.classes.forEach {
       it.copyRecursively(options.output, true)

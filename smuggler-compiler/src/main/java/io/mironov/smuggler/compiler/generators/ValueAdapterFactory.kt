@@ -4,6 +4,7 @@ import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.and
 import io.michaelrocks.grip.annotatedWith
 import io.michaelrocks.grip.classes
+import io.michaelrocks.grip.classpath
 import io.michaelrocks.grip.isInterface
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.signature.GenericType
@@ -27,7 +28,6 @@ import io.mironov.smuggler.compiler.common.isSynthetic
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import org.objectweb.asm.Type
-import java.io.File
 import java.util.Arrays
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
@@ -64,10 +64,10 @@ internal class ValueAdapterFactory private constructor(
         Types.ANDROID_BUNDLE to BundleValueAdapter
     )
 
-    fun from(grip: Grip, inputs: Collection<File>): ValueAdapterFactory {
+    fun from(grip: Grip): ValueAdapterFactory {
       return ValueAdapterFactory(grip, ADAPTERS + grip.select(classes)
-          .from(inputs.toList())
-          .where(not(isInterface()) and isSubclass(Types.SMUGGLER_ADAPTER, grip) and annotatedWith(Types.SMUGGLER_GLOBAL_ADAPTER))
+          .from(classpath)
+          .where(not(isInterface()) and isSubclass(Types.SMUGGLER_ADAPTER) and annotatedWith(Types.SMUGGLER_GLOBAL_ADAPTER))
           .execute().values
           .associate { createAssistedValueAdapter(it, grip) }
       )
@@ -123,7 +123,7 @@ internal class ValueAdapterFactory private constructor(
       val assisted = resolveAssistedType(spec.type, spec.type, grip)
       val signature = spec.signature
 
-      if (signature != null && !signature.typeParameters.isEmpty()) {
+      if (!signature.typeParameters.isEmpty()) {
         throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can''t have any type parameters")
       }
 

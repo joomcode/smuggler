@@ -12,7 +12,6 @@ import io.mironov.smuggler.compiler.common.given
 import io.mironov.smuggler.compiler.common.isPrivate
 import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.common.Signature
-import io.mironov.smuggler.compiler.common.cast
 import io.mironov.smuggler.compiler.common.getStaticInitializer
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import org.objectweb.asm.ClassReader
@@ -94,13 +93,7 @@ internal class ParcelableContentGenerator(
 
   private fun onCreatePatchedClassGeneratedContent(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(spec.clazz.type, emptyMap(), environment.newClass {
-      val classes = environment.grip.classRegistry.javaClass.getDeclaredField("fileRegistry")
-      val registry = classes.apply { isAccessible = true }.get(environment.grip.classRegistry)
-
-      val reader = registry.javaClass.getMethod("readClass", Type::class.java)
-      val bytes = reader.invoke(registry, spec.clazz.type).cast<ByteArray>()
-
-      ClassReader(bytes).accept(object : ClassVisitor(ASM5, this) {
+      ClassReader(environment.grip.fileRegistry.readClass(spec.clazz.type)).accept(object : ClassVisitor(ASM5, this) {
         override fun visit(version: Int, access: Int, name: String, signature: String?, parent: String?, exceptions: Array<out String>?) {
           super.visit(version, access, name, signature, parent, exceptions)
           visitField(ACC_PUBLIC + ACC_STATIC + ACC_FINAL, "CREATOR", Types.ANDROID_CREATOR, creatorFieldSignatureFrom(spec))
