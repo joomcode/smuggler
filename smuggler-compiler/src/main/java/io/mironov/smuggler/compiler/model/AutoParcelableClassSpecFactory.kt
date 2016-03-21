@@ -15,7 +15,6 @@ import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
 
 internal object AutoParcelableClassSpecFactory {
   fun from(mirror: ClassMirror): AutoParcelableClassSpec {
-    val signature = mirror.signature
     val metadata = mirror.getAnnotation<Metadata>() ?: run {
       throw InvalidAutoParcelableException(mirror.type, "Only kotlin classes can implement AutoParcelable interface.")
     }
@@ -28,7 +27,7 @@ internal object AutoParcelableClassSpecFactory {
       throw InvalidAutoParcelableException(mirror.type, "Only data classes can implement AutoParcelable interface.")
     }
 
-    if (signature != null && !signature.typeParameters.isEmpty()) {
+    if (!mirror.signature.typeParameters.isEmpty()) {
       throw InvalidAutoParcelableException(mirror.type, "Generic classes are not supported at the moment.")
     }
 
