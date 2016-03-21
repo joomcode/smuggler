@@ -12,12 +12,20 @@ data class SmugglerOptions(
     private val classes = ArrayList<File>()
     private val classpath = ArrayList<File>()
 
+    fun classes(file: File) = apply {
+      classes.add(file)
+    }
+
     fun classes(files: List<File>) = apply {
       classes.addAll(files)
     }
 
     fun classpath(files: List<File>) = apply {
       classpath.addAll(files)
+    }
+
+    fun classpath(file: File) = apply {
+      classpath.add(file)
     }
 
     fun build(): SmugglerOptions {
