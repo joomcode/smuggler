@@ -22,7 +22,7 @@ class SmugglerCompiler {
     val factory = ValueAdapterFactory.from(grip)
 
     val parcelables = grip.select(classes)
-        .from(files)
+        .from(options.classes)
         .where(not(isInterface()) and isSubclass(Types.SMUGGLER_PARCELABLE))
 
     options.classes.forEach {
