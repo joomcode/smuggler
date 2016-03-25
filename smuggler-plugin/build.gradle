@@ -9,6 +9,9 @@ apply plugin: "com.jfrog.bintray"
 apply plugin: "maven-publish"
 apply plugin: "idea"
 
+targetCompatibility = JavaVersion.VERSION_1_6
+sourceCompatibility = JavaVersion.VERSION_1_6
+
 dependencies {
   compile project(":smuggler-compiler")
 
