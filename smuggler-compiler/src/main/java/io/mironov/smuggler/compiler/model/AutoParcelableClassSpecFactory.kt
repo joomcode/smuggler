@@ -1,6 +1,7 @@
 package io.mironov.smuggler.compiler.model
 
 import io.michaelrocks.grip.mirrors.ClassMirror
+import io.michaelrocks.grip.mirrors.isStatic
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
@@ -8,7 +9,6 @@ import io.mironov.smuggler.compiler.annotations.strings
 import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredField
 import io.mironov.smuggler.compiler.common.getDeclaredMethod
-import io.mironov.smuggler.compiler.common.isStatic
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil

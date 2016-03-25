@@ -7,6 +7,9 @@ import io.michaelrocks.grip.classes
 import io.michaelrocks.grip.classpath
 import io.michaelrocks.grip.isInterface
 import io.michaelrocks.grip.mirrors.ClassMirror
+import io.michaelrocks.grip.mirrors.isAbstract
+import io.michaelrocks.grip.mirrors.isPublic
+import io.michaelrocks.grip.mirrors.isSynthetic
 import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.not
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
@@ -20,11 +23,8 @@ import io.mironov.smuggler.compiler.common.asAsmType
 import io.mironov.smuggler.compiler.common.asRawType
 import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredConstructor
-import io.mironov.smuggler.compiler.common.isAbstract
-import io.mironov.smuggler.compiler.common.isPublic
 import io.mironov.smuggler.compiler.common.isSubclass
 import io.mironov.smuggler.compiler.common.isSubclassOf
-import io.mironov.smuggler.compiler.common.isSynthetic
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import org.objectweb.asm.Type

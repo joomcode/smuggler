@@ -1,6 +1,7 @@
 package io.mironov.smuggler.compiler.generators
 
 import io.michaelrocks.grip.mirrors.MethodMirror
+import io.michaelrocks.grip.mirrors.isPrivate
 import io.mironov.smuggler.compiler.ContentGenerator
 import io.mironov.smuggler.compiler.GeneratedContent
 import io.mironov.smuggler.compiler.GenerationEnvironment
@@ -9,7 +10,6 @@ import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.asAsmType
 import io.mironov.smuggler.compiler.common.given
-import io.mironov.smuggler.compiler.common.isPrivate
 import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.common.Signature
 import io.mironov.smuggler.compiler.common.getStaticInitializer

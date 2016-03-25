@@ -4,6 +4,7 @@ import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.FieldMirror
 import io.michaelrocks.grip.mirrors.MethodMirror
+import io.michaelrocks.grip.mirrors.isStatic
 import io.michaelrocks.grip.mirrors.isStaticInitializer
 import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.mironov.smuggler.compiler.SmugglerException
