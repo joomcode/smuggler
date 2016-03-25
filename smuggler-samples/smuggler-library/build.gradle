@@ -22,5 +22,4 @@ android {
 
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 }
