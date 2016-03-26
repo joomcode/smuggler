@@ -31,11 +31,11 @@ internal fun GenericType.asAsmType(): Type {
 
 internal fun Grip.isSubclassOf(type: Type, parent: Type): Boolean {
   if (type.sort == Type.METHOD) {
-    throw SmugglerException("Invalid argument type = $type. Types with ''sort'' == Type.METHOD are not allowed.")
+    throw SmugglerException("Invalid argument type = $type. Types with ''sort'' == Type.METHOD are not allowed")
   }
 
   if (parent.sort == Type.METHOD) {
-    throw SmugglerException("Invalid argument parent = $parent. Types with ''sort'' == Type.METHOD are not allowed.")
+    throw SmugglerException("Invalid argument parent = $parent. Types with ''sort'' == Type.METHOD are not allowed")
   }
 
   if (type == parent) {
