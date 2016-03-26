@@ -4,10 +4,10 @@ import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.MethodMirror
 import io.michaelrocks.grip.mirrors.signature.GenericType
 
-internal data class AutoParcelableClassSpec(
-    val clazz: ClassMirror,
-    val properties: List<AutoParcelablePropertySpec>
-)
+internal sealed class AutoParcelableClassSpec(val clazz: ClassMirror) {
+  class Object(clazz: ClassMirror, val name: String) : AutoParcelableClassSpec(clazz)
+  class Data(clazz: ClassMirror, val properties: List<AutoParcelablePropertySpec>) : AutoParcelableClassSpec(clazz)
+}
 
 internal data class AutoParcelablePropertySpec(
     val name: String,

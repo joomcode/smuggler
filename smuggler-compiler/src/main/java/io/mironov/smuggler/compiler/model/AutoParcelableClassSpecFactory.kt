@@ -23,8 +23,12 @@ internal object AutoParcelableClassSpecFactory {
     val clazz = proto.classProto
     val resolver = proto.nameResolver
 
+    if (Flags.CLASS_KIND.get(clazz.flags) == ProtoBuf.Class.Kind.OBJECT) {
+      return AutoParcelableClassSpec.Object(mirror, "INSTANCE")
+    }
+
     if (!Flags.IS_DATA.get(clazz.flags)) {
-      throw InvalidAutoParcelableException(mirror.type, "Only data classes can implement AutoParcelable interface.")
+      throw InvalidAutoParcelableException(mirror.type, "Only data classes and objects can implement AutoParcelable interface.")
     }
 
     if (!mirror.signature.typeParameters.isEmpty()) {
@@ -44,13 +48,11 @@ internal object AutoParcelableClassSpecFactory {
       throw InvalidAutoParcelableException(mirror.type, "AutoParcelable classes shouldn''t declare CREATOR field.")
     }
 
-    val properties = constructor.valueParameterList.mapIndexed { index, parameter ->
+    return AutoParcelableClassSpec.Data(mirror, constructor.valueParameterList.mapIndexed { index, parameter ->
       val name = resolver.getName(parameter.name).identifier
       val getter = mirror.getDeclaredMethod("component${index + 1}")!!
 
       AutoParcelablePropertySpec(name, getter.signature.returnType, getter)
-    }
-
-    return AutoParcelableClassSpec(mirror, properties)
+    })
   }
 }
