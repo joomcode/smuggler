@@ -794,6 +794,60 @@ class SmugglerTest {
     }
   }
 
+  @Test fun shouldWorkWithObjects() {
+    data class Objects(
+        val one: One,
+        val two: Two,
+        val three: Three,
+        val four: Four
+    ) : AutoParcelable
+
+    data class Lists(
+        val one: List<One>,
+        val two: List<Two>,
+        val three: List<Three>,
+        val four: List<Four>,
+        val five: List<AutoParcelable>
+    ) : AutoParcelable
+
+    data class Sets(
+        val one: Set<One>,
+        val two: Set<Two>,
+        val three: Set<Three>,
+        val four: Set<Four>,
+        val five: Set<AutoParcelable>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Objects> {
+      Objects(
+          one = One,
+          two = Two,
+          three = Three,
+          four = Four
+      )
+    }
+
+    SmugglerAssertions.verify<Lists> {
+      Lists(
+          one = generator.nextList { One },
+          two = generator.nextList { Two },
+          three = generator.nextList { Three },
+          four = generator.nextList { Four },
+          five = generator.nextList { generator.nextElement(arrayOf(One, Two, Three, Four)) }
+      )
+    }
+
+    SmugglerAssertions.verify<Sets> {
+      Sets(
+          one = generator.nextSet { One },
+          two = generator.nextSet { Two },
+          three = generator.nextSet { Three },
+          four = generator.nextSet { Four },
+          five = generator.nextSet { generator.nextElement(arrayOf(One, Two, Three, Four)) }
+      )
+    }
+  }
+
   interface Wrapper : AutoParcelable {
     val value: String
   }
@@ -831,6 +885,11 @@ class SmugglerTest {
       const val EXTRA_MESSAGE = "message"
     }
   }
+
+  private object One : AutoParcelable
+  private object Two : AutoParcelable
+  private object Three : AutoParcelable
+  private object Four : AutoParcelable
 
   private enum class Magic {
     ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN

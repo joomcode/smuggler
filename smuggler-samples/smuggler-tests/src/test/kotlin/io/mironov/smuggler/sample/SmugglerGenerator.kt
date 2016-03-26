@@ -35,6 +35,12 @@ class SmugglerGenerator(private val seed: Long) {
   inline fun <reified S : MutableSet<T>, reified T : Any> nextSet(factory: (Int) -> S, element: (Int) -> T): S = createSet(factory, element)
   inline fun <reified S : MutableSet<T>, reified T : Any> nextNullableSet(factory: (Int) -> S, element: (Int) -> T): S? = nextNullableValue { nextSet(factory, element) }
 
+  fun <T : Any> nextElement(array: Array<T>): T = array[random.nextInt(array.size)]
+  fun <T : Any> nextNullableElement(array: Array<T>): T? = nextNullableValue { nextElement(array) }
+
+  fun <T : Any> nextElement(list: List<T>): T = list[random.nextInt(list.size)]
+  fun <T : Any> nextNullableElement(list: List<T>): T? = nextNullableValue { nextElement(list) }
+
   fun nextArraySize() = random.nextInt(MAX_ARRAY_SIZE)
   fun nextNullableProbability() = random.nextInt(3) == 0
 
