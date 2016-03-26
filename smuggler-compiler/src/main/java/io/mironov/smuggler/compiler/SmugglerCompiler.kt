@@ -3,6 +3,7 @@ package io.mironov.smuggler.compiler
 import io.michaelrocks.grip.GripFactory
 import io.michaelrocks.grip.and
 import io.michaelrocks.grip.classes
+import io.michaelrocks.grip.isAbstract
 import io.michaelrocks.grip.isInterface
 import io.michaelrocks.grip.not
 import io.mironov.smuggler.compiler.common.Types
@@ -23,7 +24,7 @@ class SmugglerCompiler {
 
     val parcelables = grip.select(classes)
         .from(options.classes)
-        .where(not(isInterface()) and isSubclass(Types.SMUGGLER_PARCELABLE))
+        .where(not(isInterface()) and not(isAbstract()) and isSubclass(Types.SMUGGLER_PARCELABLE))
 
     options.classes.forEach {
       it.copyRecursively(options.output, true)
