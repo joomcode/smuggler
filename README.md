@@ -19,6 +19,18 @@ data class Chat(
 ) : AutoParcelable
 ```
 
+Kotlin objects are supported as well:
+```kotlin
+interface Command : AutoParcelable
+
+object LoginCommand : Command
+object LogoutCommand : Command
+object MenuCommand : Command
+
+data class ProductCommand(val id: String) : Command
+data class CategoryCommand(val id: String) : Command
+```
+
 # Project Setup
 ```gradle
 buildscript {

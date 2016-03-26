@@ -796,54 +796,48 @@ class SmugglerTest {
 
   @Test fun shouldWorkWithObjects() {
     data class Objects(
-        val one: One,
-        val two: Two,
-        val three: Three,
-        val four: Four
+        val one: LoginCommand,
+        val two: LogoutCommand,
+        val three: MenuCommand
     ) : AutoParcelable
 
     data class Lists(
-        val one: List<One>,
-        val two: List<Two>,
-        val three: List<Three>,
-        val four: List<Four>,
-        val five: List<AutoParcelable>
+        val one: List<LoginCommand>,
+        val two: List<LogoutCommand>,
+        val three: List<MenuCommand>,
+        val four: List<Command>
     ) : AutoParcelable
 
     data class Sets(
-        val one: Set<One>,
-        val two: Set<Two>,
-        val three: Set<Three>,
-        val four: Set<Four>,
-        val five: Set<AutoParcelable>
+        val one: Set<LoginCommand>,
+        val two: Set<LogoutCommand>,
+        val three: Set<MenuCommand>,
+        val four: Set<Command>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Objects> {
       Objects(
-          one = One,
-          two = Two,
-          three = Three,
-          four = Four
+          one = LoginCommand,
+          two = LogoutCommand,
+          three = MenuCommand
       )
     }
 
     SmugglerAssertions.verify<Lists> {
       Lists(
-          one = generator.nextList { One },
-          two = generator.nextList { Two },
-          three = generator.nextList { Three },
-          four = generator.nextList { Four },
-          five = generator.nextList { generator.nextElement(arrayOf(One, Two, Three, Four)) }
+          one = generator.nextList { LoginCommand },
+          two = generator.nextList { LogoutCommand },
+          three = generator.nextList { MenuCommand },
+          four = generator.nextList { generator.nextElement(arrayOf(LoginCommand, LogoutCommand, ProductCommand(generator.nextString()), CategoryCommand(generator.nextString()))) }
       )
     }
 
     SmugglerAssertions.verify<Sets> {
       Sets(
-          one = generator.nextSet { One },
-          two = generator.nextSet { Two },
-          three = generator.nextSet { Three },
-          four = generator.nextSet { Four },
-          five = generator.nextSet { generator.nextElement(arrayOf(One, Two, Three, Four)) }
+          one = generator.nextSet { LoginCommand },
+          two = generator.nextSet { LogoutCommand },
+          three = generator.nextSet { MenuCommand },
+          four = generator.nextSet { generator.nextElement(arrayOf(LoginCommand, LogoutCommand, ProductCommand(generator.nextString()), CategoryCommand(generator.nextString()))) }
       )
     }
   }
@@ -886,10 +880,14 @@ class SmugglerTest {
     }
   }
 
-  private object One : AutoParcelable
-  private object Two : AutoParcelable
-  private object Three : AutoParcelable
-  private object Four : AutoParcelable
+  private interface Command : AutoParcelable
+
+  private object LoginCommand : Command
+  private object LogoutCommand : Command
+  private object MenuCommand : Command
+
+  private data class ProductCommand(val id: String) : Command
+  private data class CategoryCommand(val id: String) : Command
 
   private enum class Magic {
     ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN
