@@ -28,9 +28,9 @@ buildscript {
   }
     
   dependencies {
-  	classpath "com.android.tools.build:gradle:1.5.0"
+    classpath "com.android.tools.build:gradle:1.5.0"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0"
-    classpath "io.mironov.smuggler:smuggler-plugin:0.12.3"
+    classpath "io.mironov.smuggler:smuggler-plugin:0.12.4"
   }
 }
 
