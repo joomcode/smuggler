@@ -22,7 +22,7 @@ android {
   }
 
   sourceSets {
-    androidTest.java.srcDirs += 'src/test/kotlin'
+    androidTest.java.srcDirs += 'src/instrumented/kotlin'
   }
 }
 
@@ -30,6 +30,7 @@ dependencies {
   compile project(":smuggler-samples:smuggler-library")
 
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
   androidTestCompile "com.android.support.test:runner:$supportTestRunnerVersion"
   androidTestCompile "com.android.support.test:rules:$supportTestRunnerVersion"
