@@ -1,15 +1,19 @@
 # Smuggler
-Makes your data classes Parcelable. Just add `AutoParceable` to the class declaration. That's all. No methods need to be implemented.
+Makes your data classes Parcelable. Just add `AutoParcelable` to the class declaration. That's all. No methods need to be implemented.
 
 ```kotlin
 data class User(
+  val uuid: String,
   val firstName: String,
   val lastName: String
 ) : AutoParcelable
 
 data class Message(
+  val uuid: String,
   val text: String,
-  val user: User
+  val sender: User,
+  val timestamp: Long,
+  val seen: Boolean
 ) : AutoParcelable
 
 data class Chat(
@@ -95,31 +99,35 @@ Some **important** notes:
   ```kotlin
   @LocalAdapter(BigIntegerTypeAdapter::class, CalendarTypeAdapter::class)
   data class Local(
-      val integer: BigInteger,
-      val calendar: Calendar
+    val integer: BigInteger,
+    val calendar: Calendar
   ) : AutoParcelable
   ```
 - Defining `TypeAdapter` for a particular type automatically allows to use this type with `Lists`, `Maps`, `Sets` and `Arrays`:
 
   ```kotlin
   data class BigIntegerExample(
-      val single: BigInteger,
-      val array: Array<BigInteger>,
-      val multidimensional: Array<Array<BigInteger>>,
-      val list: List<BigInteger>,
-      val set: Set<BigInteger>,
-      val map: Map<String, BigInteger>,
-      val complex: Map<Set<BigInteger>, Array<List<BigInteger>>>
+    val single: BigInteger,
+    val array: Array<BigInteger>,
+    val multidimensional: Array<Array<BigInteger>>,
+    val list: List<BigInteger>,
+    val set: Set<BigInteger>,
+    val map: Map<String, BigInteger>,
+    val complex: Map<Set<BigInteger>, Array<List<BigInteger>>>
   ) : AutoParcelable
   ```
 - Custom `TypeAdapter` can be defined both as `class` or `object`
 - `TypeAdapter` defined as `class` must have a public no-args constructor
 
+# How does it work?
+`Smuggler` doesn't use reflection so you don't have to worry about its performance. It isn't an annotation proccessor so you don't have to deal with `kapt` bugs. Instead, `Smuggler` built on top of [transform api](http://tools.android.com/tech-docs/new-build-system/transform-api) and works by proccessing your compiled bytecode and patching classes that implement `AutoParcelable` interface. 
+
 # Known limitations
-- Only data classes are supported
+- Only data classes and kotlin objects are supported
 - Data classes with type parameters aren't supported at the moment
 - Lists, Maps and Arrays with bounded type parameters aren't supported at the moment
 - Jack&Jill toolchain isn't supported at the moment
+- The library doesn't work nicely with JVM tests at the moment [#12](https://github.com/nsk-mironov/smuggler/issues/12)
 
 # What does "Smuggler" mean?
 A smuggler was an individual who dealt with the secret exchanged shipment of goods to block restrictions or tax fees. The items shipped were often considered contraband, and highly illegal. Notable smugglers included Han Solo, Chewbacca, and Lando Calrissian. © [http://starwars.wikia.com](http://starwars.wikia.com/wiki/Smuggler)
