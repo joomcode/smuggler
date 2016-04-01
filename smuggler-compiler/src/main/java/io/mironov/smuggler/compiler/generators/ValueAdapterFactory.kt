@@ -1,17 +1,13 @@
 package io.mironov.smuggler.compiler.generators
 
 import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.and
-import io.michaelrocks.grip.annotatedWith
 import io.michaelrocks.grip.classes
 import io.michaelrocks.grip.classpath
-import io.michaelrocks.grip.isInterface
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.isAbstract
 import io.michaelrocks.grip.mirrors.isPublic
 import io.michaelrocks.grip.mirrors.isSynthetic
 import io.michaelrocks.grip.mirrors.signature.GenericType
-import io.michaelrocks.grip.not
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.InvalidTypeAdapterException
 import io.mironov.smuggler.compiler.annotations.LocalAdapter
@@ -23,7 +19,7 @@ import io.mironov.smuggler.compiler.common.asAsmType
 import io.mironov.smuggler.compiler.common.asRawType
 import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredConstructor
-import io.mironov.smuggler.compiler.common.isSubclass
+import io.mironov.smuggler.compiler.common.isGlobalTypeAdapter
 import io.mironov.smuggler.compiler.common.isSubclassOf
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
@@ -67,7 +63,7 @@ internal class ValueAdapterFactory private constructor(
     fun from(grip: Grip): ValueAdapterFactory {
       return ValueAdapterFactory(grip, ADAPTERS + grip.select(classes)
           .from(classpath)
-          .where(not(isInterface()) and isSubclass(Types.SMUGGLER_ADAPTER) and annotatedWith(Types.SMUGGLER_GLOBAL_ADAPTER))
+          .where(isGlobalTypeAdapter())
           .execute().values
           .associate { createAssistedValueAdapter(it, grip) }
       )

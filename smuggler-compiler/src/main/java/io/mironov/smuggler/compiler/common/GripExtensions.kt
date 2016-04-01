@@ -1,12 +1,17 @@
 package io.mironov.smuggler.compiler.common
 
 import io.michaelrocks.grip.Grip
+import io.michaelrocks.grip.and
+import io.michaelrocks.grip.annotatedWith
+import io.michaelrocks.grip.isAbstract
+import io.michaelrocks.grip.isInterface
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.FieldMirror
 import io.michaelrocks.grip.mirrors.MethodMirror
 import io.michaelrocks.grip.mirrors.isStatic
 import io.michaelrocks.grip.mirrors.isStaticInitializer
 import io.michaelrocks.grip.mirrors.signature.GenericType
+import io.michaelrocks.grip.not
 import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.annotations.AnnotationProxy
 import org.objectweb.asm.Type
@@ -75,6 +80,18 @@ internal fun Grip.isSubclassOf(type: Type, parent: Type): Boolean {
 
 internal fun isSubclass(type: Type): (Grip, ClassMirror) -> Boolean = { grip, mirror ->
   grip.isSubclassOf(mirror.type, type)
+}
+
+internal fun isTypeAdapter(): (Grip, ClassMirror) -> Boolean {
+  return isSubclass(Types.SMUGGLER_ADAPTER)
+}
+
+internal fun isGlobalTypeAdapter(): (Grip, ClassMirror) -> Boolean {
+  return isTypeAdapter() and annotatedWith(Types.SMUGGLER_GLOBAL_ADAPTER)
+}
+
+internal fun isAutoParcelable(): (Grip, ClassMirror) -> Boolean {
+  return not(isInterface()) and isSubclass(Types.SMUGGLER_PARCELABLE)
 }
 
 internal inline fun <reified A : Any> ClassMirror.getAnnotation(): A? {
