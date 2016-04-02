@@ -2,7 +2,6 @@ package io.mironov.smuggler.compiler.generators
 
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.classes
-import io.michaelrocks.grip.classpath
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.isAbstract
 import io.michaelrocks.grip.mirrors.isPublic
@@ -24,6 +23,7 @@ import io.mironov.smuggler.compiler.common.isSubclassOf
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
 import org.objectweb.asm.Type
+import java.io.File
 import java.util.Arrays
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
@@ -60,9 +60,9 @@ internal class ValueAdapterFactory private constructor(
         Types.ANDROID_BUNDLE to BundleValueAdapter
     )
 
-    fun from(grip: Grip): ValueAdapterFactory {
+    fun from(grip: Grip, files: Collection<File>): ValueAdapterFactory {
       return ValueAdapterFactory(grip, ADAPTERS + grip.select(classes)
-          .from(classpath)
+          .from(files)
           .where(isGlobalTypeAdapter())
           .execute().values
           .associate { createAssistedValueAdapter(it, grip) }

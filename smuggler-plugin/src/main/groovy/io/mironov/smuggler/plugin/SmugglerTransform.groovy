@@ -31,9 +31,10 @@ public class SmugglerTransform extends Transform {
     final def application = project.extensions.findByType(AppExtension)
     final def library = project.extensions.findByType(LibraryExtension)
 
-    final def classes = new ArrayList<File>()
+    final def projects = new ArrayList<File>()
+    final def subprojects = new ArrayList<File>()
     final def bootclasspath = new ArrayList<File>()
-    final def classpath = new ArrayList<File>()
+    final def libraries = new ArrayList<File>()
 
     if (application != null && application.bootClasspath != null) {
       bootclasspath.addAll(application.bootClasspath)
@@ -44,19 +45,37 @@ public class SmugglerTransform extends Transform {
     }
 
     inputs.each {
-      classes.addAll(it.directoryInputs*.file)
-      classes.addAll(it.jarInputs*.file)
+      projects.addAll(it.directoryInputs*.file)
+      projects.addAll(it.jarInputs*.file)
     }
 
     references.each {
-      classpath.addAll(it.directoryInputs*.file)
-      classpath.addAll(it.jarInputs*.file)
+      libraries.addAll(it.jarInputs
+          .findAll { !it.scopes.contains(QualifiedContent.Scope.SUB_PROJECTS) }
+          .collect { it.file }
+      )
+
+      libraries.addAll(it.directoryInputs
+          .findAll { !it.scopes.contains(QualifiedContent.Scope.SUB_PROJECTS) }
+          .collect { it.file }
+      )
+
+      subprojects.addAll(it.jarInputs
+          .findAll { it.scopes.contains(QualifiedContent.Scope.SUB_PROJECTS) }
+          .collect { it.file }
+      )
+
+      subprojects.addAll(it.directoryInputs
+          .findAll { it.scopes.contains(QualifiedContent.Scope.SUB_PROJECTS) }
+          .collect { it.file }
+      )
     }
 
     compiler.compile(new SmugglerOptions.Builder(output)
-        .classes(classes)
+        .project(projects)
+        .subprojects(subprojects)
         .bootclasspath(bootclasspath)
-        .classpath(classpath)
+        .libraries(libraries)
         .build()
     )
   }
@@ -86,7 +105,7 @@ public class SmugglerTransform extends Transform {
   public Map<String, Object> getParameterInputs() {
     return [
         version: BuildConfig.VERSION,
-        hash: BuildConfig.GIT_HASH
+        hash   : BuildConfig.GIT_HASH
     ]
   }
 

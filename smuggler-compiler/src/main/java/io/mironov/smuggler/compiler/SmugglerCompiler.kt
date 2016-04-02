@@ -11,17 +11,16 @@ import java.util.HashSet
 
 class SmugglerCompiler {
   fun compile(options: SmugglerOptions) {
-    val files = HashSet(options.classes + options.classpath + options.bootclasspath)
-    val grip = GripFactory.create(files)
+    val grip = GripFactory.create(HashSet(options.project + options.subprojects + options.libraries + options.bootclasspath))
 
     val environment = GenerationEnvironment(grip)
-    val factory = ValueAdapterFactory.from(grip)
+    val factory = ValueAdapterFactory.from(grip, HashSet(options.project + options.subprojects))
 
     val parcelables = grip.select(classes)
-        .from(options.classes)
+        .from(options.project)
         .where(isAutoParcelable())
 
-    options.classes.forEach {
+    options.project.forEach {
       it.copyRecursively(options.output, true)
     }
 
