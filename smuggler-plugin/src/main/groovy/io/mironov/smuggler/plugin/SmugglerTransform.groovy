@@ -13,11 +13,8 @@ import com.google.common.collect.Iterables
 import io.mironov.smuggler.compiler.SmugglerCompiler
 import io.mironov.smuggler.compiler.SmugglerOptions
 import org.gradle.api.Project
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 public class SmugglerTransform extends Transform {
-  private final Logger logger = LoggerFactory.getLogger(SmugglerTransform.class)
   private final Project project
 
   public SmugglerTransform(final Project project) {
@@ -35,34 +32,15 @@ public class SmugglerTransform extends Transform {
     final def library = project.extensions.findByType(LibraryExtension)
 
     final def classes = new ArrayList<File>()
+    final def bootclasspath = new ArrayList<File>()
     final def classpath = new ArrayList<File>()
 
-    if (application != null) {
-      classpath.addAll(application.bootClasspath)
+    if (application != null && application.bootClasspath != null) {
+      bootclasspath.addAll(application.bootClasspath)
     }
 
-    if (library != null) {
-      classpath.addAll(library.bootClasspath)
-    }
-
-    inputs.each {
-      it.directoryInputs.each {
-        logger.debug("[CLASSES] ${it.scopes} ${it.file}")
-      }
-
-      it.jarInputs.each {
-        logger.debug("[CLASSES] ${it.scopes} ${it.file}")
-      }
-    }
-
-    references.each {
-      it.directoryInputs.each {
-        logger.debug("[CLASSPATH] ${it.scopes} ${it.file}")
-      }
-
-      it.jarInputs.each {
-        logger.debug("[CLASSPATH] ${it.scopes} ${it.file}")
-      }
+    if (library != null && library.bootClasspath != null) {
+      bootclasspath.addAll(library.bootClasspath)
     }
 
     inputs.each {
@@ -77,6 +55,7 @@ public class SmugglerTransform extends Transform {
 
     compiler.compile(new SmugglerOptions.Builder(output)
         .classes(classes)
+        .bootclasspath(bootclasspath)
         .classpath(classpath)
         .build()
     )

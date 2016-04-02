@@ -11,7 +11,7 @@ import java.util.HashSet
 
 class SmugglerCompiler {
   fun compile(options: SmugglerOptions) {
-    val files = HashSet(options.classes + options.classpath)
+    val files = HashSet(options.classes + options.classpath + options.bootclasspath)
     val grip = GripFactory.create(files)
 
     val environment = GenerationEnvironment(grip)

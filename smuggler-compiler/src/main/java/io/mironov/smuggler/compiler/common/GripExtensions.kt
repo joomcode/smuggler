@@ -3,7 +3,6 @@ package io.mironov.smuggler.compiler.common
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.and
 import io.michaelrocks.grip.annotatedWith
-import io.michaelrocks.grip.isAbstract
 import io.michaelrocks.grip.isInterface
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.FieldMirror
