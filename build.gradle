@@ -29,7 +29,7 @@ ext {
   supportVersion = "23.0.1"
   supportTestRunnerVersion = "0.4.1"
 
-  androidToolsBetaVersion = "2.1.0-alpha3"
+  androidToolsBetaVersion = "2.1.0"
   androidToolsStableVersion = "1.5.0"
 
   kotlinVersion = "1.0.1"
