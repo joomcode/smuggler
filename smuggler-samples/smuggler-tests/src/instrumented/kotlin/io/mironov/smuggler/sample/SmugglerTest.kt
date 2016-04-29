@@ -29,7 +29,7 @@ import java.util.SortedSet
 import java.util.TreeMap
 import java.util.TreeSet
 
-@Suppress("EqualsOrHashCode")
+@Suppress("ArrayInDataClass")
 @RunWith(AndroidJUnit4::class)
 class SmugglerTest {
   private lateinit var generator: SmugglerGenerator
