@@ -18,7 +18,7 @@ import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
 internal object AutoParcelableClassSpecFactory {
   fun from(mirror: ClassMirror): AutoParcelableClassSpec {
     val metadata = mirror.getAnnotation<Metadata>() ?: run {
-      throw InvalidAutoParcelableException(mirror.type.toAsmType(), "Only kotlin classes can implement AutoParcelable interface")
+      throw InvalidAutoParcelableException(mirror.type, "Only kotlin classes can implement AutoParcelable interface")
     }
 
     val proto = JvmProtoBufUtil.readClassDataFrom(metadata.data, metadata.strings)
@@ -30,28 +30,28 @@ internal object AutoParcelableClassSpecFactory {
     }
 
     if (!Flags.IS_DATA.get(clazz.flags)) {
-      throw InvalidAutoParcelableException(mirror.type.toAsmType(), "Only data classes and objects can implement AutoParcelable interface")
+      throw InvalidAutoParcelableException(mirror.type, "Only data classes and objects can implement AutoParcelable interface")
     }
 
     if (!mirror.signature.typeParameters.isEmpty()) {
-      throw InvalidAutoParcelableException(mirror.type.toAsmType(), "Generic classes are not supported at the moment")
+      throw InvalidAutoParcelableException(mirror.type, "Generic classes are not supported at the moment")
     }
 
     if (mirror.superType != null && mirror.superType?.toAsmType() != Types.OBJECT) {
-      throw InvalidAutoParcelableException(mirror.type.toAsmType(), "AutoParcelable classes must be direct subclasses of java.lang.Object")
+      throw InvalidAutoParcelableException(mirror.type, "AutoParcelable classes must be direct subclasses of java.lang.Object")
     }
 
     val creator = mirror.getDeclaredField("CREATOR")
     val constructor = clazz.constructorList.singleOrNull() { !Flags.IS_SECONDARY.get(it.flags) } ?: run {
-      throw InvalidAutoParcelableException(mirror.type.toAsmType(), "AutoParcelable classes must have exactly one primary constructor")
+      throw InvalidAutoParcelableException(mirror.type, "AutoParcelable classes must have exactly one primary constructor")
     }
 
     if (Flags.VISIBILITY.get(constructor.flags) != ProtoBuf.Visibility.PUBLIC) {
-      throw InvalidAutoParcelableException(mirror.type.toAsmType(), "AutoParcelable classes must have primary constructor with public visibility")
+      throw InvalidAutoParcelableException(mirror.type, "AutoParcelable classes must have primary constructor with public visibility")
     }
 
     if (creator != null && creator.isStatic) {
-      throw InvalidAutoParcelableException(mirror.type.toAsmType(), "AutoParcelable classes shouldn''t declare CREATOR field")
+      throw InvalidAutoParcelableException(mirror.type, "AutoParcelable classes shouldn''t declare CREATOR field")
     }
 
     return AutoParcelableClassSpec.Data(mirror, constructor.valueParameterList.mapIndexed { index, parameter ->

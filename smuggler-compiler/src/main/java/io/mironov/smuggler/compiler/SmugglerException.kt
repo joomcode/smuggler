@@ -1,6 +1,6 @@
 package io.mironov.smuggler.compiler
 
-import org.objectweb.asm.Type
+import io.michaelrocks.grip.mirrors.Type
 import java.text.MessageFormat
 
 open class SmugglerException : RuntimeException {

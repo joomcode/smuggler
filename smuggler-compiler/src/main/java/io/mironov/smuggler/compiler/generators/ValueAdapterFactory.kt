@@ -9,6 +9,7 @@ import io.michaelrocks.grip.mirrors.isPublic
 import io.michaelrocks.grip.mirrors.isSynthetic
 import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.mirrors.toAsmType
+import io.michaelrocks.grip.mirrors.toType
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.InvalidTypeAdapterException
 import io.mironov.smuggler.compiler.annotations.LocalAdapter
@@ -82,15 +83,15 @@ internal class ValueAdapterFactory private constructor(
 
     private fun createAssistedValueAdapter(spec: ClassMirror, grip: Grip): Pair<Type, ValueAdapter> {
       if (!grip.isSubclassOf(spec.type.toAsmType(), Types.SMUGGLER_ADAPTER)) {
-        throw InvalidTypeAdapterException(spec.type.toAsmType(), "TypeAdapter classes must implement TypeAdapter interface")
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must implement TypeAdapter interface")
       }
 
       if (!spec.isPublic) {
-        throw InvalidTypeAdapterException(spec.type.toAsmType(), "TypeAdapter classes must have public visibility")
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public visibility")
       }
 
       if (spec.isAbstract) {
-        throw InvalidTypeAdapterException(spec.type.toAsmType(), "TypeAdapter classes must be not abstract")
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be not abstract")
       }
 
       val constructor = spec.getDeclaredConstructor()
@@ -102,7 +103,7 @@ internal class ValueAdapterFactory private constructor(
         val clazz = proto.classProto
 
         if (Flags.CLASS_KIND.get(clazz.flags) == ProtoBuf.Class.Kind.COMPANION_OBJECT) {
-          throw InvalidTypeAdapterException(spec.type.toAsmType(), "TypeAdapter cannot be a companion object")
+          throw InvalidTypeAdapterException(spec.type, "TypeAdapter cannot be a companion object")
         }
 
         if (Flags.CLASS_KIND.get(clazz.flags) == ProtoBuf.Class.Kind.OBJECT) {
@@ -111,7 +112,7 @@ internal class ValueAdapterFactory private constructor(
       }
 
       if (constructor == null || !constructor.isPublic) {
-        throw InvalidTypeAdapterException(spec.type.toAsmType(), "TypeAdapter classes must have public no args constructor")
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must have public no args constructor")
       }
 
       return assisted to AssistedValueAdapter.fromClass(spec.type.toAsmType(), assisted)
@@ -122,11 +123,11 @@ internal class ValueAdapterFactory private constructor(
       val signature = spec.signature
 
       if (!signature.typeParameters.isEmpty()) {
-        throw throw InvalidTypeAdapterException(spec.type.toAsmType(), "TypeAdapter classes can''t have any type parameters")
+        throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can''t have any type parameters")
       }
 
       if (assisted !is GenericType.Raw) {
-        throw InvalidTypeAdapterException(spec.type.toAsmType(), "TypeAdapter classes must be parameterized with a raw type")
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be parameterized with a raw type")
       }
 
       return assisted.type.toAsmType()
@@ -145,7 +146,7 @@ internal class ValueAdapterFactory private constructor(
       }
 
       if (parent == null) {
-        throw InvalidTypeAdapterException(adapter, "Unable to extract assisted type information")
+        throw InvalidTypeAdapterException(adapter.toType(), "Unable to extract assisted type information")
       }
 
       return resolveAssistedType(adapter, parent.toAsmType(), grip)
@@ -204,7 +205,7 @@ internal class ValueAdapterFactory private constructor(
         return SerializableValueAdapter
       }
 
-      throw InvalidAutoParcelableException(spec.clazz.type.toAsmType(), "Property ''{0}'' has unsupported type ''{1}''", property.name, type.className)
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property.name, type.className)
     }
   }
 
@@ -212,7 +213,7 @@ internal class ValueAdapterFactory private constructor(
     val adapters = createAdaptersForParameterizedType(spec, property, generic)
 
     if (adapters.size != 1) {
-      throw InvalidAutoParcelableException(spec.clazz.type.toAsmType(), "Property ''{0}'' must have exactly one type argument", property.name)
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
     }
 
     return CollectionValueAdapter(collection, implementation, adapters[0])
@@ -222,7 +223,7 @@ internal class ValueAdapterFactory private constructor(
     val adapters = createAdaptersForParameterizedType(spec, property, generic)
 
     if (adapters.size != 2) {
-      throw InvalidAutoParcelableException(spec.clazz.type.toAsmType(), "Property ''{0}'' must have exactly two type arguments", property.name)
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly two type arguments", property.name)
     }
 
     return MapValueAdapter(collection, implementation, adapters[0], adapters[1])
@@ -230,15 +231,15 @@ internal class ValueAdapterFactory private constructor(
 
   private fun createSparseArray(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
     if (property.type !is GenericType.Parameterized) {
-      throw InvalidAutoParcelableException(spec.clazz.type.toAsmType(), "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
     }
 
     if (property.type.typeArguments.size != 1) {
-      throw InvalidAutoParcelableException(spec.clazz.type.toAsmType(), "Property ''{0}'' must have exactly one type argument", property.name)
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
     }
 
     if (property.type.typeArguments[0] !is GenericType.Raw) {
-      throw InvalidAutoParcelableException(spec.clazz.type.toAsmType(), "Property ''{0}'' must be parameterized with a raw type", property.name)
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a raw type", property.name)
     }
 
     return SparseArrayValueAdapter(property.type.typeArguments[0].asRawType().type.toAsmType())
@@ -246,12 +247,12 @@ internal class ValueAdapterFactory private constructor(
 
   private fun createAdaptersForParameterizedType(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): List<ValueAdapter> {
     if (generic !is GenericType.Parameterized) {
-      throw InvalidAutoParcelableException(spec.clazz.type.toAsmType(), "Property ''{0}'' must be parameterized", property.name)
+      throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized", property.name)
     }
 
     generic.typeArguments.forEach {
       if (it !is GenericType.Raw && it !is GenericType.Parameterized && it !is GenericType.Array) {
-        throw InvalidAutoParcelableException(spec.clazz.type.toAsmType(), "Property ''{0}'' must be parameterized with raw or generic type", property.name)
+        throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
       }
     }
 
