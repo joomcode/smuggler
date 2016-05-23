@@ -1,6 +1,7 @@
 package io.mironov.smuggler.compiler.generators
 
 import io.michaelrocks.grip.mirrors.signature.GenericType
+import io.michaelrocks.grip.mirrors.toType
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
@@ -93,7 +94,7 @@ internal open class SimpleBoxedValueAdapter(
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(boxed, Methods.get(unboxer, unboxed))
 
-    delegate.toParcel(adapter, context.typed(GenericType.RawType(unboxed)).apply {
+    delegate.toParcel(adapter, context.typed(GenericType.Raw(unboxed.toType())).apply {
       value(adapter.newLocal(unboxed).apply {
         adapter.storeLocal(this)
       })
@@ -338,8 +339,8 @@ internal class ArrayPropertyAdapter(
   }
 
   private fun ValueContext.asElementContext(): ValueContext {
-    return if (type !is GenericType.GenericArrayType) {
-      typed(GenericType.RawType(Types.getElementType(type.asAsmType())))
+    return if (type !is GenericType.Array) {
+      typed(GenericType.Raw(Types.getElementType(type.asAsmType()).toType()))
     } else {
       typed(type.elementType)
     }

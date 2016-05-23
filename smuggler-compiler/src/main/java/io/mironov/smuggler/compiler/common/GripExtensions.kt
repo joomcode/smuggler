@@ -4,31 +4,33 @@ import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.and
 import io.michaelrocks.grip.annotatedWith
 import io.michaelrocks.grip.isInterface
+import io.michaelrocks.grip.mirrors.Type as GripType
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.FieldMirror
 import io.michaelrocks.grip.mirrors.MethodMirror
 import io.michaelrocks.grip.mirrors.isStatic
 import io.michaelrocks.grip.mirrors.isStaticInitializer
 import io.michaelrocks.grip.mirrors.signature.GenericType
+import io.michaelrocks.grip.mirrors.toAsmType
 import io.michaelrocks.grip.not
 import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.annotations.AnnotationProxy
 import org.objectweb.asm.Type
 import java.util.Arrays
 
-internal fun GenericType.asRawType() = cast<GenericType.RawType>()
+internal fun GenericType.asRawType() = cast<GenericType.Raw>()
 internal fun GenericType.asTypeVariable() = cast<GenericType.TypeVariable>()
-internal fun GenericType.asGenericArrayType() = cast<GenericType.GenericArrayType>()
-internal fun GenericType.asParameterizedType() = cast<GenericType.ParameterizedType>()
-internal fun GenericType.asInnerType() = cast<GenericType.InnerType>()
-internal fun GenericType.asUpperBoundedType() = cast<GenericType.UpperBoundedType>()
-internal fun GenericType.asLowerBoundedType() = cast<GenericType.LowerBoundedType>()
+internal fun GenericType.asGenericArrayType() = cast<GenericType.Array>()
+internal fun GenericType.asParameterizedType() = cast<GenericType.Parameterized>()
+internal fun GenericType.asInnerType() = cast<GenericType.Inner>()
+internal fun GenericType.asUpperBoundedType() = cast<GenericType.UpperBounded>()
+internal fun GenericType.asLowerBoundedType() = cast<GenericType.LowerBounded>()
 
 internal fun GenericType.asAsmType(): Type {
   return when (this) {
-    is GenericType.RawType -> type
-    is GenericType.GenericArrayType -> Types.getArrayType(elementType.asAsmType())
-    is GenericType.ParameterizedType -> type
+    is GenericType.Raw -> type.toAsmType()
+    is GenericType.Array -> Types.getArrayType(elementType.asAsmType())
+    is GenericType.Parameterized -> type.toAsmType()
     else -> throw UnsupportedOperationException()
   }
 }
@@ -66,19 +68,19 @@ internal fun Grip.isSubclassOf(type: Type, parent: Type): Boolean {
     return false
   }
 
-  val mirror = classRegistry.getClassMirror(type)
+  val mirror = classRegistry.getClassMirror(GripType.Object(type))
 
   mirror.interfaces.forEach {
-    if (isSubclassOf(it, parent)) {
+    if (isSubclassOf(it.toAsmType(), parent)) {
       return true
     }
   }
 
-  return isSubclassOf(mirror.superType ?: return false, parent)
+  return isSubclassOf(mirror.superType?.toAsmType() ?: return false, parent)
 }
 
 internal fun isSubclass(type: Type): (Grip, ClassMirror) -> Boolean = { grip, mirror ->
-  grip.isSubclassOf(mirror.type, type)
+  grip.isSubclassOf(mirror.type.toAsmType(), type)
 }
 
 internal fun isTypeAdapter(): (Grip, ClassMirror) -> Boolean {
@@ -86,7 +88,7 @@ internal fun isTypeAdapter(): (Grip, ClassMirror) -> Boolean {
 }
 
 internal fun isGlobalTypeAdapter(): (Grip, ClassMirror) -> Boolean {
-  return isTypeAdapter() and annotatedWith(Types.SMUGGLER_GLOBAL_ADAPTER)
+  return isTypeAdapter() and annotatedWith(GripType.Object(Types.SMUGGLER_GLOBAL_ADAPTER))
 }
 
 internal fun isAutoParcelable(): (Grip, ClassMirror) -> Boolean {
@@ -95,19 +97,19 @@ internal fun isAutoParcelable(): (Grip, ClassMirror) -> Boolean {
 
 internal inline fun <reified A : Any> ClassMirror.getAnnotation(): A? {
   val annotation = annotations.firstOrNull {
-    it.type == Types.getAnnotationType(A::class.java)
+    it.type.toAsmType() == Types.getAnnotationType(A::class.java)
   } ?: return null
 
   return AnnotationProxy.create(A::class.java, annotation)
 }
 
 internal fun ClassMirror.getStaticInitializer(): MethodMirror? {
-  return methods.firstOrNull { it.isStaticInitializer() }
+  return methods.firstOrNull { it.isStaticInitializer }
 }
 
 internal fun ClassMirror.getDeclaredConstructor(vararg args: Type): MethodMirror? {
   return constructors.firstOrNull {
-    !it.isStatic && Arrays.equals(it.type.argumentTypes, args)
+    !it.isStatic && Arrays.equals(it.type.toAsmType().argumentTypes, args)
   }
 }
 
@@ -117,7 +119,7 @@ internal fun ClassMirror.getDeclaredMethod(name: String): MethodMirror? {
 
 internal fun ClassMirror.getDeclaredMethod(name: String, returns: Type, vararg args: Type): MethodMirror? {
   return methods.singleOrNull {
-    it.name == name && it.type.returnType == returns && Arrays.equals(it.type.argumentTypes, args)
+    it.name == name && it.type.returnType == returns && Arrays.equals(it.type.toAsmType().argumentTypes, args)
   }
 }
 

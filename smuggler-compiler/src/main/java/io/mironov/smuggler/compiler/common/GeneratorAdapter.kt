@@ -3,6 +3,7 @@ package io.mironov.smuggler.compiler.common
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.FieldMirror
 import io.michaelrocks.grip.mirrors.MethodMirror
+import io.michaelrocks.grip.mirrors.toAsmType
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -22,47 +23,47 @@ internal open class GeneratorAdapter : org.objectweb.asm.commons.GeneratorAdapte
   }
 
   fun checkCast(spec: ClassMirror) {
-    checkCast(spec.type)
+    checkCast(spec.type.toAsmType())
   }
 
   fun getField(owner: ClassMirror, field: FieldMirror) {
-    getField(owner.type, field.name, field.type)
+    getField(owner.type.toAsmType(), field.name, field.type.toAsmType())
   }
 
   fun getField(owner: ClassMirror, name: String, type: ClassMirror) {
-    getField(owner.type, name, type.type)
+    getField(owner.type.toAsmType(), name, type.type.toAsmType())
   }
 
   fun getField(owner: ClassMirror, name: String, type: Type) {
-    getField(owner.type, name, type)
+    getField(owner.type.toAsmType(), name, type)
   }
 
   fun putField(owner: ClassMirror, field: FieldMirror) {
-    putField(owner.type, field.name, field.type)
+    putField(owner.type.toAsmType(), field.name, field.type.toAsmType())
   }
 
   fun putField(owner: ClassMirror, name: String, type: ClassMirror) {
-    putField(owner.type, name, type.type)
+    putField(owner.type.toAsmType(), name, type.type.toAsmType())
   }
 
   fun putField(owner: ClassMirror, name: String, type: Type) {
-    putField(owner.type, name, type)
+    putField(owner.type.toAsmType(), name, type)
   }
 
   fun invokeStatic(owner: ClassMirror, method: Method) {
-    invokeStatic(owner.type, method)
+    invokeStatic(owner.type.toAsmType(), method)
   }
 
   fun invokeStatic(owner: ClassMirror, method: MethodMirror) {
-    invokeStatic(owner.type, Methods.get(method))
+    invokeStatic(owner.type.toAsmType(), Methods.get(method))
   }
 
   fun invokeVirtual(owner: ClassMirror, method: Method) {
-    invokeVirtual(owner.type, method)
+    invokeVirtual(owner.type.toAsmType(), method)
   }
 
   fun invokeVirtual(owner: ClassMirror, method: MethodMirror) {
-    invokeVirtual(owner.type, Methods.get(method))
+    invokeVirtual(owner.type.toAsmType(), Methods.get(method))
   }
 
   fun invokeVirtual(owner: Type, method: MethodMirror) {

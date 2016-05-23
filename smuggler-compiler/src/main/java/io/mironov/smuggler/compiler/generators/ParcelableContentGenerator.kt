@@ -1,7 +1,9 @@
 package io.mironov.smuggler.compiler.generators
 
+import io.michaelrocks.grip.mirrors.Type as GripType
 import io.michaelrocks.grip.mirrors.MethodMirror
 import io.michaelrocks.grip.mirrors.isPrivate
+import io.michaelrocks.grip.mirrors.toAsmType
 import io.mironov.smuggler.compiler.ContentGenerator
 import io.mironov.smuggler.compiler.GeneratedContent
 import io.mironov.smuggler.compiler.GenerationEnvironment
@@ -14,12 +16,12 @@ import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.common.Signature
 import io.mironov.smuggler.compiler.common.getStaticInitializer
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
+import org.objectweb.asm.Type
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ACC_BRIDGE
-import org.objectweb.asm.Type
 import org.objectweb.asm.Opcodes.ACC_FINAL
 import org.objectweb.asm.Opcodes.ACC_PUBLIC
 import org.objectweb.asm.Opcodes.ACC_STATIC
@@ -64,7 +66,7 @@ internal class ParcelableContentGenerator(
 
       newMethod(createMethodSpecForNewArrayMethod(spec, false)) {
         loadArg(0)
-        newArray(spec.clazz.type)
+        newArray(spec.clazz.type.toAsmType())
       }
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, true)) {
@@ -84,7 +86,7 @@ internal class ParcelableContentGenerator(
   }
 
   private fun onCreatePatchedClassGeneratedContent(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
-    return GeneratedContent.from(spec.clazz.type, emptyMap(), environment.newClass {
+    return GeneratedContent.from(spec.clazz.type.toAsmType(), emptyMap(), environment.newClass {
       ClassReader(environment.grip.fileRegistry.readClass(spec.clazz.type)).accept(object : ClassVisitor(ASM5, this) {
         override fun visit(version: Int, access: Int, name: String, signature: String?, parent: String?, exceptions: Array<out String>?) {
           super.visit(version, access, name, signature, parent, exceptions)
@@ -107,7 +109,7 @@ internal class ParcelableContentGenerator(
       if (spec.clazz.getStaticInitializer() == null) {
         newMethod(ACC_PUBLIC + ACC_STATIC, Methods.getStaticConstructor()) {
           newInstance(creatorTypeFrom(spec), Methods.getConstructor())
-          putStatic(spec.clazz.type, "CREATOR", Types.ANDROID_CREATOR)
+          putStatic(spec.clazz.type.toAsmType(), "CREATOR", Types.ANDROID_CREATOR)
         }
       }
 
@@ -171,7 +173,7 @@ internal class ParcelableContentGenerator(
       storeLocal(this, Types.ANDROID_PARCEL)
     })
 
-    newInstance(spec.clazz.type, Methods.getConstructor(spec.properties.map { it.type.asAsmType() })) {
+    newInstance(spec.clazz.type.toAsmType(), Methods.getConstructor(spec.properties.map { it.type.asAsmType() })) {
       spec.properties.forEach {
         factory.create(spec, it).fromParcel(this, context.typed(it.type))
       }
@@ -183,45 +185,45 @@ internal class ParcelableContentGenerator(
   }
 
   private fun GeneratorAdapter.onGenerateCreateFromParcelMethodForObjectClass(spec: AutoParcelableClassSpec.Object) {
-    getStatic(spec.clazz.type, spec.name, spec.clazz.type)
+    getStatic(spec.clazz.type.toAsmType(), spec.name, spec.clazz.type.toAsmType())
   }
 
   private fun creatorTypeFrom(spec: AutoParcelableClassSpec): Type {
-    return Types.getGeneratedType(spec.clazz.type, "AutoCreator")
+    return Types.getGeneratedType(spec.clazz.type.toAsmType(), "AutoCreator")
   }
 
   private fun creatorTypeSignatureFrom(spec: AutoParcelableClassSpec): String {
-    return Signature.type(Signature.simple(Types.OBJECT), Signature.generic(Types.ANDROID_CREATOR, spec.clazz.type)).toString()
+    return Signature.type(Signature.simple(Types.OBJECT), Signature.generic(Types.ANDROID_CREATOR, spec.clazz.type.toAsmType())).toString()
   }
 
   private fun creatorFieldSignatureFrom(spec: AutoParcelableClassSpec): String {
-    return Signature.generic(Types.ANDROID_CREATOR, spec.clazz.type).toString()
+    return Signature.generic(Types.ANDROID_CREATOR, spec.clazz.type.toAsmType()).toString()
   }
 
   private fun createMethodSpecForNewArrayMethod(spec: AutoParcelableClassSpec, bridge: Boolean): MethodMirror {
     return MethodMirror.Builder().name("newArray")
-        .type(Type.getMethodType(Types.getArrayType(if (bridge) Types.OBJECT else spec.clazz.type), Types.INT))
+        .type(GripType.Method(Type.getMethodType(Types.getArrayType(if (bridge) Types.OBJECT else spec.clazz.type.toAsmType()), Types.INT)))
         .access(if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT)
         .build()
   }
 
   private fun createMethodSpecForCreateFromParcelMethod(spec: AutoParcelableClassSpec, bridge: Boolean): MethodMirror {
     return MethodMirror.Builder().name("createFromParcel")
-        .type(Type.getMethodType(if (bridge) Types.OBJECT else spec.clazz.type, Types.ANDROID_PARCEL))
+        .type(GripType.Method(Type.getMethodType(if (bridge) Types.OBJECT else spec.clazz.type.toAsmType(), Types.ANDROID_PARCEL)))
         .access(if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT)
         .build()
   }
 
   private fun createMethodSpecForDescribeContentsMethod(spec: AutoParcelableClassSpec): MethodMirror {
     return MethodMirror.Builder().name("describeContents")
-        .type(Type.getMethodType(Types.INT))
+        .type(GripType.Method(Type.getMethodType(Types.INT)))
         .access(ACC_METHOD_DEFAULT)
         .build()
   }
 
   private fun createMethodSpecForWriteToParcelMethod(spec: AutoParcelableClassSpec): MethodMirror {
     return MethodMirror.Builder().name("writeToParcel")
-        .type(Type.getMethodType(Types.VOID, Types.ANDROID_PARCEL, Types.INT))
+        .type(GripType.Method(Type.getMethodType(Types.VOID, Types.ANDROID_PARCEL, Types.INT)))
         .access(ACC_METHOD_DEFAULT)
         .build()
   }
@@ -241,7 +243,7 @@ internal class ParcelableContentGenerator(
   private fun createInterceptedMethodVisitor(delegate: MethodVisitor?, access: Int, name: String, description: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
     return InitializerBlockInterceptor(delegate, access, Method(name, description)) {
       newInstance(creatorTypeFrom(spec), Methods.getConstructor())
-      putStatic(spec.clazz.type, "CREATOR", Types.ANDROID_CREATOR)
+      putStatic(spec.clazz.type.toAsmType(), "CREATOR", Types.ANDROID_CREATOR)
     }
   }
 

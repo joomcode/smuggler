@@ -1,12 +1,13 @@
 package io.mironov.smuggler.compiler.generators
 
+import io.michaelrocks.grip.mirrors.Type
 import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.mironov.smuggler.compiler.common.Types
 import java.util.HashMap
 import java.util.NoSuchElementException
 
 internal class ValueContext(
-    val type: GenericType = GenericType.RawType(Types.OBJECT)
+    val type: GenericType = GenericType.Raw(Type.Object(Types.OBJECT))
 ) {
   private val names = HashMap<String, Int>()
 

@@ -1,6 +1,6 @@
 package io.mironov.smuggler.compiler.annotations
 
-import org.objectweb.asm.Type
+import io.michaelrocks.grip.mirrors.Type
 
 @AnnotationDelegate("io.mironov.smuggler.GlobalAdapter")
 interface GlobalAdapter

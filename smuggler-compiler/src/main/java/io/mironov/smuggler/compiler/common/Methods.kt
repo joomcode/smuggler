@@ -2,6 +2,7 @@ package io.mironov.smuggler.compiler.common
 
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.MethodMirror
+import io.michaelrocks.grip.mirrors.toAsmType
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.Method
 
@@ -27,7 +28,7 @@ internal object Methods {
   }
 
   fun getConstructor(first: ClassMirror, vararg args: ClassMirror): Method {
-    return Method("<init>", Type.VOID_TYPE, arrayOf(first.type) + args.map(ClassMirror::type))
+    return Method("<init>", Type.VOID_TYPE, arrayOf(first.type.toAsmType()) + args.map { it.type.toAsmType() })
   }
 
   fun getStaticConstructor(): Method {
