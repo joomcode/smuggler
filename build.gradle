@@ -2,6 +2,7 @@ buildscript {
   repositories {
     mavenLocal()
     jcenter()
+    maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
   }
 }
 
@@ -10,12 +11,14 @@ allprojects {
     repositories {
       mavenLocal()
       jcenter()
+      maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
     }
   }
 
   repositories {
     mavenLocal()
     jcenter()
+    maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.1" }
   }
 }
 
@@ -32,7 +35,7 @@ ext {
   androidToolsBetaVersion = "2.1.0"
   androidToolsStableVersion = "2.1.0"
 
-  kotlinVersion = "1.0.2"
+  kotlinVersion = "1.1-M01"
   bintrayVersion = "1.4"
 
   asmVersion = "5.0.4"
