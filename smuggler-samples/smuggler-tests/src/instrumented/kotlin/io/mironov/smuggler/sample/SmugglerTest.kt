@@ -548,7 +548,7 @@ class SmugglerTest {
     SmugglerAssertions.verify<Complex>() {
       Complex(
           one = generator.nextSet { generator.nextSet { generator.nextLong() } },
-          two = generator.nextSet { generator.nextArray { generator.nextBoolean() } } ,
+          two = generator.nextSet { generator.nextArray { generator.nextBoolean() } },
           three = generator.nextSet { generator.nextList { generator.nextBoolean() } },
           four = generator.nextArray { generator.nextSet { generator.nextBoolean() } },
           five = generator.nextList { generator.nextSet { generator.nextBoolean() } }
@@ -840,6 +840,29 @@ class SmugglerTest {
           four = generator.nextSet { generator.nextElement(arrayOf(LoginCommand, LogoutCommand, ProductCommand(generator.nextString()), CategoryCommand(generator.nextString()))) }
       )
     }
+  }
+
+  @Test fun shouldWorkWithSealedClasses() {
+    SmugglerAssertions.verify<Result.Success> {
+      Result.Success(value = generator.nextString())
+    }
+
+    SmugglerAssertions.verify<Result.Failure> {
+      Result.Failure(code = generator.nextInt())
+    }
+
+    SmugglerAssertions.verify<Result>(strict = false) {
+      if (generator.nextBoolean()) {
+        Result.Success(value = generator.nextString())
+      } else {
+        Result.Failure(code = generator.nextInt())
+      }
+    }
+  }
+
+  private sealed class Result(val type: String) : AutoParcelable {
+    data class Success(val value: String) : Result("success")
+    data class Failure(val code: Int) : Result("failure")
   }
 
   interface Wrapper : AutoParcelable {

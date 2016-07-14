@@ -2,12 +2,10 @@ package io.mironov.smuggler.compiler.model
 
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.isStatic
-import io.michaelrocks.grip.mirrors.toAsmType
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
-import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredField
 import io.mironov.smuggler.compiler.common.getDeclaredMethod
@@ -35,10 +33,6 @@ internal object AutoParcelableClassSpecFactory {
 
     if (!mirror.signature.typeParameters.isEmpty()) {
       throw InvalidAutoParcelableException(mirror.type, "Generic classes are not supported at the moment")
-    }
-
-    if (mirror.superType != null && mirror.superType?.toAsmType() != Types.OBJECT) {
-      throw InvalidAutoParcelableException(mirror.type, "AutoParcelable classes must be direct subclasses of java.lang.Object")
     }
 
     val creator = mirror.getDeclaredField("CREATOR")

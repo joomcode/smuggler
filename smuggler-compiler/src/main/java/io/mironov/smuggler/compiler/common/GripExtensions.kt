@@ -3,6 +3,7 @@ package io.mironov.smuggler.compiler.common
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.and
 import io.michaelrocks.grip.annotatedWith
+import io.michaelrocks.grip.isAbstract
 import io.michaelrocks.grip.isInterface
 import io.michaelrocks.grip.mirrors.Type as GripType
 import io.michaelrocks.grip.mirrors.ClassMirror
@@ -92,7 +93,7 @@ internal fun isGlobalTypeAdapter(): (Grip, ClassMirror) -> Boolean {
 }
 
 internal fun isAutoParcelable(): (Grip, ClassMirror) -> Boolean {
-  return not(isInterface()) and isSubclass(Types.SMUGGLER_PARCELABLE)
+  return not(isInterface()) and not(isAbstract()) and isSubclass(Types.SMUGGLER_PARCELABLE)
 }
 
 internal inline fun <reified A : Any> ClassMirror.getAnnotation(): A? {

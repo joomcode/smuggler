@@ -5,8 +5,10 @@ import io.mironov.smuggler.AutoParcelable
 import org.junit.Assert
 
 object SmugglerAssertions {
-  inline fun <reified P : AutoParcelable> verify(factory: () -> P) {
-    verify(P::class.java)
+  inline fun <reified P : AutoParcelable> verify(strict: Boolean = true, factory: () -> P) {
+    if (strict) {
+      verify(P::class.java)
+    }
 
     0.until(25).forEach {
       verify(factory())
