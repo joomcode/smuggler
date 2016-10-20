@@ -1,7 +1,6 @@
 package io.mironov.smuggler.compiler.model
 
 import io.michaelrocks.grip.mirrors.ClassMirror
-import io.michaelrocks.grip.mirrors.MethodMirror
 import io.michaelrocks.grip.mirrors.signature.GenericType
 
 internal sealed class AutoParcelableClassSpec(val clazz: ClassMirror) {
@@ -11,6 +10,5 @@ internal sealed class AutoParcelableClassSpec(val clazz: ClassMirror) {
 
 internal data class AutoParcelablePropertySpec(
     val name: String,
-    val type: GenericType,
-    val getter: MethodMirror
+    val type: GenericType
 )

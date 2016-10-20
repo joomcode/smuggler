@@ -142,13 +142,7 @@ internal class ParcelableContentGenerator(
     spec.properties.forEach {
       context.property(it.name, newLocal(it.type.asAsmType()).apply {
         loadThis()
-
-        if (it.getter.isPrivate) {
-          invokeSpecial(spec.clazz, it.getter)
-        } else {
-          invokeVirtual(spec.clazz, it.getter)
-        }
-
+        getField(spec.clazz, it.name, it.type.asAsmType())
         storeLocal(this, it.type.asAsmType())
       })
     }

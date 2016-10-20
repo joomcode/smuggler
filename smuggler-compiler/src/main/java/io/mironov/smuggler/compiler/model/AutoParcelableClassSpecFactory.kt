@@ -8,7 +8,6 @@ import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
 import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredField
-import io.mironov.smuggler.compiler.common.getDeclaredMethod
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
@@ -50,9 +49,12 @@ internal object AutoParcelableClassSpecFactory {
 
     return AutoParcelableClassSpec.Data(mirror, constructor.valueParameterList.mapIndexed { index, parameter ->
       val name = resolver.getName(parameter.name).identifier
-      val getter = mirror.getDeclaredMethod("component${index + 1}")!!
 
-      AutoParcelablePropertySpec(name, getter.signature.returnType, getter)
+      val field = mirror.getDeclaredField(name) ?: run {
+        throw InvalidAutoParcelableException(mirror.type, "Unable to find field \"$name\"")
+      }
+
+      AutoParcelablePropertySpec(name, field.signature.type)
     })
   }
 }
