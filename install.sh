@@ -1,0 +1,1 @@
+./gradlew :smuggler-plugin:generateBuildClass :smuggler-runtime:assembleRelease publishToMavenLocal -PskipSample=true
