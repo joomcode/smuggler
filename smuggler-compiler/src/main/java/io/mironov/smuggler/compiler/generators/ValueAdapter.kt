@@ -217,6 +217,22 @@ internal object DateValueAdapter : OptionalValueAdapter() {
   }
 }
 
+internal object CharSequenceValueAdapter : OptionalValueAdapter() {
+  override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.getStatic(Types.ANDROID_TEXT_UTILS, "CHAR_SEQUENCE_CREATOR", Types.ANDROID_CREATOR)
+    adapter.loadLocal(context.parcel())
+    adapter.invokeInterface(Types.ANDROID_CREATOR, Methods.get("createFromParcel", Types.OBJECT, Types.ANDROID_PARCEL))
+    adapter.checkCast(context.type.asAsmType())
+  }
+
+  override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.loadLocal(context.value())
+    adapter.loadLocal(context.parcel())
+    adapter.loadLocal(context.flags())
+    adapter.invokeStatic(Types.ANDROID_TEXT_UTILS, Methods.get("writeToParcel", Types.VOID, Types.CHAR_SEQUENCE, Types.ANDROID_PARCEL, Types.INT))
+  }
+}
+
 internal object SerializableValueAdapter : ValueAdapter {
   override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
@@ -253,7 +269,7 @@ internal object ParcelableValueAdapter : ValueAdapter {
 internal class ArrayPropertyAdapter(
     private val element: ValueAdapter
 ) : OptionalValueAdapter() {
-  final override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
 
@@ -295,7 +311,7 @@ internal class ArrayPropertyAdapter(
     adapter.loadLocal(elements)
   }
 
-  final override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+  override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
 

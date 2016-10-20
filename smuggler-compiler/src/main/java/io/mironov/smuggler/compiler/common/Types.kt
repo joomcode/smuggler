@@ -26,6 +26,7 @@ internal object Types {
   val ENUM = getType<Enum<*>>()
   val SERIALIZABLE = getType<Serializable>()
   val DATE = getType<Date>()
+  val CHAR_SEQUENCE = getType<CharSequence>()
 
   val ITERATOR = getType<java.util.Iterator<*>>()
   val COLLECTION = getType<java.util.Collection<*>>()
@@ -73,6 +74,7 @@ internal object Types {
   val ANDROID_BUNDLE = Type.getObjectType("android/os/Bundle")
   val ANDROID_SPARSE_BOOLEAN_ARRAY = Type.getObjectType("android/util/SparseBooleanArray")
   val ANDROID_SPARSE_ARRAY = Type.getObjectType("android/util/SparseArray")
+  val ANDROID_TEXT_UTILS = Type.getObjectType("android/text/TextUtils")
 
   val SMUGGLER_PARCELABLE = Type.getObjectType("io/mironov/smuggler/AutoParcelable")
   val SMUGGLER_GLOBAL_ADAPTER = Type.getObjectType("io/mironov/smuggler/GlobalAdapter")

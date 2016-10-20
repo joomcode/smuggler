@@ -58,6 +58,7 @@ internal class ValueAdapterFactory private constructor(
 
         Types.STRING to StringValueAdapter,
         Types.DATE to DateValueAdapter,
+        Types.CHAR_SEQUENCE to CharSequenceValueAdapter,
 
         Types.ANDROID_SPARSE_BOOLEAN_ARRAY to SparseBooleanArrayValueAdapter,
         Types.ANDROID_BUNDLE to BundleValueAdapter

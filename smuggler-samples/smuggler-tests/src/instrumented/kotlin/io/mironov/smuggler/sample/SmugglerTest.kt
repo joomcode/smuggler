@@ -345,7 +345,7 @@ class SmugglerTest {
         val messages: Array<Message>
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<Chat>() {
+    SmugglerAssertions.verify<Chat> {
       Chat(
           title = generator.nextString(),
           participants = generator.nextArray {
@@ -394,7 +394,7 @@ class SmugglerTest {
         val messages: SparseArray<Message>
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<Simple>() {
+    SmugglerAssertions.verify<Simple> {
       Simple(
           booleans = generator.nextSparseBooleanArray(),
           strings = generator.nextSparseArray { generator.nextString() },
@@ -404,7 +404,7 @@ class SmugglerTest {
       )
     }
 
-    SmugglerAssertions.verify<Complex>() {
+    SmugglerAssertions.verify<Complex> {
       Complex(
           users = generator.nextSparseArray {
             User(
@@ -441,7 +441,7 @@ class SmugglerTest {
         val longs: List<Long>
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<Lists>() {
+    SmugglerAssertions.verify<Lists> {
       Lists(
           users = generator.nextList {
             User(
@@ -469,7 +469,7 @@ class SmugglerTest {
         val linked: LinkedList<String>
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<Lists>() {
+    SmugglerAssertions.verify<Lists> {
       Lists(
           base = generator.nextList { generator.nextString() },
           array = generator.nextList({ ArrayList<String>() }, { generator.nextString() }),
@@ -487,7 +487,7 @@ class SmugglerTest {
         val five: Collection<Collection<String>>
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<ComplexArraysAndLists>() {
+    SmugglerAssertions.verify<ComplexArraysAndLists> {
       ComplexArraysAndLists(
           one = generator.nextList { generator.nextList { generator.nextList { generator.nextLong() } } },
           two = generator.nextList { generator.nextArray { generator.nextList { generator.nextBoolean() } } },
@@ -525,7 +525,7 @@ class SmugglerTest {
         val five: List<Set<Boolean>>
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<Simple>() {
+    SmugglerAssertions.verify<Simple> {
       Simple(
           users = generator.nextSet {
             User(
@@ -545,7 +545,7 @@ class SmugglerTest {
       )
     }
 
-    SmugglerAssertions.verify<Complex>() {
+    SmugglerAssertions.verify<Complex> {
       Complex(
           one = generator.nextSet { generator.nextSet { generator.nextLong() } },
           two = generator.nextSet { generator.nextArray { generator.nextBoolean() } },
@@ -565,7 +565,7 @@ class SmugglerTest {
         val tree: TreeSet<String>
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<Sets>() {
+    SmugglerAssertions.verify<Sets> {
       Sets(
           base = generator.nextSet({ LinkedHashSet<String>() }, { generator.nextString() }),
           hash = generator.nextSet({ HashSet<String>() }, { generator.nextString() }),
@@ -655,7 +655,7 @@ class SmugglerTest {
         val tree: TreeMap<String, String>
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<Maps>() {
+    SmugglerAssertions.verify<Maps> {
       Maps(
           base = generator.nextMap({ LinkedHashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
           hash = generator.nextMap({ HashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
@@ -689,7 +689,7 @@ class SmugglerTest {
   }
 
   @Test fun shouldWorkWithLibraryProjects() {
-    SmugglerAssertions.verify<Chat>() {
+    SmugglerAssertions.verify<Chat> {
       Chat(
           title = generator.nextString(),
           participants = generator.nextList {
@@ -730,7 +730,7 @@ class SmugglerTest {
         val calendars: List<Calendar>
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<Global>() {
+    SmugglerAssertions.verify<Global> {
       Global(
           integer = BigInteger(generator.nextInt().toString()),
           calendar = Calendar.getInstance().apply { timeInMillis = generator.nextLong() },
@@ -838,6 +838,25 @@ class SmugglerTest {
           two = generator.nextSet { LogoutCommand },
           three = generator.nextSet { MenuCommand },
           four = generator.nextSet { generator.nextElement(arrayOf(LoginCommand, LogoutCommand, ProductCommand(generator.nextString()), CategoryCommand(generator.nextString()))) }
+      )
+    }
+  }
+
+  @Test
+  fun shouldWorkWithCharSequence() {
+    data class Container(
+        val value: CharSequence,
+        val collection: Collection<CharSequence>,
+        val array: Array<CharSequence>,
+        val list: List<CharSequence>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Container> {
+      Container(
+          value = generator.nextString(),
+          collection = generator.nextList { generator.nextString() },
+          array = generator.nextArray { generator.nextString() },
+          list = generator.nextList { generator.nextString() }
       )
     }
   }
