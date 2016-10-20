@@ -2,7 +2,6 @@ package io.mironov.smuggler.compiler.generators
 
 import io.michaelrocks.grip.mirrors.Type as GripType
 import io.michaelrocks.grip.mirrors.MethodMirror
-import io.michaelrocks.grip.mirrors.isPrivate
 import io.michaelrocks.grip.mirrors.toAsmType
 import io.mironov.smuggler.compiler.ContentGenerator
 import io.mironov.smuggler.compiler.GeneratedContent
