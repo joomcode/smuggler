@@ -861,7 +861,6 @@ class SmugglerTest {
     }
   }
 
-/*
   @Test fun shouldWorkWithSealedClasses() {
     SmugglerAssertions.verify<Result.Success> {
       Result.Success(value = generator.nextString())
@@ -881,10 +880,9 @@ class SmugglerTest {
   }
 
   private sealed class Result(val type: String) : AutoParcelable {
-    data class Success(val value: String) : Result("success")
-    data class Failure(val code: Int) : Result("failure")
+    class Success(val value: String) : Result("success")
+    class Failure(val code: Int) : Result("failure")
   }
-*/
 
   interface Wrapper : AutoParcelable {
     val value: String
