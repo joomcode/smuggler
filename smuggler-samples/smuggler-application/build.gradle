@@ -23,6 +23,10 @@ android {
 dependencies {
   compile project(":smuggler-samples:smuggler-library")
 
+  compile "com.android.support:support-v13:24.0.0"
+  compile "com.android.support:appcompat-v7:24.0.0"
+  compile "com.android.support:design:24.0.0"
+
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 }
