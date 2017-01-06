@@ -38,7 +38,7 @@ ext {
   kotlinVersion = "1.0.6"
   bintrayVersion = "1.4"
 
-  asmVersion = "5.0.4"
+  asmVersion = "5.2"
   gripVersion = "0.5.1-beta"
 
   slf4jVersion = "1.7.13"
