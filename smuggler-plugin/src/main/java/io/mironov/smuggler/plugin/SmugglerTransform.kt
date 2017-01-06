@@ -2,7 +2,10 @@ package io.mironov.smuggler.plugin
 
 import com.android.build.api.transform.Format
 import com.android.build.api.transform.QualifiedContent
+import com.android.build.api.transform.QualifiedContent.DefaultContentType
+import com.android.build.api.transform.QualifiedContent.Scope
 import com.android.build.api.transform.Transform
+import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.LibraryExtension
@@ -14,8 +17,56 @@ import java.io.File
 import java.util.ArrayList
 import java.util.EnumSet
 
-class SmugglerTransform(val project: Project) : Transform() {
+class SmugglerTransform(private val project: Project) : Transform() {
   override fun transform(invocation: TransformInvocation) {
+    val options = createOptions(invocation)
+    val compiler = createCompiler()
+
+    for (file in options.project) {
+      file.copyRecursively(options.output, true)
+    }
+
+    compiler.compile(options)
+  }
+
+  override fun getScopes(): Set<Scope> {
+    return EnumSet.of(Scope.PROJECT)
+  }
+
+  override fun getInputTypes(): Set<QualifiedContent.ContentType> {
+    return EnumSet.of(DefaultContentType.CLASSES)
+  }
+
+  override fun getReferencedScopes(): Set<Scope> {
+    return EnumSet.of(
+        Scope.TESTED_CODE,
+        Scope.PROJECT_LOCAL_DEPS,
+        Scope.SUB_PROJECTS,
+        Scope.SUB_PROJECTS_LOCAL_DEPS,
+        Scope.EXTERNAL_LIBRARIES
+    )
+  }
+
+  override fun getParameterInputs(): Map<String, Any> {
+    return mapOf(
+        "version" to BuildConfig.VERSION,
+        "hash" to BuildConfig.GIT_HASH
+    )
+  }
+
+  override fun getName(): String {
+    return "smuggler"
+  }
+
+  override fun isIncremental(): Boolean {
+    return false
+  }
+
+  private fun createCompiler(): SmugglerCompiler {
+    return SmugglerCompiler()
+  }
+
+  private fun createOptions(invocation: TransformInvocation): SmugglerOptions {
     val input = Iterables.getOnlyElement(Iterables.getOnlyElement(invocation.inputs).directoryInputs)
     val output = invocation.outputProvider.getContentLocation(input.name, input.contentTypes, input.scopes, Format.DIRECTORY)
 
@@ -36,77 +87,38 @@ class SmugglerTransform(val project: Project) : Transform() {
     }
 
     invocation.inputs.forEach {
-      projects.addAll(it.directoryInputs.map(QualifiedContent::getFile))
-      projects.addAll(it.jarInputs.map(QualifiedContent::getFile))
+      collect(it, projects)
     }
 
     invocation.referencedInputs.forEach {
-      libraries.addAll(it.jarInputs
-          .filter { !it.scopes.contains(QualifiedContent.Scope.SUB_PROJECTS) }
-          .map { it.file }
-      )
+      collect(it, subprojects) {
+        it.scopes.contains(Scope.SUB_PROJECTS)
+      }
 
-      libraries.addAll(it.directoryInputs
-          .filter { !it.scopes.contains(QualifiedContent.Scope.SUB_PROJECTS) }
-          .map { it.file }
-      )
-
-      subprojects.addAll(it.jarInputs
-          .filter { it.scopes.contains(QualifiedContent.Scope.SUB_PROJECTS) }
-          .map { it.file }
-      )
-
-      subprojects.addAll(it.directoryInputs
-          .filter { it.scopes.contains(QualifiedContent.Scope.SUB_PROJECTS) }
-          .map { it.file }
-      )
+      collect(it, libraries) {
+        !it.scopes.contains(Scope.SUB_PROJECTS)
+      }
     }
 
-    val compiler = SmugglerCompiler()
-    val options = SmugglerOptions.Builder(output)
+    return SmugglerOptions.Builder(output)
         .project(projects)
         .subprojects(subprojects)
         .bootclasspath(bootclasspath)
         .libraries(libraries)
         .build()
+  }
 
-    for (file in options.project) {
-      file.copyRecursively(options.output, true)
+  private fun collect(input: TransformInput, output: MutableList<File>, filter: (QualifiedContent) -> Boolean = { true }) {
+    for (directory in input.directoryInputs) {
+      if (filter(directory)) {
+        output.add(directory.file)
+      }
     }
 
-    compiler.compile(options)
-  }
-
-  override fun getScopes(): Set<QualifiedContent.Scope> {
-    return EnumSet.of(QualifiedContent.Scope.PROJECT)
-  }
-
-  override fun getInputTypes(): Set<QualifiedContent.ContentType> {
-    return EnumSet.of(QualifiedContent.DefaultContentType.CLASSES)
-  }
-
-  override fun getReferencedScopes(): Set<QualifiedContent.Scope> {
-    return EnumSet.of(
-        QualifiedContent.Scope.TESTED_CODE,
-        QualifiedContent.Scope.PROJECT_LOCAL_DEPS,
-        QualifiedContent.Scope.SUB_PROJECTS,
-        QualifiedContent.Scope.SUB_PROJECTS_LOCAL_DEPS,
-        QualifiedContent.Scope.EXTERNAL_LIBRARIES
-    )
-  }
-
-  override fun getParameterInputs(): Map<String, Any> {
-    return mapOf(
-        "version" to BuildConfig.VERSION,
-        "hash" to BuildConfig.GIT_HASH
-    )
-  }
-
-  override fun getName(): String {
-    return "smuggler"
-  }
-
-  override fun isIncremental(): Boolean {
-    return false
+    for (jar in input.jarInputs) {
+      if (filter(jar)) {
+        output.add(jar.file)
+      }
+    }
   }
 }
