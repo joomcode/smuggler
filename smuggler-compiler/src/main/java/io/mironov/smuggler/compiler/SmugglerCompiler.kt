@@ -19,13 +19,10 @@ class SmugglerCompiler {
     val parcelables = grip.select(classes)
         .from(options.project)
         .where(isAutoParcelable())
+        .execute()
 
-    options.project.forEach {
-      it.copyRecursively(options.output, true)
-    }
-
-    parcelables.execute().classes.forEach {
-      val spec = AutoParcelableClassSpecFactory.from(it)
+    for (parcelable in parcelables.classes) {
+      val spec = AutoParcelableClassSpecFactory.from(parcelable)
       val generator = ParcelableContentGenerator(spec, ValueAdapterFactory.from(factory, spec))
 
       generator.generate(environment).forEach {

@@ -16,8 +16,6 @@ import java.util.EnumSet
 
 class SmugglerTransform(val project: Project) : Transform() {
   override fun transform(invocation: TransformInvocation) {
-    val compiler = SmugglerCompiler()
-
     val input = Iterables.getOnlyElement(Iterables.getOnlyElement(invocation.inputs).directoryInputs)
     val output = invocation.outputProvider.getContentLocation(input.name, input.contentTypes, input.scopes, Format.DIRECTORY)
 
@@ -64,13 +62,19 @@ class SmugglerTransform(val project: Project) : Transform() {
       )
     }
 
-    compiler.compile(SmugglerOptions.Builder(output)
+    val compiler = SmugglerCompiler()
+    val options = SmugglerOptions.Builder(output)
         .project(projects)
         .subprojects(subprojects)
         .bootclasspath(bootclasspath)
         .libraries(libraries)
         .build()
-    )
+
+    for (file in options.project) {
+      file.copyRecursively(options.output, true)
+    }
+
+    compiler.compile(options)
   }
 
   override fun getScopes(): Set<QualifiedContent.Scope> {
