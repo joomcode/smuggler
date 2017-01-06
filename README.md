@@ -44,9 +44,9 @@ buildscript {
   }
     
   dependencies {
-    classpath "com.android.tools.build:gradle:1.5.0"
+    classpath "com.android.tools.build:gradle:2.2.0"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0"
-    classpath "io.mironov.smuggler:smuggler-plugin:0.12.5"
+    classpath "io.mironov.smuggler:smuggler-plugin:0.12.9"
   }
 }
 
@@ -59,9 +59,8 @@ apply plugin: "com.android.application"
 apply plugin: "io.mironov.smuggler"
 ```
 Some **important** notes:
-- Only android gradle plugin 1.5.0 and up is supported.
-- In case you have a mutli-module project and want to use `AutoParceable`, you have to add `smuggler-plugin` to each module.
 - Smuggler plugin must be applied **after** android plugin.
+- In case you have a mutli-module project and want to use `AutoParceable`, you have to add `smuggler-plugin` to each module.
 
 # Supported types
 - Primitive types: `boolean`, `byte`, `char`, `double`, `float`, `int`, `long`, `short`
