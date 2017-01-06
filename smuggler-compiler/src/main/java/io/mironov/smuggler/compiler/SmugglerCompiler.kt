@@ -7,12 +7,15 @@ import io.mironov.smuggler.compiler.generators.ParcelableContentGenerator
 import io.mironov.smuggler.compiler.generators.ValueAdapterFactory
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpecFactory
 import java.io.File
+import java.util.ArrayList
 import java.util.HashSet
 
 class SmugglerCompiler {
-  fun compile(options: SmugglerOptions) {
-    val grip = GripFactory.create(HashSet(options.project + options.subprojects + options.libraries + options.bootclasspath))
+  fun compile(options: SmugglerOptions): SmugglerOutput {
+    val inputs = HashSet(options.project + options.subprojects + options.libraries + options.bootclasspath)
+    val outputs = ArrayList<File>()
 
+    val grip = GripFactory.create(inputs)
     val environment = GenerationEnvironment(grip)
     val factory = ValueAdapterFactory.from(grip, HashSet(options.project + options.subprojects))
 
@@ -24,10 +27,17 @@ class SmugglerCompiler {
     for (parcelable in parcelables.classes) {
       val spec = AutoParcelableClassSpecFactory.from(parcelable)
       val generator = ParcelableContentGenerator(spec, ValueAdapterFactory.from(factory, spec))
+      val content = generator.generate(environment)
 
-      generator.generate(environment).forEach {
+      content.forEach {
         File(options.output, it.path).writeBytes(it.content)
       }
+
+      content.forEach {
+        outputs.add(File(options.output, it.path))
+      }
     }
+
+    return SmugglerOutput(outputs)
   }
 }
