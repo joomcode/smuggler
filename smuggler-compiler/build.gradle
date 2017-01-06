@@ -22,8 +22,6 @@ dependencies {
   compile "org.ow2.asm:asm-commons:$asmVersion"
 
   compile "io.michaelrocks:grip:$gripVersion"
-
-  testCompile "junit:junit:$junitVersion"
 }
 
 publishing {
