@@ -17,7 +17,10 @@ import java.io.File
 import java.util.ArrayList
 import java.util.EnumSet
 
-class SmugglerTransform(private val project: Project) : Transform() {
+class SmugglerTransform(
+    private val project: Project,
+    private val extension: SmugglerExtension
+) : Transform() {
   override fun transform(invocation: TransformInvocation) {
     val options = createOptions(invocation)
     val compiler = createCompiler()
@@ -49,6 +52,7 @@ class SmugglerTransform(private val project: Project) : Transform() {
 
   override fun getParameterInputs(): Map<String, Any> {
     return mapOf(
+        "incremental" to extension.incremental,
         "version" to BuildConfig.VERSION,
         "hash" to BuildConfig.GIT_HASH
     )
@@ -59,7 +63,7 @@ class SmugglerTransform(private val project: Project) : Transform() {
   }
 
   override fun isIncremental(): Boolean {
-    return false
+    return extension.incremental
   }
 
   private fun createCompiler(): SmugglerCompiler {
