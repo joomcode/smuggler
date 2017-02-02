@@ -158,56 +158,56 @@ internal class ValueAdapterFactory private constructor(
     return create(spec, property, property.type)
   }
 
-  fun create(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
-    return adapters[generic.asAsmType()] ?: run {
+  private fun create(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+    return TracedValueAdapter(adapters[generic.asAsmType()] ?: run {
       val type = generic.asAsmType()
 
       when (type) {
-        Types.MAP -> return createMap(Types.MAP, Types.LINKED_MAP, spec, property, generic)
-        Types.LINKED_MAP -> return createMap(Types.LINKED_MAP, Types.LINKED_MAP, spec, property, generic)
-        Types.HASH_MAP -> return createMap(Types.HASH_MAP, Types.HASH_MAP, spec, property, generic)
-        Types.SORTED_MAP -> return createMap(Types.SORTED_MAP, Types.TREE_MAP, spec, property, generic)
-        Types.TREE_MAP -> return createMap(Types.TREE_MAP, Types.TREE_MAP, spec, property, generic)
+        Types.MAP -> return@run createMap(Types.MAP, Types.LINKED_MAP, spec, property, generic)
+        Types.LINKED_MAP -> return@run createMap(Types.LINKED_MAP, Types.LINKED_MAP, spec, property, generic)
+        Types.HASH_MAP -> return@run createMap(Types.HASH_MAP, Types.HASH_MAP, spec, property, generic)
+        Types.SORTED_MAP -> return@run createMap(Types.SORTED_MAP, Types.TREE_MAP, spec, property, generic)
+        Types.TREE_MAP -> return@run createMap(Types.TREE_MAP, Types.TREE_MAP, spec, property, generic)
 
-        Types.SET -> return createCollection(Types.SET, Types.LINKED_SET, spec, property, generic)
-        Types.LINKED_SET -> return createCollection(Types.LINKED_SET, Types.LINKED_SET, spec, property, generic)
-        Types.HASH_SET -> return createCollection(Types.HASH_SET, Types.HASH_SET, spec, property, generic)
-        Types.SORTED_SET -> return createCollection(Types.SORTED_SET, Types.TREE_SET, spec, property, generic)
+        Types.SET -> return@run createCollection(Types.SET, Types.LINKED_SET, spec, property, generic)
+        Types.LINKED_SET -> return@run createCollection(Types.LINKED_SET, Types.LINKED_SET, spec, property, generic)
+        Types.HASH_SET -> return@run createCollection(Types.HASH_SET, Types.HASH_SET, spec, property, generic)
+        Types.SORTED_SET -> return@run createCollection(Types.SORTED_SET, Types.TREE_SET, spec, property, generic)
         Types.TREE_SET -> createCollection(Types.TREE_SET, Types.TREE_SET, spec, property, generic)
 
-        Types.LIST -> return createCollection(Types.LIST, Types.ARRAY_LIST, spec, property, generic)
-        Types.LINKED_LIST -> return createCollection(Types.LINKED_LIST, Types.LINKED_LIST, spec, property, generic)
-        Types.ARRAY_LIST -> return createCollection(Types.ARRAY_LIST, Types.ARRAY_LIST, spec, property, generic)
+        Types.LIST -> return@run createCollection(Types.LIST, Types.ARRAY_LIST, spec, property, generic)
+        Types.LINKED_LIST -> return@run createCollection(Types.LINKED_LIST, Types.LINKED_LIST, spec, property, generic)
+        Types.ARRAY_LIST -> return@run createCollection(Types.ARRAY_LIST, Types.ARRAY_LIST, spec, property, generic)
 
-        Types.COLLECTION -> return createCollection(Types.COLLECTION, Types.ARRAY_LIST, spec, property, generic)
+        Types.COLLECTION -> return@run createCollection(Types.COLLECTION, Types.ARRAY_LIST, spec, property, generic)
       }
 
       if (grip.isSubclassOf(type, Types.ENUM)) {
-        return EnumValueAdapter
+        return@run EnumValueAdapter
       }
 
       if (grip.isSubclassOf(type, Types.ANDROID_SPARSE_ARRAY)) {
-        return createSparseArray(spec, property)
+        return@run createSparseArray(spec, property)
       }
 
       if (grip.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
-        return ParcelableValueAdapter
+        return@run ParcelableValueAdapter
       }
 
       if (generic is GenericType.Array) {
-        return ArrayPropertyAdapter(create(spec, property, generic.elementType))
+        return@run ArrayPropertyAdapter(create(spec, property, generic.elementType))
       }
 
       if (type.sort == Type.ARRAY) {
-        return ArrayPropertyAdapter(create(spec, property, GenericType.Raw(GripType.Object(Types.getElementType(type)))))
+        return@run ArrayPropertyAdapter(create(spec, property, GenericType.Raw(GripType.Object(Types.getElementType(type)))))
       }
 
       if (grip.isSubclassOf(type, Types.SERIALIZABLE)) {
-        return SerializableValueAdapter
+        return@run SerializableValueAdapter
       }
 
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property.name, type.className)
-    }
+    })
   }
 
   private fun createCollection(collection: Type, implementation: Type, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {

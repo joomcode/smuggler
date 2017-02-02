@@ -15,7 +15,7 @@ internal interface ValueAdapter {
   fun toParcel(adapter: GeneratorAdapter, context: ValueContext)
 }
 
-internal abstract class OptionalValueAdapter() : ValueAdapter {
+internal abstract class OptionalValueAdapter : ValueAdapter {
   final override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     val start = adapter.newLabel()
     val end = adapter.newLabel()
@@ -628,5 +628,46 @@ internal class AssistedValueAdapter(
       is Assistant.Companion -> getStatic(assistant.owner, assistant.name, assistant.type)
       is Assistant.Object -> getStatic(assistant.type, assistant.name, assistant.type)
     }
+  }
+}
+
+internal class TracedValueAdapter(private val delegate: ValueAdapter) : ValueAdapter {
+  private companion object {
+    private var indent = 0
+  }
+
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
+    section("fromParcel", adapter, context) {
+      delegate.fromParcel(adapter, context)
+    }
+  }
+
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
+    section("toParcel", adapter, context) {
+      delegate.toParcel(adapter, context)
+    }
+  }
+
+  private inline fun section(name: String, adapter: GeneratorAdapter, context: ValueContext, action: () -> Unit) {
+    report("[Trace] ${"    ".repeat(indent)}--> $name ${tag(context)}", adapter, context)
+    indent++
+    action()
+    indent--
+    report("[Trace] ${"    ".repeat(indent)}<-- $name ${tag(context)}", adapter, context)
+  }
+
+  private fun report(message: String, adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.push("Smuggler")
+    adapter.push(message)
+    adapter.invokeStatic(Types.ANDROID_LOG, Methods.get("d", Types.INT, Types.STRING, Types.STRING))
+    adapter.pop()
+  }
+
+  private fun tag(context: ValueContext): String {
+    return "[${unwrap(delegate).javaClass.simpleName}] [${context.type}]"
+  }
+
+  private fun unwrap(adapter: ValueAdapter): ValueAdapter {
+    return if (adapter is TracedValueAdapter) unwrap(adapter.delegate) else adapter
   }
 }
