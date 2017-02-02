@@ -159,14 +159,14 @@ internal class ValueAdapterFactory private constructor(
   }
 
   fun create(spec: AutoParcelableClassSpec): ValueAdapter {
-    return TracedValueAdapter(when (spec) {
+    return when (spec) {
       is AutoParcelableClassSpec.Data -> AutoParcelableClassValueAdapter(spec, this)
       is AutoParcelableClassSpec.Object -> AutoParcelableObjectValueAdapter(spec)
-    })
+    }
   }
 
   private fun create(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
-    return TracedValueAdapter(adapters[generic.asAsmType()] ?: run {
+    return adapters[generic.asAsmType()] ?: run {
       val type = generic.asAsmType()
 
       when (type) {
@@ -214,7 +214,7 @@ internal class ValueAdapterFactory private constructor(
       }
 
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' has unsupported type ''{1}''", property.name, type.className)
-    })
+    }
   }
 
   private fun createCollection(collection: Type, implementation: Type, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
