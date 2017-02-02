@@ -2,6 +2,7 @@ package io.mironov.smuggler.compiler.generators
 
 import io.michaelrocks.grip.mirrors.Type as GripType
 import io.michaelrocks.grip.mirrors.MethodMirror
+import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.mirrors.toAsmType
 import io.mironov.smuggler.compiler.ContentGenerator
 import io.mironov.smuggler.compiler.GeneratedContent
@@ -57,10 +58,14 @@ internal class ParcelableContentGenerator(
       }
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
-        when (spec) {
-          is AutoParcelableClassSpec.Data -> onGenerateCreateFromParcelMethodForDataClass(spec)
-          is AutoParcelableClassSpec.Object -> onGenerateCreateFromParcelMethodForObjectClass(spec)
-        }
+        val context = ValueContext(GenericType.Raw(spec.clazz.type))
+
+        context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
+          loadArg(0)
+          storeLocal(this, Types.ANDROID_PARCEL)
+        })
+
+        factory.create(spec).fromParcel(this, context)
       }
 
       newMethod(createMethodSpecForNewArrayMethod(spec, false)) {
@@ -113,72 +118,33 @@ internal class ParcelableContentGenerator(
       }
 
       newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
-        when (spec) {
-          is AutoParcelableClassSpec.Data -> onGenerateWriteToParcelMethodForDataClass(spec)
-          is AutoParcelableClassSpec.Object -> onGenerateWriteToParcelMethodForObjectClass(spec)
+        val context = ValueContext(GenericType.Raw(spec.clazz.type))
+
+        context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
+          loadArg(0)
+          storeLocal(this, Types.ANDROID_PARCEL)
+        })
+
+        context.flags(newLocal(Types.INT).apply {
+          loadArg(1)
+          storeLocal(this, Types.INT)
+        })
+
+        spec.properties.forEach {
+          context.property(it.name, newLocal(it.type.asAsmType()).apply {
+            loadThis()
+            getField(spec.clazz, it.name, it.type.asAsmType())
+            storeLocal(this, it.type.asAsmType())
+          })
         }
+
+        factory.create(spec).toParcel(this, context)
       }
 
       newMethod(createMethodSpecForDescribeContentsMethod(spec)) {
         push(0)
       }
     })
-  }
-
-  private fun GeneratorAdapter.onGenerateWriteToParcelMethodForDataClass(spec: AutoParcelableClassSpec.Data) {
-    val context = ValueContext()
-
-    context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
-      loadArg(0)
-      storeLocal(this, Types.ANDROID_PARCEL)
-    })
-
-    context.flags(newLocal(Types.INT).apply {
-      loadArg(1)
-      storeLocal(this, Types.INT)
-    })
-
-    spec.properties.forEach {
-      context.property(it.name, newLocal(it.type.asAsmType()).apply {
-        loadThis()
-        getField(spec.clazz, it.name, it.type.asAsmType())
-        storeLocal(this, it.type.asAsmType())
-      })
-    }
-
-    spec.properties.forEach {
-      val property = factory.create(spec, it)
-
-      context.value(newLocal(it.type.asAsmType()).apply {
-        loadLocal(context.property(it.name))
-        storeLocal(this, it.type.asAsmType())
-      })
-
-      property.toParcel(this, context.typed(it.type))
-    }
-  }
-
-  private fun GeneratorAdapter.onGenerateCreateFromParcelMethodForDataClass(spec: AutoParcelableClassSpec.Data) {
-    val context = ValueContext()
-
-    context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
-      loadArg(0)
-      storeLocal(this, Types.ANDROID_PARCEL)
-    })
-
-    newInstance(spec.clazz.type.toAsmType(), Methods.getConstructor(spec.properties.map { it.type.asAsmType() })) {
-      spec.properties.forEach {
-        factory.create(spec, it).fromParcel(this, context.typed(it.type))
-      }
-    }
-  }
-
-  private fun GeneratorAdapter.onGenerateWriteToParcelMethodForObjectClass(spec: AutoParcelableClassSpec.Object) {
-    // nothing to do
-  }
-
-  private fun GeneratorAdapter.onGenerateCreateFromParcelMethodForObjectClass(spec: AutoParcelableClassSpec.Object) {
-    getStatic(spec.clazz.type.toAsmType(), spec.name, spec.clazz.type.toAsmType())
   }
 
   private fun creatorTypeFrom(spec: AutoParcelableClassSpec): Type {

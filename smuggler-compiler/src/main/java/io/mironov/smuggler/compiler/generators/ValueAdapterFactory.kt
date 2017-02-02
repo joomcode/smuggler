@@ -158,6 +158,13 @@ internal class ValueAdapterFactory private constructor(
     return create(spec, property, property.type)
   }
 
+  fun create(spec: AutoParcelableClassSpec): ValueAdapter {
+    return TracedValueAdapter(when (spec) {
+      is AutoParcelableClassSpec.Data -> AutoParcelableClassValueAdapter(spec, this)
+      is AutoParcelableClassSpec.Object -> AutoParcelableObjectValueAdapter(spec)
+    })
+  }
+
   private fun create(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
     return TracedValueAdapter(adapters[generic.asAsmType()] ?: run {
       val type = generic.asAsmType()

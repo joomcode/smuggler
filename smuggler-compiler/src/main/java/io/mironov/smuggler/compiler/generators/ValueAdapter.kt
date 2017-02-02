@@ -1,12 +1,14 @@
 package io.mironov.smuggler.compiler.generators
 
 import io.michaelrocks.grip.mirrors.signature.GenericType
+import io.michaelrocks.grip.mirrors.toAsmType
 import io.michaelrocks.grip.mirrors.toType
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.asAsmType
 import io.mironov.smuggler.compiler.common.asParameterizedType
+import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 
@@ -631,11 +633,43 @@ internal class AssistedValueAdapter(
   }
 }
 
-internal class TracedValueAdapter(private val delegate: ValueAdapter) : ValueAdapter {
-  private companion object {
-    private var indent = 0
+internal class AutoParcelableObjectValueAdapter(private val spec: AutoParcelableClassSpec.Object) : ValueAdapter {
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.getStatic(spec.clazz.type.toAsmType(), spec.name, spec.clazz.type.toAsmType())
   }
 
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
+    // nothing to do
+  }
+}
+
+internal class AutoParcelableClassValueAdapter(
+    private val spec: AutoParcelableClassSpec.Data,
+    private val factory: ValueAdapterFactory
+) : ValueAdapter {
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.newInstance(spec.clazz.type.toAsmType(), Methods.getConstructor(spec.properties.map { it.type.asAsmType() })) {
+      spec.properties.forEach {
+        factory.create(spec, it).fromParcel(adapter, context.typed(it.type))
+      }
+    }
+  }
+
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
+    spec.properties.forEach {
+      val property = factory.create(spec, it)
+
+      context.value(adapter.newLocal(it.type.asAsmType()).apply {
+        adapter.loadLocal(context.property(it.name))
+        adapter.storeLocal(this, it.type.asAsmType())
+      })
+
+      property.toParcel(adapter, context.typed(it.type))
+    }
+  }
+}
+
+internal class TracedValueAdapter(private val delegate: ValueAdapter) : ValueAdapter {
   override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     section("fromParcel", adapter, context) {
       delegate.fromParcel(adapter, context)
@@ -649,11 +683,9 @@ internal class TracedValueAdapter(private val delegate: ValueAdapter) : ValueAda
   }
 
   private inline fun section(name: String, adapter: GeneratorAdapter, context: ValueContext, action: () -> Unit) {
-    report("[Trace] ${"    ".repeat(indent)}--> $name ${tag(context)}", adapter, context)
-    indent++
+    report("[Trace] --> $name ${tag(context)}", adapter, context)
     action()
-    indent--
-    report("[Trace] ${"    ".repeat(indent)}<-- $name ${tag(context)}", adapter, context)
+    report("[Trace] <-- $name ${tag(context)}", adapter, context)
   }
 
   private fun report(message: String, adapter: GeneratorAdapter, context: ValueContext) {
@@ -664,7 +696,7 @@ internal class TracedValueAdapter(private val delegate: ValueAdapter) : ValueAda
   }
 
   private fun tag(context: ValueContext): String {
-    return "[${unwrap(delegate).javaClass.simpleName}] [${context.type}]"
+    return "[${context.type}] [${unwrap(delegate).javaClass.simpleName}]"
   }
 
   private fun unwrap(adapter: ValueAdapter): ValueAdapter {
