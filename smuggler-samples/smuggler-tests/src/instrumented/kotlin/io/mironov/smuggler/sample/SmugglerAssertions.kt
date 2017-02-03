@@ -10,7 +10,7 @@ object SmugglerAssertions {
       verify(P::class.java)
     }
 
-    0.until(2).forEach {
+    0.until(10).forEach {
       verify(factory())
     }
   }
