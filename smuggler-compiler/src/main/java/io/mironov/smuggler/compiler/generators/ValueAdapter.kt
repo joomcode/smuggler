@@ -648,9 +648,16 @@ internal class AutoParcelableClassValueAdapter(
     private val factory: ValueAdapterFactory
 ) : ValueAdapter {
   override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
+    spec.properties.forEach {
+      context.property(it.name, adapter.newLocal(it.type.asAsmType()).apply {
+        adapter.fromParcel(factory.create(spec, it), context.typed(it.type))
+        adapter.storeLocal(this, it.type.asAsmType())
+      })
+    }
+
     adapter.newInstance(spec.clazz.type.toAsmType(), Methods.getConstructor(spec.properties.map { it.type.asAsmType() })) {
       spec.properties.forEach {
-        factory.create(spec, it).fromParcel(adapter, context.typed(it.type))
+        adapter.loadLocal(context.property(it.name))
       }
     }
   }
@@ -664,8 +671,16 @@ internal class AutoParcelableClassValueAdapter(
         adapter.storeLocal(this, it.type.asAsmType())
       })
 
-      property.toParcel(adapter, context.typed(it.type))
+      adapter.toParcel(property, context.typed(it.type))
     }
+  }
+
+  private fun GeneratorAdapter.fromParcel(adapter: ValueAdapter, context: ValueContext) {
+    adapter.fromParcel(this, context)
+  }
+
+  private fun GeneratorAdapter.toParcel(adapter: ValueAdapter, context: ValueContext) {
+    adapter.toParcel(this, context)
   }
 }
 
