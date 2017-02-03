@@ -683,38 +683,3 @@ internal class AutoParcelableClassValueAdapter(
     adapter.toParcel(this, context)
   }
 }
-
-internal class TracedValueAdapter(private val delegate: ValueAdapter) : ValueAdapter {
-  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
-    section("fromParcel", adapter, context) {
-      delegate.fromParcel(adapter, context)
-    }
-  }
-
-  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
-    section("toParcel", adapter, context) {
-      delegate.toParcel(adapter, context)
-    }
-  }
-
-  private inline fun section(name: String, adapter: GeneratorAdapter, context: ValueContext, action: () -> Unit) {
-    report("[Trace] --> $name ${tag(context)}", adapter, context)
-    action()
-    report("[Trace] <-- $name ${tag(context)}", adapter, context)
-  }
-
-  private fun report(message: String, adapter: GeneratorAdapter, context: ValueContext) {
-    adapter.push("Smuggler")
-    adapter.push(message)
-    adapter.invokeStatic(Types.ANDROID_LOG, Methods.get("d", Types.INT, Types.STRING, Types.STRING))
-    adapter.pop()
-  }
-
-  private fun tag(context: ValueContext): String {
-    return "[${context.type}] [${unwrap(delegate).javaClass.simpleName}]"
-  }
-
-  private fun unwrap(adapter: ValueAdapter): ValueAdapter {
-    return if (adapter is TracedValueAdapter) unwrap(adapter.delegate) else adapter
-  }
-}
