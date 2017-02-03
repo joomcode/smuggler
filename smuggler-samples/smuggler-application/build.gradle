@@ -18,6 +18,22 @@ android {
     targetSdkVersion projectTargetSdkVersion
     minSdkVersion projectMinSdkVersion
   }
+
+  signingConfigs {
+    release {
+      storeFile file("magic.keystore")
+      storePassword "magic1"
+
+      keyAlias "magic"
+      keyPassword "magic1"
+    }
+  }
+
+  buildTypes {
+    release {
+      signingConfig signingConfigs.release
+    }
+  }
 }
 
 dependencies {
