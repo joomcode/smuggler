@@ -32,7 +32,7 @@ class SmugglerTransform(
     compiler.compile(options)
   }
 
-  override fun getScopes(): Set<Scope> {
+  override fun getScopes(): MutableSet<Scope> {
     return EnumSet.of(Scope.PROJECT)
   }
 
@@ -40,7 +40,7 @@ class SmugglerTransform(
     return EnumSet.of(DefaultContentType.CLASSES)
   }
 
-  override fun getReferencedScopes(): Set<Scope> {
+  override fun getReferencedScopes(): MutableSet<Scope> {
     return EnumSet.of(
         Scope.TESTED_CODE,
         Scope.PROJECT_LOCAL_DEPS,
