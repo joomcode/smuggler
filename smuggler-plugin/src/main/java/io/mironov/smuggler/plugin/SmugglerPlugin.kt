@@ -9,7 +9,7 @@ import com.android.build.gradle.TestPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-class SmugglerPlugin : Plugin<Project> {
+open class SmugglerPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     onPrepareExtension(project)
     onPrepareDependencies(project)
@@ -17,7 +17,7 @@ class SmugglerPlugin : Plugin<Project> {
   }
 
   private fun onPrepareExtension(project: Project) {
-    project.extensions.create("smuggler", SmugglerExtension::class.java, project)
+    project.extensions.create("smuggler", SmugglerExtension::class.java)
   }
 
   private fun onPrepareDependencies(project: Project) {
