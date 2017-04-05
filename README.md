@@ -125,7 +125,6 @@ Some **important** notes:
 - Only data classes and kotlin objects are supported
 - Data classes with type parameters aren't supported at the moment
 - Lists, Maps and Arrays with bounded type parameters aren't supported at the moment
-- Jack&Jill toolchain isn't supported at the moment
 - The library doesn't work nicely with JVM tests at the moment [#12](https://github.com/nsk-mironov/smuggler/issues/12)
 
 # What does "Smuggler" mean?
