@@ -20,8 +20,8 @@ internal object AutoParcelableClassSpecFactory {
     }
 
     val proto = JvmProtoBufUtil.readClassDataFrom(metadata.data, metadata.strings)
-    val clazz = proto.classProto
-    val resolver = proto.nameResolver
+    val resolver = proto.component1()
+    val clazz = proto.component2()
 
     if (Flags.CLASS_KIND.get(clazz.flags) == Class.Kind.OBJECT) {
       return AutoParcelableClassSpec.Object(mirror, "INSTANCE")
