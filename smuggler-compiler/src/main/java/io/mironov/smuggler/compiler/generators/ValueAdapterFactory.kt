@@ -101,7 +101,7 @@ internal class ValueAdapterFactory private constructor(
 
       if (metadata != null) {
         val proto = JvmProtoBufUtil.readClassDataFrom(metadata.data, metadata.strings)
-        val clazz = proto.classProto
+        val clazz = proto.component2()
 
         if (Flags.CLASS_KIND.get(clazz.flags) == ProtoBuf.Class.Kind.COMPANION_OBJECT) {
           throw InvalidTypeAdapterException(spec.type, "TypeAdapter cannot be a companion object")
