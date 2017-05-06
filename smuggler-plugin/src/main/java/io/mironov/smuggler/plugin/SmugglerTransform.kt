@@ -9,7 +9,6 @@ import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.LibraryExtension
-import com.google.common.collect.Iterables
 import io.mironov.smuggler.compiler.SmugglerCompiler
 import io.mironov.smuggler.compiler.SmugglerOptions
 import org.gradle.api.Project
@@ -23,7 +22,7 @@ class SmugglerTransform(
 ) : Transform() {
   override fun transform(invocation: TransformInvocation) {
     val options = createOptions(invocation)
-    val compiler = createCompiler()
+    val compiler = SmugglerCompiler()
 
     for (file in options.project) {
       file.copyRecursively(options.output, true)
@@ -63,16 +62,14 @@ class SmugglerTransform(
   }
 
   override fun isIncremental(): Boolean {
-    return extension.incremental
-  }
-
-  private fun createCompiler(): SmugglerCompiler {
-    return SmugglerCompiler()
+    return false
   }
 
   private fun createOptions(invocation: TransformInvocation): SmugglerOptions {
-    val input = Iterables.getOnlyElement(Iterables.getOnlyElement(invocation.inputs).directoryInputs)
-    val output = invocation.outputProvider.getContentLocation(input.name, input.contentTypes, input.scopes, Format.DIRECTORY)
+    val inputs = invocation.inputs.flatMap { it.directoryInputs }
+    val types = inputs.flatMapTo(LinkedHashSet()) { it.contentTypes }
+    val scopes = inputs.flatMapTo(LinkedHashSet()) { it.scopes }
+    val output = invocation.outputProvider.getContentLocation("classes", types, scopes, Format.DIRECTORY)
 
     val application = project.extensions.findByType(AppExtension::class.java)
     val library = project.extensions.findByType(LibraryExtension::class.java)
