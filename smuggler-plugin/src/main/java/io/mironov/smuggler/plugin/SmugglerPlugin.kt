@@ -31,11 +31,11 @@ open class SmugglerPlugin : Plugin<Project> {
     val transform = SmugglerTransform(project, extension)
 
     if (project.plugins.hasPlugin(LibraryPlugin::class.java)) {
-      project.extensions.findByType(LibraryExtension::class.java).registerTransform(transform)
+      project.extensions.findByType(LibraryExtension::class.java)!!.registerTransform(transform)
     } else if (project.plugins.hasPlugin(TestPlugin::class.java)) {
-      project.extensions.findByType(TestExtension::class.java).registerTransform(transform)
+      project.extensions.findByType(TestExtension::class.java)!!.registerTransform(transform)
     } else if (project.plugins.hasPlugin(AppPlugin::class.java)) {
-      project.extensions.findByType(AppExtension::class.java).registerTransform(transform)
+      project.extensions.findByType(AppExtension::class.java)!!.registerTransform(transform)
     }
   }
 }

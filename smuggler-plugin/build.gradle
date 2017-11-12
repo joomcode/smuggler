@@ -19,8 +19,8 @@ dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
-  compileOnly "com.android.tools.build:gradle:$androidToolsBetaVersion"
-  compileOnly "com.android.tools.build:gradle-api:$androidToolsBetaVersion"
+  compileOnly "com.android.tools.build:gradle:$androidToolsVersion"
+  compileOnly "com.android.tools.build:gradle-api:$androidToolsVersion"
 
   compile gradleApi()
 }

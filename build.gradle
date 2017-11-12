@@ -1,8 +1,14 @@
 buildscript {
+  ext.androidToolsVersion = "3.0.0"
+
   repositories {
     mavenLocal()
-    mavenCentral()
     jcenter()
+    google()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:$androidToolsVersion"
   }
 }
 
@@ -10,32 +16,29 @@ allprojects {
   buildscript {
     repositories {
       mavenLocal()
-      mavenCentral()
       jcenter()
+      google()
     }
   }
 
   repositories {
     mavenLocal()
-    mavenCentral()
     jcenter()
+    google()
   }
 }
 
 ext {
-  projectCompileSdkVersion = 25
-  projectBuildToolsVersion = "25.0.2"
+  projectCompileSdkVersion = 27
+  projectBuildToolsVersion = "27.0.1"
 
   projectMinSdkVersion = 16
-  projectTargetSdkVersion = 25
+  projectTargetSdkVersion = 27
 
-  supportVersion = "25.2.0"
+  supportVersion = "27.0.0"
   supportTestRunnerVersion = "0.4.1"
 
-  androidToolsBetaVersion = "2.3.0"
-  androidToolsStableVersion = "2.3.0"
-
-  kotlinVersion = "1.1.3"
+  kotlinVersion = "1.1.51"
   bintrayVersion = "1.4"
 
   asmVersion = "5.2"
