@@ -2,6 +2,9 @@ package io.mironov.smuggler.compiler.common
 
 import org.objectweb.asm.Opcodes
 
+internal val Int.isPublic: Boolean
+  get() = this and Opcodes.ACC_PUBLIC != 0
+
 internal val Int.isPrivate: Boolean
   get() = this and Opcodes.ACC_PRIVATE != 0
 
@@ -22,3 +25,6 @@ internal val Int.isSynthetic: Boolean
 
 internal val Int.isStatic: Boolean
   get() = this and Opcodes.ACC_STATIC != 0
+
+internal val Int.isFinal: Boolean
+  get() = this and Opcodes.ACC_FINAL != 0

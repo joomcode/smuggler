@@ -2,7 +2,6 @@ package io.mironov.smuggler.compiler.generators
 
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.classes
-import io.michaelrocks.grip.mirrors.Type as GripType
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.isAbstract
 import io.michaelrocks.grip.mirrors.isPublic
@@ -21,6 +20,7 @@ import io.mironov.smuggler.compiler.common.asAsmType
 import io.mironov.smuggler.compiler.common.asRawType
 import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredConstructor
+import io.mironov.smuggler.compiler.common.isFinal
 import io.mironov.smuggler.compiler.common.isGlobalTypeAdapter
 import io.mironov.smuggler.compiler.common.isSubclassOf
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
@@ -31,6 +31,7 @@ import java.util.Arrays
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
+import io.michaelrocks.grip.mirrors.Type as GripType
 
 internal class ValueAdapterFactory private constructor(
     private val grip: Grip,
@@ -198,7 +199,15 @@ internal class ValueAdapterFactory private constructor(
       }
 
       if (grip.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
-        return@run ParcelableValueAdapter
+        val registry = grip.classRegistry
+        val mirror = registry.getClassMirror(GripType.Object(type))
+        val final = mirror.access.isFinal
+
+        if (final) {
+          return@run MonomorphicParcelableValueAdapter
+        } else {
+          return@run PolymorphicParcelableValueAdapter
+        }
       }
 
       if (generic is GenericType.Array) {

@@ -1,6 +1,5 @@
 package io.mironov.smuggler.compiler.generators
 
-import io.michaelrocks.grip.mirrors.Type as GripType
 import io.michaelrocks.grip.mirrors.MethodMirror
 import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.mirrors.toAsmType
@@ -9,14 +8,13 @@ import io.mironov.smuggler.compiler.GeneratedContent
 import io.mironov.smuggler.compiler.GenerationEnvironment
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
+import io.mironov.smuggler.compiler.common.Signature
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.asAsmType
+import io.mironov.smuggler.compiler.common.getStaticInitializer
 import io.mironov.smuggler.compiler.common.given
 import io.mironov.smuggler.compiler.common.isStatic
-import io.mironov.smuggler.compiler.common.Signature
-import io.mironov.smuggler.compiler.common.getStaticInitializer
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
-import org.objectweb.asm.Type
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
@@ -28,7 +26,9 @@ import org.objectweb.asm.Opcodes.ACC_STATIC
 import org.objectweb.asm.Opcodes.ACC_SUPER
 import org.objectweb.asm.Opcodes.ACC_SYNTHETIC
 import org.objectweb.asm.Opcodes.ASM5
+import org.objectweb.asm.Type
 import org.objectweb.asm.commons.Method
+import io.michaelrocks.grip.mirrors.Type as GripType
 
 @Suppress("UNUSED_PARAMETER")
 internal class ParcelableContentGenerator(
@@ -58,7 +58,7 @@ internal class ParcelableContentGenerator(
       }
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
-        val context = ValueContext(GenericType.Raw(spec.clazz.type))
+        val context = ValueContext(GenericType.Raw(spec.clazz.type), environment.grip)
 
         context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
           loadArg(0)
@@ -118,7 +118,7 @@ internal class ParcelableContentGenerator(
       }
 
       newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
-        val context = ValueContext(GenericType.Raw(spec.clazz.type))
+        val context = ValueContext(GenericType.Raw(spec.clazz.type), environment.grip)
 
         context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
           loadArg(0)

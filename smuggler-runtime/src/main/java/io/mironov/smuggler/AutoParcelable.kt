@@ -9,12 +9,12 @@ interface AutoParcelable : Parcelable {
   companion object {
     private val CREATORS = IdentityHashMap<Class<*>, Parcelable.Creator<*>>()
 
-    inline fun <reified S : AutoParcelable> creator(): Parcelable.Creator<S> {
+    inline fun <reified S : Parcelable> creator(): Parcelable.Creator<S> {
       return creator(S::class.java)
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <S : AutoParcelable> creator(clazz: Class<S>): Parcelable.Creator<S> {
+    fun <S : Parcelable> creator(clazz: Class<S>): Parcelable.Creator<S> {
       return synchronized(CREATORS) {
         CREATORS.getOrPut(clazz) {
           val creator = try {

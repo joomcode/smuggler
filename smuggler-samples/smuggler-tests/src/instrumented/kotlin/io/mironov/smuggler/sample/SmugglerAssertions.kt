@@ -1,11 +1,12 @@
 package io.mironov.smuggler.sample
 
 import android.os.Parcel
+import android.os.Parcelable
 import io.mironov.smuggler.AutoParcelable
 import org.junit.Assert
 
 object SmugglerAssertions {
-  inline fun <reified P : AutoParcelable> verify(strict: Boolean = true, factory: () -> P) {
+  inline fun <reified P : Parcelable> verify(strict: Boolean = true, factory: () -> P) {
     if (strict) {
       verify(P::class.java)
     }
@@ -15,14 +16,14 @@ object SmugglerAssertions {
     }
   }
 
-  fun <P : AutoParcelable> verify(parcelable: P) {
+  fun <P : Parcelable> verify(parcelable: P) {
     val marshalled = marshall(parcelable)
     val unmarshalled = unmarshall<P>(marshalled, parcelable.javaClass.classLoader)
 
     Assert.assertTrue(SmugglerEquivalence.equals(parcelable, unmarshalled))
   }
 
-  fun <P : AutoParcelable> verify(clazz: Class<P>) {
+  fun <P : Parcelable> verify(clazz: Class<P>) {
     consume(AutoParcelable.creator(clazz))
   }
 
@@ -34,7 +35,7 @@ object SmugglerAssertions {
     // nothing to do
   }
 
-  private fun <P : AutoParcelable> marshall(parcelable: P): ByteArray {
+  private fun <P : Parcelable> marshall(parcelable: P): ByteArray {
     val parcel = Parcel.obtain().apply {
       writeParcelable(parcelable, 0)
     }
@@ -44,7 +45,7 @@ object SmugglerAssertions {
     }
   }
 
-  private fun <P : AutoParcelable> unmarshall(bytes: ByteArray, loader: ClassLoader): P {
+  private fun <P : Parcelable> unmarshall(bytes: ByteArray, loader: ClassLoader): P {
     val parcel = Parcel.obtain().apply {
       unmarshall(bytes, 0, bytes.size)
       setDataPosition(0)

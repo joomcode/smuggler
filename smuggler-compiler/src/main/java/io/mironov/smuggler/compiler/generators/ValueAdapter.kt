@@ -3,14 +3,21 @@ package io.mironov.smuggler.compiler.generators
 import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.mirrors.toAsmType
 import io.michaelrocks.grip.mirrors.toType
+import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.asAsmType
 import io.mironov.smuggler.compiler.common.asParameterizedType
+import io.mironov.smuggler.compiler.common.getDeclaredField
+import io.mironov.smuggler.compiler.common.isAutoParcelable
+import io.mironov.smuggler.compiler.common.isPublic
+import io.mironov.smuggler.compiler.common.isStatic
+import io.mironov.smuggler.compiler.common.isSubclass
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
+import io.michaelrocks.grip.mirrors.Type as GripType
 
 internal interface ValueAdapter {
   fun fromParcel(adapter: GeneratorAdapter, context: ValueContext)
@@ -250,7 +257,7 @@ internal object SerializableValueAdapter : ValueAdapter {
   }
 }
 
-internal object ParcelableValueAdapter : ValueAdapter {
+internal object PolymorphicParcelableValueAdapter : ValueAdapter {
   override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
     adapter.push(context.type.asAsmType())
@@ -265,6 +272,59 @@ internal object ParcelableValueAdapter : ValueAdapter {
     adapter.checkCast(Types.ANDROID_PARCELABLE)
     adapter.loadLocal(context.flags())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeParcelable", Types.VOID, Types.ANDROID_PARCELABLE, Types.INT))
+  }
+}
+
+internal object MonomorphicParcelableValueAdapter : OptionalValueAdapter() {
+  override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.getStatic(context.type.asAsmType(), "CREATOR", resolveCreatorType(context))
+    adapter.checkCast(Types.ANDROID_CREATOR)
+    adapter.loadLocal(context.parcel())
+    adapter.invokeInterface(Types.ANDROID_CREATOR, Methods.get("createFromParcel", Types.OBJECT, Types.ANDROID_PARCEL))
+    adapter.checkCast(context.type.asAsmType())
+  }
+
+  override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    adapter.loadLocal(context.value())
+    adapter.checkCast(Types.ANDROID_PARCELABLE)
+    adapter.loadLocal(context.parcel())
+    adapter.loadLocal(context.flags())
+    adapter.invokeInterface(Types.ANDROID_PARCELABLE, Methods.get("writeToParcel", Types.VOID, Types.ANDROID_PARCEL, Types.INT))
+  }
+
+  private fun resolveCreatorType(context: ValueContext): Type {
+    val type = context.type.asAsmType()
+    val registry = context.grip.classRegistry
+    val mirror = registry.getClassMirror(GripType.Object(type))
+
+    if (isAutoParcelable()(context.grip, mirror)) {
+      return Types.ANDROID_CREATOR
+    }
+
+    val creator = mirror.getDeclaredField("CREATOR") ?: run {
+      invalidParcelableClass(type, "Unable to find the CREATOR object.")
+    }
+
+    if (!creator.access.isStatic) {
+      invalidParcelableClass(type, "The CREATOR object must be static.")
+    }
+
+    if (!creator.access.isPublic) {
+      invalidParcelableClass(type, "The CREATOR object must be public.")
+    }
+
+    val creatorType = GripType.Object(creator.type.toAsmType())
+    val creatorMirror = registry.getClassMirror(creatorType)
+
+    if (!isSubclass(Types.ANDROID_CREATOR)(context.grip, creatorMirror)) {
+      invalidParcelableClass(type, "The CREATOR object must implement Parcelable.Creator interface.")
+    }
+
+    return creator.type.toAsmType()
+  }
+
+  private fun invalidParcelableClass(type: Type, message: String, vararg args: Any?): Nothing {
+    throw SmugglerException("Invalid Parcelable class '${type.className}'. $message", *args)
   }
 }
 

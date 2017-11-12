@@ -1,6 +1,7 @@
 package io.mironov.smuggler.sample
 
 import android.os.Parcel
+import android.os.Parcelable
 import android.support.test.runner.AndroidJUnit4
 import android.util.SparseArray
 import android.util.SparseBooleanArray
@@ -875,6 +876,60 @@ class SmugglerTest {
         Result.Success(value = generator.nextString())
       } else {
         Result.Failure(code = generator.nextInt())
+      }
+    }
+  }
+
+  @Test fun shouldWorkWithManualCreator() {
+    data class Container(
+        val single: Manual,
+        val array: Array<Manual>,
+        val list: List<Manual>,
+        val set: Set<Manual>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<Manual> {
+      Manual(value = generator.nextInt())
+    }
+
+    SmugglerAssertions.verify<Container> {
+      Container(
+          single = Manual(generator.nextInt()),
+          array = generator.nextArray { Manual(generator.nextInt()) },
+          list = generator.nextList { Manual(generator.nextInt()) },
+          set = generator.nextSet { Manual(generator.nextInt()) }
+      )
+    }
+  }
+
+  private class Manual(val value: Int) : Parcelable {
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+      parcel.writeInt(value)
+    }
+
+    override fun describeContents(): Int {
+      return 0
+    }
+
+    override fun equals(other: Any?): Boolean {
+      return other is Manual && other.value == value
+    }
+
+    override fun hashCode(): Int {
+      return value
+    }
+
+    override fun toString(): String {
+      return "Manual[value = $value]"
+    }
+
+    companion object CREATOR : Parcelable.Creator<Manual> {
+      override fun createFromParcel(parcel: Parcel): Manual {
+        return Manual(parcel.readInt())
+      }
+
+      override fun newArray(size: Int): Array<Manual?> {
+        return arrayOfNulls(size)
       }
     }
   }
