@@ -42,9 +42,7 @@ class SmugglerTransform(
   override fun getReferencedScopes(): MutableSet<Scope> {
     return EnumSet.of(
         Scope.TESTED_CODE,
-        Scope.PROJECT_LOCAL_DEPS,
         Scope.SUB_PROJECTS,
-        Scope.SUB_PROJECTS_LOCAL_DEPS,
         Scope.EXTERNAL_LIBRARIES
     )
   }
