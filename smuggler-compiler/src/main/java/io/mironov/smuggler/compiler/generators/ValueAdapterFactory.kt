@@ -212,10 +212,6 @@ internal class ValueAdapterFactory private constructor(
         return@run ArrayPropertyAdapter(create(spec, property, generic.elementType))
       }
 
-      if (type.sort == Type.ARRAY) {
-        return@run ArrayPropertyAdapter(create(spec, property, KotlinType.Raw(Types.getElementType(type), true)))
-      }
-
       if (grip.isSubclassOf(type, Types.SERIALIZABLE)) {
         return@run SerializableValueAdapter
       }

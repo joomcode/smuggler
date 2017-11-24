@@ -44,9 +44,17 @@ internal sealed class KotlinType {
   }
 
   companion object {
+    fun from(type: Type): KotlinType {
+      return if (type.sort == Type.ARRAY) {
+        KotlinType.Array(from(Types.getElementType(type)), true)
+      } else {
+        KotlinType.Raw(type, true)
+      }
+    }
+
     fun from(type: GenericType): KotlinType {
       return when (type) {
-        is GenericType.Raw -> KotlinType.Raw(type.type.toAsmType(), true)
+        is GenericType.Raw -> from(type.type.toAsmType())
         is GenericType.Array -> KotlinType.Array(from(type.elementType), true)
         is GenericType.Parameterized -> KotlinType.Parameterized(type.type.toAsmType(), type.typeArguments.map { from(it) }, true)
         is GenericType.Inner -> KotlinType.Inner(from(type.type), from(type.ownerType), true)

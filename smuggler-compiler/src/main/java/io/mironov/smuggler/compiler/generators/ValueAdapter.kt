@@ -332,7 +332,8 @@ internal class ArrayPropertyAdapter(
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
 
-    val elementType = Types.getElementType(context.type.asAsmType())
+    val arrayType = context.type.asArrayType()
+    val elementType = arrayType.elementType.asAsmType()
     val elements = adapter.newLocal(context.type.asAsmType())
 
     val begin = adapter.newLabel()
@@ -360,7 +361,7 @@ internal class ArrayPropertyAdapter(
     adapter.mark(body)
     adapter.loadLocal(elements)
     adapter.loadLocal(index)
-    adapter.readElement(context.asElementContext())
+    adapter.readElement(context.typed(arrayType.elementType))
     adapter.arrayStore(elementType)
 
     adapter.iinc(index, 1)
@@ -374,7 +375,8 @@ internal class ArrayPropertyAdapter(
     val index = adapter.newLocal(Types.INT)
     val length = adapter.newLocal(Types.INT)
 
-    val elementType = Types.getElementType(context.type.asAsmType())
+    val arrayType = context.type.asArrayType()
+    val elementType = arrayType.elementType.asAsmType()
     val element = adapter.newLocal(elementType)
 
     val begin = adapter.newLabel()
@@ -404,21 +406,13 @@ internal class ArrayPropertyAdapter(
     adapter.loadLocal(index)
     adapter.arrayLoad(elementType)
     adapter.storeLocal(element)
-    adapter.writeElement(context.asElementContext().apply {
+    adapter.writeElement(context.typed(arrayType.elementType).apply {
       value(element)
     })
 
     adapter.iinc(index, 1)
     adapter.goTo(begin)
     adapter.mark(end)
-  }
-
-  private fun ValueContext.asElementContext(): ValueContext {
-    return if (type !is KotlinType.Array) {
-      typed(KotlinType.Raw(Types.getElementType(type.asAsmType()), true))
-    } else {
-      typed(type.elementType)
-    }
   }
 
   private fun GeneratorAdapter.readElement(context: ValueContext) = element.fromParcel(this, context)
