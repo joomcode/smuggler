@@ -11,30 +11,12 @@ import io.michaelrocks.grip.mirrors.FieldMirror
 import io.michaelrocks.grip.mirrors.MethodMirror
 import io.michaelrocks.grip.mirrors.isStatic
 import io.michaelrocks.grip.mirrors.isStaticInitializer
-import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.mirrors.toAsmType
 import io.michaelrocks.grip.not
 import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.annotations.AnnotationProxy
 import org.objectweb.asm.Type
 import java.util.Arrays
-
-internal fun GenericType.asRawType() = cast<GenericType.Raw>()
-internal fun GenericType.asTypeVariable() = cast<GenericType.TypeVariable>()
-internal fun GenericType.asGenericArrayType() = cast<GenericType.Array>()
-internal fun GenericType.asParameterizedType() = cast<GenericType.Parameterized>()
-internal fun GenericType.asInnerType() = cast<GenericType.Inner>()
-internal fun GenericType.asUpperBoundedType() = cast<GenericType.UpperBounded>()
-internal fun GenericType.asLowerBoundedType() = cast<GenericType.LowerBounded>()
-
-internal fun GenericType.asAsmType(): Type {
-  return when (this) {
-    is GenericType.Raw -> type.toAsmType()
-    is GenericType.Array -> Types.getArrayType(elementType.asAsmType())
-    is GenericType.Parameterized -> type.toAsmType()
-    else -> throw UnsupportedOperationException()
-  }
-}
 
 internal fun Grip.isSubclassOf(type: Type, parent: Type): Boolean {
   if (type.sort == Type.METHOD) {

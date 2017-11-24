@@ -1,7 +1,6 @@
 package io.mironov.smuggler.compiler.generators
 
 import io.michaelrocks.grip.mirrors.MethodMirror
-import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.mirrors.toAsmType
 import io.mironov.smuggler.compiler.ContentGenerator
 import io.mironov.smuggler.compiler.GeneratedContent
@@ -10,11 +9,11 @@ import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Signature
 import io.mironov.smuggler.compiler.common.Types
-import io.mironov.smuggler.compiler.common.asAsmType
 import io.mironov.smuggler.compiler.common.getStaticInitializer
 import io.mironov.smuggler.compiler.common.given
 import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
+import io.mironov.smuggler.compiler.model.KotlinType
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
@@ -58,7 +57,7 @@ internal class ParcelableContentGenerator(
       }
 
       newMethod(createMethodSpecForCreateFromParcelMethod(spec, false)) {
-        val context = ValueContext(GenericType.Raw(spec.clazz.type), environment.grip)
+        val context = ValueContext(KotlinType.Raw(spec.clazz.type.toAsmType(), true), environment.grip)
 
         context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
           loadArg(0)
@@ -118,7 +117,7 @@ internal class ParcelableContentGenerator(
       }
 
       newMethod(createMethodSpecForWriteToParcelMethod(spec)) {
-        val context = ValueContext(GenericType.Raw(spec.clazz.type), environment.grip)
+        val context = ValueContext(KotlinType.Raw(spec.clazz.type.toAsmType(), true), environment.grip)
 
         context.parcel(newLocal(Types.ANDROID_PARCEL).apply {
           loadArg(0)

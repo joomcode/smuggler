@@ -1,17 +1,17 @@
 package io.mironov.smuggler.compiler.generators
 
 import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.mirrors.signature.GenericType
+import io.mironov.smuggler.compiler.model.KotlinType
 import java.util.HashMap
 import java.util.NoSuchElementException
 
 internal class ValueContext(
-    val type: GenericType,
+    val type: KotlinType,
     val grip: Grip
 ) {
   private val names = HashMap<String, Int>()
 
-  fun typed(newType: GenericType): ValueContext {
+  fun typed(newType: KotlinType): ValueContext {
     val context = ValueContext(newType, grip)
     val variables = names
 

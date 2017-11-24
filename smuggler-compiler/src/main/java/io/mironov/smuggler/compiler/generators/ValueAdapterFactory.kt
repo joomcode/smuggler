@@ -6,7 +6,6 @@ import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.isAbstract
 import io.michaelrocks.grip.mirrors.isPublic
 import io.michaelrocks.grip.mirrors.isSynthetic
-import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.mirrors.toAsmType
 import io.michaelrocks.grip.mirrors.toType
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
@@ -16,8 +15,6 @@ import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
 import io.mironov.smuggler.compiler.common.Types
-import io.mironov.smuggler.compiler.common.asAsmType
-import io.mironov.smuggler.compiler.common.asRawType
 import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredConstructor
 import io.mironov.smuggler.compiler.common.isFinal
@@ -25,6 +22,7 @@ import io.mironov.smuggler.compiler.common.isGlobalTypeAdapter
 import io.mironov.smuggler.compiler.common.isSubclassOf
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
 import io.mironov.smuggler.compiler.model.AutoParcelablePropertySpec
+import io.mironov.smuggler.compiler.model.KotlinType
 import org.objectweb.asm.Type
 import java.io.File
 import java.util.Arrays
@@ -128,14 +126,14 @@ internal class ValueAdapterFactory private constructor(
         throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can''t have any type parameters")
       }
 
-      if (assisted !is GenericType.Raw) {
+      if (assisted !is KotlinType.Raw) {
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be parameterized with a raw type")
       }
 
-      return assisted.type.toAsmType()
+      return assisted.type
     }
 
-    private fun resolveAssistedType(adapter: Type, current: Type, grip: Grip): GenericType {
+    private fun resolveAssistedType(adapter: Type, current: Type, grip: Grip): KotlinType {
       val spec = grip.classRegistry.getClassMirror(GripType.Object(adapter))
       val parent = spec.superType
 
@@ -144,7 +142,7 @@ internal class ValueAdapterFactory private constructor(
       }
 
       if (method != null) {
-        return method.signature.returnType
+        return KotlinType.from(method.signature.returnType)
       }
 
       if (parent == null) {
@@ -166,7 +164,7 @@ internal class ValueAdapterFactory private constructor(
     }
   }
 
-  private fun create(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+  private fun create(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: KotlinType): ValueAdapter {
     return adapters[generic.asAsmType()] ?: run {
       val type = generic.asAsmType()
 
@@ -210,12 +208,12 @@ internal class ValueAdapterFactory private constructor(
         }
       }
 
-      if (generic is GenericType.Array) {
+      if (generic is KotlinType.Array) {
         return@run ArrayPropertyAdapter(create(spec, property, generic.elementType))
       }
 
       if (type.sort == Type.ARRAY) {
-        return@run ArrayPropertyAdapter(create(spec, property, GenericType.Raw(GripType.Object(Types.getElementType(type)))))
+        return@run ArrayPropertyAdapter(create(spec, property, KotlinType.Raw(Types.getElementType(type), true)))
       }
 
       if (grip.isSubclassOf(type, Types.SERIALIZABLE)) {
@@ -226,7 +224,7 @@ internal class ValueAdapterFactory private constructor(
     }
   }
 
-  private fun createCollection(collection: Type, implementation: Type, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+  private fun createCollection(collection: Type, implementation: Type, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: KotlinType): ValueAdapter {
     val adapters = createAdaptersForParameterizedType(spec, property, generic)
 
     if (adapters.size != 1) {
@@ -236,7 +234,7 @@ internal class ValueAdapterFactory private constructor(
     return CollectionValueAdapter(collection, implementation, adapters[0])
   }
 
-  private fun createMap(collection: Type, implementation: Type, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): ValueAdapter {
+  private fun createMap(collection: Type, implementation: Type, spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: KotlinType): ValueAdapter {
     val adapters = createAdaptersForParameterizedType(spec, property, generic)
 
     if (adapters.size != 2) {
@@ -247,7 +245,7 @@ internal class ValueAdapterFactory private constructor(
   }
 
   private fun createSparseArray(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec): ValueAdapter {
-    if (property.type !is GenericType.Parameterized) {
+    if (property.type !is KotlinType.Parameterized) {
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized as ''SparseArray<Foo>''", property.name)
     }
 
@@ -255,20 +253,20 @@ internal class ValueAdapterFactory private constructor(
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must have exactly one type argument", property.name)
     }
 
-    if (property.type.typeArguments[0] !is GenericType.Raw) {
+    if (property.type.typeArguments[0] !is KotlinType.Raw) {
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with a raw type", property.name)
     }
 
-    return SparseArrayValueAdapter(property.type.typeArguments[0].asRawType().type.toAsmType())
+    return SparseArrayValueAdapter(property.type.typeArguments[0].asRawType().type)
   }
 
-  private fun createAdaptersForParameterizedType(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: GenericType): List<ValueAdapter> {
-    if (generic !is GenericType.Parameterized) {
+  private fun createAdaptersForParameterizedType(spec: AutoParcelableClassSpec, property: AutoParcelablePropertySpec, generic: KotlinType): List<ValueAdapter> {
+    if (generic !is KotlinType.Parameterized) {
       throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized", property.name)
     }
 
     generic.typeArguments.forEach {
-      if (it !is GenericType.Raw && it !is GenericType.Parameterized && it !is GenericType.Array) {
+      if (it !is KotlinType.Raw && it !is KotlinType.Parameterized && it !is KotlinType.Array) {
         throw InvalidAutoParcelableException(spec.clazz.type, "Property ''{0}'' must be parameterized with raw or generic type", property.name)
       }
     }

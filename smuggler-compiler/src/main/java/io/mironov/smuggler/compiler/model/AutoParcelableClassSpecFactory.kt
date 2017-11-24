@@ -63,7 +63,7 @@ internal object AutoParcelableClassSpecFactory {
         throw InvalidAutoParcelableException(mirror.type, "Unable to find field \"$name\". Make sure to declare the property as val or var.")
       }
 
-      AutoParcelablePropertySpec(name, field.signature.type)
+      AutoParcelablePropertySpec(name, KotlinType.from(field.signature.type))
     })
   }
 }

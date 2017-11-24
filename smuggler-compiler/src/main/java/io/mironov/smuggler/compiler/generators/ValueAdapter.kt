@@ -1,20 +1,17 @@
 package io.mironov.smuggler.compiler.generators
 
-import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.mirrors.toAsmType
-import io.michaelrocks.grip.mirrors.toType
 import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
 import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
-import io.mironov.smuggler.compiler.common.asAsmType
-import io.mironov.smuggler.compiler.common.asParameterizedType
 import io.mironov.smuggler.compiler.common.getDeclaredField
 import io.mironov.smuggler.compiler.common.isAutoParcelable
 import io.mironov.smuggler.compiler.common.isPublic
 import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.common.isSubclass
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
+import io.mironov.smuggler.compiler.model.KotlinType
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import io.michaelrocks.grip.mirrors.Type as GripType
@@ -103,7 +100,7 @@ internal open class SimpleBoxedValueAdapter(
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(boxed, Methods.get(unboxer, unboxed))
 
-    delegate.toParcel(adapter, context.typed(GenericType.Raw(unboxed.toType())).apply {
+    delegate.toParcel(adapter, context.typed(KotlinType.Raw(unboxed, true)).apply {
       value(adapter.newLocal(unboxed).apply {
         adapter.storeLocal(this)
       })
@@ -417,8 +414,8 @@ internal class ArrayPropertyAdapter(
   }
 
   private fun ValueContext.asElementContext(): ValueContext {
-    return if (type !is GenericType.Array) {
-      typed(GenericType.Raw(Types.getElementType(type.asAsmType()).toType()))
+    return if (type !is KotlinType.Array) {
+      typed(KotlinType.Raw(Types.getElementType(type.asAsmType()), true))
     } else {
       typed(type.elementType)
     }
