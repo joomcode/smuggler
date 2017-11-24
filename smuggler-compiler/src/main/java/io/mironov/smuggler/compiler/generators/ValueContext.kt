@@ -12,11 +12,8 @@ internal class ValueContext(
   private val names = HashMap<String, Int>()
 
   fun typed(newType: KotlinType): ValueContext {
-    val context = ValueContext(newType, grip)
-    val variables = names
-
-    return context.apply {
-      variables(variables)
+    return ValueContext(newType, grip).also {
+      it.variables(names)
     }
   }
 

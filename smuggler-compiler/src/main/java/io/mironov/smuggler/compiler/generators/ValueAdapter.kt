@@ -100,18 +100,19 @@ internal open class SimpleBoxedValueAdapter(
     private val boxer: String
 ) : OptionalValueAdapter() {
   override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
-    delegate.fromParcel(adapter, context)
+    delegate.fromParcel(adapter, context.typed(KotlinType.Raw(unboxed, false)))
     adapter.invokeStatic(boxed, Methods.get(boxer, boxed, unboxed))
   }
 
   override fun toParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
+    val value = adapter.newLocal(unboxed)
+
     adapter.loadLocal(context.value())
     adapter.invokeVirtual(boxed, Methods.get(unboxer, unboxed))
+    adapter.storeLocal(value)
 
-    delegate.toParcel(adapter, context.typed(KotlinType.Raw(unboxed, true)).apply {
-      value(adapter.newLocal(unboxed).apply {
-        adapter.storeLocal(this)
-      })
+    delegate.toParcel(adapter, context.typed(KotlinType.Raw(unboxed, false)).apply {
+      value(value)
     })
   }
 }
