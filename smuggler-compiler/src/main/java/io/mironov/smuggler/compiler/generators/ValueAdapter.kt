@@ -1,5 +1,6 @@
 package io.mironov.smuggler.compiler.generators
 
+import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.mirrors.toAsmType
 import io.mironov.smuggler.compiler.SmugglerException
 import io.mironov.smuggler.compiler.common.GeneratorAdapter
@@ -7,6 +8,7 @@ import io.mironov.smuggler.compiler.common.Methods
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.getDeclaredField
 import io.mironov.smuggler.compiler.common.isAutoParcelable
+import io.mironov.smuggler.compiler.common.isFinal
 import io.mironov.smuggler.compiler.common.isPublic
 import io.mironov.smuggler.compiler.common.isStatic
 import io.mironov.smuggler.compiler.common.isSubclass
@@ -269,6 +271,35 @@ internal object PolymorphicParcelableValueAdapter : ValueAdapter {
     adapter.checkCast(Types.ANDROID_PARCELABLE)
     adapter.loadLocal(context.flags())
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeParcelable", Types.VOID, Types.ANDROID_PARCELABLE, Types.INT))
+  }
+}
+
+internal object ParcelableValueAdapter : ValueAdapter {
+  private val cache = HashMap<KotlinType, Boolean>()
+
+  override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
+    if (isMonomorphic(context.type, context.grip)) {
+      MonomorphicParcelableValueAdapter.fromParcel(adapter, context)
+    } else {
+      PolymorphicParcelableValueAdapter.fromParcel(adapter, context)
+    }
+  }
+
+  override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
+    if (isMonomorphic(context.type, context.grip)) {
+      MonomorphicParcelableValueAdapter.toParcel(adapter, context)
+    } else {
+      PolymorphicParcelableValueAdapter.toParcel(adapter, context)
+    }
+  }
+
+  private fun isMonomorphic(type: KotlinType, grip: Grip): Boolean {
+    return cache.getOrPut(type) {
+      val classType = GripType.Object(type.asAsmType())
+      val classMirror = grip.classRegistry.getClassMirror(classType)
+
+      classMirror.access.isFinal
+    }
   }
 }
 

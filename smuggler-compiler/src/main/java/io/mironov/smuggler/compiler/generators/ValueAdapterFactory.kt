@@ -17,7 +17,6 @@ import io.mironov.smuggler.compiler.annotations.strings
 import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredConstructor
-import io.mironov.smuggler.compiler.common.isFinal
 import io.mironov.smuggler.compiler.common.isGlobalTypeAdapter
 import io.mironov.smuggler.compiler.common.isSubclassOf
 import io.mironov.smuggler.compiler.model.AutoParcelableClassSpec
@@ -197,15 +196,7 @@ internal class ValueAdapterFactory private constructor(
       }
 
       if (grip.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
-        val registry = grip.classRegistry
-        val mirror = registry.getClassMirror(GripType.Object(type))
-        val final = mirror.access.isFinal
-
-        if (final) {
-          return@run MonomorphicParcelableValueAdapter
-        } else {
-          return@run PolymorphicParcelableValueAdapter
-        }
+        return@run ParcelableValueAdapter
       }
 
       if (generic is KotlinType.Array) {
