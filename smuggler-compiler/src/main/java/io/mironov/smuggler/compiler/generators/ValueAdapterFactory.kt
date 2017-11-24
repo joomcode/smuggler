@@ -167,6 +167,10 @@ internal class ValueAdapterFactory private constructor(
     return adapters[generic.asAsmType()] ?: run {
       val type = generic.asAsmType()
 
+      if (generic is KotlinType.Array) {
+        return@run ArrayPropertyAdapter(create(spec, property, generic.elementType))
+      }
+
       when (type) {
         Types.MAP -> return@run createMap(Types.MAP, Types.LINKED_MAP, spec, property, generic)
         Types.LINKED_MAP -> return@run createMap(Types.LINKED_MAP, Types.LINKED_MAP, spec, property, generic)
@@ -197,10 +201,6 @@ internal class ValueAdapterFactory private constructor(
 
       if (grip.isSubclassOf(type, Types.ANDROID_PARCELABLE)) {
         return@run ParcelableValueAdapter
-      }
-
-      if (generic is KotlinType.Array) {
-        return@run ArrayPropertyAdapter(create(spec, property, generic.elementType))
       }
 
       if (grip.isSubclassOf(type, Types.SERIALIZABLE)) {
