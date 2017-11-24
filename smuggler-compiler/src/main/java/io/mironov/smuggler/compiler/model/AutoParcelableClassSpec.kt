@@ -18,13 +18,15 @@ internal data class AutoParcelablePropertySpec(
 )
 
 internal sealed class KotlinType {
-  data class Raw(val type: Type, val nullable: Boolean) : KotlinType()
-  data class Array(val elementType: KotlinType, val nullable: Boolean) : KotlinType()
-  data class Parameterized(val type: Type, val typeArguments: List<KotlinType>, val nullable: Boolean) : KotlinType()
-  data class Inner(val type: KotlinType, val owner: KotlinType, val nullable: Boolean) : KotlinType()
-  data class UpperBounded(val type: KotlinType, val nullable: Boolean) : KotlinType()
-  data class LowerBounded(val type: KotlinType, val nullable: Boolean) : KotlinType()
-  data class TypeVariable(val name: String, val nullable: Boolean) : KotlinType()
+  data class Raw(val type: Type, override val nullable: Boolean) : KotlinType()
+  data class Array(val elementType: KotlinType, override val nullable: Boolean) : KotlinType()
+  data class Parameterized(val type: Type, val typeArguments: List<KotlinType>, override val nullable: Boolean) : KotlinType()
+  data class Inner(val type: KotlinType, val owner: KotlinType, override val nullable: Boolean) : KotlinType()
+  data class UpperBounded(val type: KotlinType, override val nullable: Boolean) : KotlinType()
+  data class LowerBounded(val type: KotlinType, override val nullable: Boolean) : KotlinType()
+  data class TypeVariable(val name: String, override val nullable: Boolean) : KotlinType()
+
+  abstract val nullable: Boolean
 
   fun asRawType() = cast<Raw>()
   fun asArrayType() = cast<Array>()

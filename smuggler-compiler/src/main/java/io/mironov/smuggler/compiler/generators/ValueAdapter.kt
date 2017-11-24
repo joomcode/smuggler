@@ -28,38 +28,44 @@ internal abstract class OptionalValueAdapter : ValueAdapter {
     val start = adapter.newLabel()
     val end = adapter.newLabel()
 
-    adapter.loadLocal(context.parcel())
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
-    adapter.ifZCmp(Opcodes.IFEQ, start)
+    if (context.type.nullable) {
+      adapter.loadLocal(context.parcel())
+      adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readInt", Types.INT))
+      adapter.ifZCmp(Opcodes.IFEQ, start)
+    }
 
     adapter.fromParcelNotNullValue(context)
-    adapter.goTo(end)
 
-    adapter.mark(start)
-    adapter.pushNull()
-
-    adapter.mark(end)
+    if (context.type.nullable) {
+      adapter.goTo(end)
+      adapter.mark(start)
+      adapter.pushNull()
+      adapter.mark(end)
+    }
   }
 
   final override fun toParcel(adapter: GeneratorAdapter, context: ValueContext) {
     val start = adapter.newLabel()
     val end = adapter.newLabel()
 
-    adapter.loadLocal(context.value())
-    adapter.ifNull(start)
+    if (context.type.nullable) {
+      adapter.loadLocal(context.value())
+      adapter.ifNull(start)
+      adapter.loadLocal(context.parcel())
+      adapter.push(1)
+      adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+    }
 
-    adapter.loadLocal(context.parcel())
-    adapter.push(1)
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
     adapter.toParcelNotNullValue(context)
-    adapter.goTo(end)
 
-    adapter.mark(start)
-    adapter.loadLocal(context.parcel())
-    adapter.push(0)
-    adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
-
-    adapter.mark(end)
+    if (context.type.nullable) {
+      adapter.goTo(end)
+      adapter.mark(start)
+      adapter.loadLocal(context.parcel())
+      adapter.push(0)
+      adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("writeInt", Types.VOID, Types.INT))
+      adapter.mark(end)
+    }
   }
 
   private fun GeneratorAdapter.fromParcelNotNullValue(context: ValueContext) = fromParcelNotNull(this, context)
