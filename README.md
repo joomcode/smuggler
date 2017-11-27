@@ -42,11 +42,11 @@ buildscript {
     mavenCentral()
     jcenter()
   }
-    
+
   dependencies {
     classpath "com.android.tools.build:gradle:2.2.0"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0"
-    classpath "io.mironov.smuggler:smuggler-plugin:0.12.13"
+    classpath "io.mironov.smuggler:smuggler-plugin:0.12.16"
   }
 }
 
@@ -79,7 +79,7 @@ Some **important** notes:
     override fun fromParcel(parcel: Parcel): BigInteger {
       return BigInteger(parcel.createByteArray())
     }
-  
+
     override fun toParcel(value: BigInteger, parcel: Parcel, flags: Int) {
       parcel.writeByteArray(value.toByteArray())
     }
@@ -119,7 +119,7 @@ Some **important** notes:
 - `TypeAdapter` defined as `class` must have a public no-args constructor
 
 # How does it work?
-`Smuggler` doesn't use reflection so you don't have to worry about its performance. It isn't an annotation proccessor so you don't have to deal with `kapt` bugs. Instead, `Smuggler` built on top of [transform api](http://tools.android.com/tech-docs/new-build-system/transform-api) and works by proccessing your compiled bytecode and patching classes that implement `AutoParcelable` interface. 
+`Smuggler` doesn't use reflection so you don't have to worry about its performance. It isn't an annotation proccessor so you don't have to deal with `kapt` bugs. Instead, `Smuggler` built on top of [transform api](http://tools.android.com/tech-docs/new-build-system/transform-api) and works by proccessing your compiled bytecode and patching classes that implement `AutoParcelable` interface.
 
 # Known limitations
 - Only data classes and kotlin objects are supported
