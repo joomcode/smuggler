@@ -12,6 +12,7 @@ import io.mironov.smuggler.TypeAdapter
 import io.mironov.smuggler.library.Chat
 import io.mironov.smuggler.library.Message
 import io.mironov.smuggler.library.User
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -899,6 +900,29 @@ class SmugglerTest {
           list = generator.nextList { Manual(generator.nextInt()) },
           set = generator.nextSet { Manual(generator.nextInt()) }
       )
+    }
+  }
+
+  @Test fun shouldOptimizeRequiredFields() {
+    data class Foo(
+        val field: Int
+    ) : AutoParcelable
+
+    data class Required(
+        val field: Foo
+    ) : AutoParcelable
+
+    data class Optional(
+        val field: Foo?
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify {
+      val field = Foo(generator.nextInt())
+
+      val optional = SmugglerAssertions.size(Optional(field))
+      val required = SmugglerAssertions.size(Required(field))
+
+      Assert.assertEquals(4, Math.abs(optional - required))
     }
   }
 

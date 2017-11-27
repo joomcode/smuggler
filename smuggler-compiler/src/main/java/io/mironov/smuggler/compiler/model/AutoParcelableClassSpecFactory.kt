@@ -53,7 +53,7 @@ internal object AutoParcelableClassSpecFactory {
     }
 
     if (creator != null && creator.isStatic) {
-      throw InvalidAutoParcelableException(mirror.type, "AutoParcelable classes shouldn''t declare CREATOR field")
+      throw InvalidAutoParcelableException(mirror.type, "AutoParcelable classes must not declare CREATOR field")
     }
 
     return AutoParcelableClassSpec.Data(mirror, constructor.valueParameterList.mapIndexed { index, parameter ->
@@ -63,7 +63,10 @@ internal object AutoParcelableClassSpecFactory {
         throw InvalidAutoParcelableException(mirror.type, "Unable to find field \"$name\". Make sure to declare the property as val or var.")
       }
 
-      AutoParcelablePropertySpec(name, KotlinType.from(field.signature.type))
+      val nullable = parameter.type.nullable
+      val type = KotlinType.from(field.signature.type, nullable)
+
+      AutoParcelablePropertySpec(name, type)
     })
   }
 }

@@ -46,23 +46,23 @@ internal sealed class KotlinType {
   }
 
   companion object {
-    fun from(type: Type): KotlinType {
+    fun from(type: Type, nullable: Boolean = true): KotlinType {
       return if (type.sort == Type.ARRAY) {
-        KotlinType.Array(from(Types.getElementType(type)), true)
+        KotlinType.Array(from(Types.getElementType(type)), nullable)
       } else {
-        KotlinType.Raw(type, true)
+        KotlinType.Raw(type, nullable)
       }
     }
 
-    fun from(type: GenericType): KotlinType {
+    fun from(type: GenericType, nullable: Boolean = true): KotlinType {
       return when (type) {
-        is GenericType.Raw -> from(type.type.toAsmType())
-        is GenericType.Array -> KotlinType.Array(from(type.elementType), true)
-        is GenericType.Parameterized -> KotlinType.Parameterized(type.type.toAsmType(), type.typeArguments.map { from(it) }, true)
-        is GenericType.Inner -> KotlinType.Inner(from(type.type), from(type.ownerType), true)
-        is GenericType.UpperBounded -> KotlinType.UpperBounded(from(type.upperBound), true)
-        is GenericType.LowerBounded -> KotlinType.LowerBounded(from(type.lowerBound), true)
-        is GenericType.TypeVariable -> KotlinType.TypeVariable(type.name, true)
+        is GenericType.Raw -> from(type.type.toAsmType(), nullable)
+        is GenericType.Array -> KotlinType.Array(from(type.elementType), nullable)
+        is GenericType.Parameterized -> KotlinType.Parameterized(type.type.toAsmType(), type.typeArguments.map { from(it) }, nullable)
+        is GenericType.Inner -> KotlinType.Inner(from(type.type), from(type.ownerType), nullable)
+        is GenericType.UpperBounded -> KotlinType.UpperBounded(from(type.upperBound), nullable)
+        is GenericType.LowerBounded -> KotlinType.LowerBounded(from(type.lowerBound), nullable)
+        is GenericType.TypeVariable -> KotlinType.TypeVariable(type.name, nullable)
       }
     }
   }

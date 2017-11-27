@@ -11,8 +11,14 @@ object SmugglerAssertions {
       verify(P::class.java)
     }
 
-    0.until(10).forEach {
+    repeat(10) {
       verify(factory())
+    }
+  }
+
+  inline fun verify(action: () -> Unit) {
+    repeat(10) {
+      action()
     }
   }
 
@@ -35,23 +41,34 @@ object SmugglerAssertions {
     // nothing to do
   }
 
-  private fun <P : Parcelable> marshall(parcelable: P): ByteArray {
-    val parcel = Parcel.obtain().apply {
-      writeParcelable(parcelable, 0)
+  fun size(parcelable: Parcelable): Int {
+    return acquireParcel {
+      parcelable.writeToParcel(it, 0)
+      it.dataSize()
     }
+  }
 
-    return parcel.marshall().apply {
-      parcel.recycle()
+  private fun <P : Parcelable> marshall(parcelable: P): ByteArray {
+    return acquireParcel {
+      it.writeParcelable(parcelable, 0)
+      it.marshall()
     }
   }
 
   private fun <P : Parcelable> unmarshall(bytes: ByteArray, loader: ClassLoader): P {
-    val parcel = Parcel.obtain().apply {
-      unmarshall(bytes, 0, bytes.size)
-      setDataPosition(0)
+    return acquireParcel {
+      it.unmarshall(bytes, 0, bytes.size)
+      it.setDataPosition(0)
+      it.readParcelable(loader)
     }
+  }
 
-    return parcel.readParcelable<P>(loader).apply {
+  private fun <T> acquireParcel(action: (Parcel) -> T): T {
+    val parcel = Parcel.obtain()
+
+    return try {
+      action(parcel)
+    } finally {
       parcel.recycle()
     }
   }
