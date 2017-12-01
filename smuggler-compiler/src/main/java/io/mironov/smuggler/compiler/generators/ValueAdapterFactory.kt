@@ -6,6 +6,7 @@ import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.isAbstract
 import io.michaelrocks.grip.mirrors.isPublic
 import io.michaelrocks.grip.mirrors.isSynthetic
+import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.mirrors.toAsmType
 import io.michaelrocks.grip.mirrors.toType
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
@@ -15,6 +16,7 @@ import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
 import io.mironov.smuggler.compiler.common.Types
+import io.mironov.smuggler.compiler.common.cast
 import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredConstructor
 import io.mironov.smuggler.compiler.common.isGlobalTypeAdapter
@@ -93,6 +95,10 @@ internal class ValueAdapterFactory private constructor(
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be not abstract")
       }
 
+      if (!spec.signature.typeParameters.isEmpty()) {
+        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can''t have any type parameters")
+      }
+
       val constructor = spec.getDeclaredConstructor()
       val assisted = createAssistedTypeForTypeAdapter(spec, grip)
       val metadata = spec.getAnnotation<Metadata>()
@@ -118,30 +124,23 @@ internal class ValueAdapterFactory private constructor(
     }
 
     private fun createAssistedTypeForTypeAdapter(spec: ClassMirror, grip: Grip): Type {
-      val assisted = resolveAssistedType(spec.type.toAsmType(), spec.type.toAsmType(), grip)
-      val signature = spec.signature
-
-      if (!signature.typeParameters.isEmpty()) {
-        throw throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can''t have any type parameters")
-      }
-
-      if (assisted !is KotlinType.Raw) {
-        throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be parameterized with a raw type")
-      }
-
-      return assisted.type
+      return resolveAssistedType(spec.type.toAsmType(), spec.type.toAsmType(), grip)
     }
 
-    private fun resolveAssistedType(adapter: Type, current: Type, grip: Grip): KotlinType {
-      val spec = grip.classRegistry.getClassMirror(GripType.Object(adapter))
+    private fun resolveAssistedType(adapter: Type, current: Type, grip: Grip): Type {
+      val spec = grip.classRegistry.getClassMirror(GripType.Object(current))
       val parent = spec.superType
 
       val method = spec.methods.singleOrNull {
         !it.isSynthetic && it.name == "fromParcel" && Arrays.equals(it.type.toAsmType().argumentTypes, arrayOf(Types.ANDROID_PARCEL))
       }
 
-      if (method != null) {
-        return KotlinType.from(method.signature.returnType)
+      if (method != null && method.signature.returnType !is GenericType.Raw) {
+        throw InvalidTypeAdapterException(adapter.toType(), "Unable to extract assisted type information")
+      }
+
+      if (method != null && method.signature.returnType is GenericType.Raw) {
+        return method.signature.returnType.cast<GenericType.Raw>().type.toAsmType()
       }
 
       if (parent == null) {
