@@ -2,13 +2,19 @@ package io.mironov.smuggler.compiler.model
 
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.isStatic
+import io.michaelrocks.grip.mirrors.signature.GenericType
+import io.michaelrocks.grip.mirrors.toAsmType
 import io.mironov.smuggler.compiler.InvalidAutoParcelableException
 import io.mironov.smuggler.compiler.annotations.Metadata
 import io.mironov.smuggler.compiler.annotations.data
 import io.mironov.smuggler.compiler.annotations.strings
+import io.mironov.smuggler.compiler.common.Types
 import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredField
+import io.mironov.smuggler.compiler.common.given
+import org.objectweb.asm.Type
 import kotlin.reflect.jvm.internal.impl.serialization.Flags
+import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf.Class
 import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf.Visibility
 import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
@@ -63,10 +69,68 @@ internal object AutoParcelableClassSpecFactory {
         throw InvalidAutoParcelableException(mirror.type, "Unable to find field \"$name\". Make sure to declare the property as val or var.")
       }
 
-      val nullable = parameter.type.nullable
-      val type = KotlinType.from(field.signature.type, nullable)
-
-      AutoParcelablePropertySpec(name, type)
+      AutoParcelablePropertySpec(name, createKotlinType(field.signature.type, parameter.type))
     })
+  }
+
+  private fun createKotlinType(generic: GenericType, proto: ProtoBuf.Type?): KotlinType {
+    return when (generic) {
+      is GenericType.Raw -> createKotlinType(
+          type = generic.type.toAsmType(),
+          proto = proto
+      )
+
+      is GenericType.Array -> KotlinType.Array(
+          elementType = createKotlinType(generic.elementType, argument(proto, 0, 1)),
+          nullable = nullable(proto)
+      )
+
+      is GenericType.Parameterized -> KotlinType.Parameterized(
+          type = generic.type.toAsmType(),
+          nullable = nullable(proto),
+          typeArguments = generic.typeArguments.mapIndexed { index, argument ->
+            createKotlinType(argument, argument(proto, index, generic.typeArguments.size))
+          }
+      )
+
+      is GenericType.Inner -> KotlinType.Inner(
+          type = createKotlinType(generic.type, null),
+          owner = createKotlinType(generic.ownerType, null),
+          nullable = nullable(proto)
+      )
+
+      is GenericType.UpperBounded -> KotlinType.UpperBounded(
+          type = createKotlinType(generic.upperBound, null),
+          nullable = nullable(proto)
+      )
+
+      is GenericType.LowerBounded -> KotlinType.LowerBounded(
+          type = createKotlinType(generic.lowerBound, null),
+          nullable = nullable(proto)
+      )
+
+      is GenericType.TypeVariable -> KotlinType.TypeVariable(
+          name = generic.name,
+          nullable = nullable(proto)
+      )
+    }
+  }
+
+  private fun createKotlinType(type: Type, proto: ProtoBuf.Type?): KotlinType {
+    return if (type.sort == Type.ARRAY) {
+      KotlinType.Array(createKotlinType(Types.getElementType(type), argument(proto, 0, 1)), nullable(proto))
+    } else {
+      KotlinType.Raw(type, nullable(proto))
+    }
+  }
+
+  private fun nullable(proto: ProtoBuf.Type?): Boolean {
+    return proto == null || proto.nullable
+  }
+
+  private fun argument(proto: ProtoBuf.Type?, index: Int, expected: Int): ProtoBuf.Type? {
+    return given(proto != null && proto.argumentCount == expected) {
+      proto!!.argumentList.getOrNull(index)?.type
+    }
   }
 }

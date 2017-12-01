@@ -922,7 +922,29 @@ class SmugglerTest {
       val optional = SmugglerAssertions.size(Optional(field))
       val required = SmugglerAssertions.size(Required(field))
 
-      Assert.assertEquals(4, Math.abs(optional - required))
+      Assert.assertEquals(4, optional - required)
+    }
+  }
+
+  @Test fun shouldOptimizeRequiredTypeArguments() {
+    data class Required(
+        val list: List<Int>,
+        val nested: List<List<Int>>
+    ) : AutoParcelable
+
+    data class Optional(
+        val list: List<Int?>,
+        val nested: List<List<Int?>?>
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify {
+      val list = generator.nextList { generator.nextInt() }
+      val nested = generator.nextList { list }
+
+      val optional = SmugglerAssertions.size(Optional(list, nested))
+      val required = SmugglerAssertions.size(Required(list, nested))
+
+      Assert.assertEquals(4 * (list.size + nested.size + nested.size * list.size), optional - required)
     }
   }
 
