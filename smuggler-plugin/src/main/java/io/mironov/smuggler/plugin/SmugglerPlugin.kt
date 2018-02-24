@@ -6,11 +6,20 @@ import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.TestExtension
 import com.android.build.gradle.TestPlugin
+import com.android.builder.model.Version
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 open class SmugglerPlugin : Plugin<Project> {
   override fun apply(project: Project) {
+    val version = Version.ANDROID_GRADLE_PLUGIN_VERSION
+    val parts = version.split('.', limit = 3)
+    val major = parts.getOrNull(0)?.toIntOrNull() ?: 0
+
+    if (major < 3) {
+      throw IllegalStateException("Android gradle plugin $version isn't supported anymore. The minimal supported version is 3.0.0")
+    }
+
     onPrepareExtension(project)
     onPrepareDependencies(project)
     onPrepareTransforms(project)
