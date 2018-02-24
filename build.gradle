@@ -1,5 +1,5 @@
 buildscript {
-  ext.androidToolsVersion = "3.0.0"
+  ext.androidToolsVersion = "3.0.1"
 
   repositories {
     mavenLocal()
@@ -38,7 +38,7 @@ ext {
   supportVersion = "27.0.0"
   supportTestRunnerVersion = "0.4.1"
 
-  kotlinVersion = "1.1.60"
+  kotlinVersion = "1.2.21"
   bintrayVersion = "1.4"
 
   asmVersion = "5.2"
