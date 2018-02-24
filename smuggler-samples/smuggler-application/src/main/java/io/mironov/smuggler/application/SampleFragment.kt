@@ -25,7 +25,7 @@ class SampleFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    val text = view.findViewById(R.id.text) as TextView
+    val text = view.findViewById<TextView>(R.id.text)
     val args = arguments.getParcelable<SampleArguments>("arguments")
 
     text.text = args.message.text
