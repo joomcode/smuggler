@@ -21,9 +21,9 @@ open class SmugglerPlugin : Plugin<Project> {
   }
 
   private fun onPrepareDependencies(project: Project) {
-    project.dependencies.add("compile", "io.mironov.smuggler:smuggler-runtime:${BuildConfig.VERSION}@aar")
-    project.dependencies.add("androidTestCompile", "io.mironov.smuggler:smuggler-runtime:${BuildConfig.VERSION}@aar")
-    project.dependencies.add("testCompile", "io.mironov.smuggler:smuggler-runtime:${BuildConfig.VERSION}@aar")
+    project.dependencies.add("implementation", "io.mironov.smuggler:smuggler-runtime:${BuildConfig.VERSION}@aar")
+    project.dependencies.add("androidTestImplementation", "io.mironov.smuggler:smuggler-runtime:${BuildConfig.VERSION}@aar")
+    project.dependencies.add("testImplementation", "io.mironov.smuggler:smuggler-runtime:${BuildConfig.VERSION}@aar")
   }
 
   private fun onPrepareTransforms(project: Project) {

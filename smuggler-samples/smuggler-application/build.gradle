@@ -36,12 +36,12 @@ android {
 }
 
 dependencies {
-  compile project(":smuggler-samples:smuggler-library")
+  implementation project(":smuggler-samples:smuggler-library")
 
-  compile "com.android.support:support-v13:$supportVersion"
-  compile "com.android.support:appcompat-v7:$supportVersion"
-  compile "com.android.support:design:$supportVersion"
+  implementation "com.android.support:support-v13:$supportVersion"
+  implementation "com.android.support:appcompat-v7:$supportVersion"
+  implementation "com.android.support:design:$supportVersion"
 
-  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 }
