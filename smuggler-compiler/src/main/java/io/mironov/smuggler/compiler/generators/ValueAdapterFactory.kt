@@ -27,9 +27,9 @@ import io.mironov.smuggler.compiler.model.KotlinType
 import org.objectweb.asm.Type
 import java.io.File
 import java.util.Arrays
-import kotlin.reflect.jvm.internal.impl.serialization.Flags
-import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
-import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
+import kotlin.reflect.jvm.internal.impl.metadata.ProtoBuf
+import kotlin.reflect.jvm.internal.impl.metadata.deserialization.Flags
+import kotlin.reflect.jvm.internal.impl.metadata.jvm.deserialization.JvmProtoBufUtil
 import io.michaelrocks.grip.mirrors.Type as GripType
 
 internal class ValueAdapterFactory private constructor(

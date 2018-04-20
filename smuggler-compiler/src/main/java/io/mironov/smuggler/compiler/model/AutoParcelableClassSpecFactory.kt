@@ -13,11 +13,11 @@ import io.mironov.smuggler.compiler.common.getAnnotation
 import io.mironov.smuggler.compiler.common.getDeclaredField
 import io.mironov.smuggler.compiler.common.given
 import org.objectweb.asm.Type
-import kotlin.reflect.jvm.internal.impl.serialization.Flags
-import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf
-import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf.Class
-import kotlin.reflect.jvm.internal.impl.serialization.ProtoBuf.Visibility
-import kotlin.reflect.jvm.internal.impl.serialization.jvm.JvmProtoBufUtil
+import kotlin.reflect.jvm.internal.impl.metadata.ProtoBuf
+import kotlin.reflect.jvm.internal.impl.metadata.ProtoBuf.Class
+import kotlin.reflect.jvm.internal.impl.metadata.ProtoBuf.Visibility
+import kotlin.reflect.jvm.internal.impl.metadata.deserialization.Flags
+import kotlin.reflect.jvm.internal.impl.metadata.jvm.deserialization.JvmProtoBufUtil
 
 internal object AutoParcelableClassSpecFactory {
   fun from(mirror: ClassMirror): AutoParcelableClassSpec {
@@ -63,7 +63,7 @@ internal object AutoParcelableClassSpecFactory {
     }
 
     return AutoParcelableClassSpec.Data(mirror, constructor.valueParameterList.mapIndexed { index, parameter ->
-      val name = resolver.getName(parameter.name).identifier
+      val name = resolver.getString(parameter.name)
 
       val field = mirror.getDeclaredField(name) ?: run {
         throw InvalidAutoParcelableException(mirror.type, "Unable to find field \"$name\". Make sure to declare the property as val or var.")
