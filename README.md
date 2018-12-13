@@ -1,3 +1,6 @@
+# [DEPRECATED]
+Please note the library is deprecated now. Consider using [`@Parcelize`](https://kotlinlang.org/docs/tutorials/android-plugin.html#parcelable) instead which is now an official to generate `Parcelable` implementation.
+
 # Smuggler
 Makes your data classes Parcelable. Just add `AutoParcelable` to the class declaration. That's all. No methods need to be implemented.
 
