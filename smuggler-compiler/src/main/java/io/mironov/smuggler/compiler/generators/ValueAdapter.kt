@@ -266,7 +266,7 @@ internal object SerializableValueAdapter : ValueAdapter {
 internal object PolymorphicParcelableValueAdapter : ValueAdapter {
   override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
-    adapter.push(context.type.asAsmType())
+    adapter.push(Types.SMUGGLER_PARCELABLE)
     adapter.invokeVirtual(Types.CLASS, Methods.get("getClassLoader", Types.CLASS_LOADER))
     adapter.invokeVirtual(Types.ANDROID_PARCEL, Methods.get("readParcelable", Types.ANDROID_PARCELABLE, Types.CLASS_LOADER))
     adapter.checkCast(context.type.asAsmType())
