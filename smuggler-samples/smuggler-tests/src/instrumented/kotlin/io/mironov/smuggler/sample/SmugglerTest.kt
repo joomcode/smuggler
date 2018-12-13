@@ -36,11 +36,13 @@ import java.util.TreeSet
 class SmugglerTest {
   private lateinit var generator: SmugglerGenerator
 
-  @Before fun setUp() {
+  @Before
+  fun setUp() {
     generator = SmugglerGenerator(9999)
   }
 
-  @Test fun shouldWorkWithPrimitives() {
+  @Test
+  fun shouldWorkWithPrimitives() {
     data class Primitives(
         val boolean: Boolean,
         val byte: Byte,
@@ -68,7 +70,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithNestedObjects() {
+  @Test
+  fun shouldWorkWithNestedObjects() {
     data class User(
         val firstName: String,
         val lastName: String
@@ -96,7 +99,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithPrimitiveArrays() {
+  @Test
+  fun shouldWorkWithPrimitiveArrays() {
     data class PrimitiveArrays(
         val booleans: BooleanArray,
         val bytes: ByteArray,
@@ -124,7 +128,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithEnums() {
+  @Test
+  fun shouldWorkWithEnums() {
     data class Enums(
         val magic: Magic,
         val foo: Foo
@@ -138,7 +143,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithOptionalPrimitives() {
+  @Test
+  fun shouldWorkWithOptionalPrimitives() {
     data class Optionals(
         val boolean: Boolean?,
         val byte: Byte?,
@@ -170,7 +176,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithOptionalNestedObjects() {
+  @Test
+  fun shouldWorkWithOptionalNestedObjects() {
     data class User(
         val firstName: String,
         val lastName: String
@@ -216,7 +223,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithCustomStaticClassInitializer() {
+  @Test
+  fun shouldWorkWithCustomStaticClassInitializer() {
     SmugglerAssertions.consume(WithStaticClassInitializer.Companion)
     SmugglerAssertions.consume(WithStaticClassInitializer.EXTRA_PAYLOAD)
     SmugglerAssertions.consume(WithStaticClassInitializer.EXTRA_MESSAGE)
@@ -233,7 +241,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithParcelableArrays() {
+  @Test
+  fun shouldWorkWithParcelableArrays() {
     data class User(
         val firstName: String,
         val lastName: String
@@ -269,7 +278,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithPrimitiveMultiDimensionalArrays() {
+  @Test
+  fun shouldWorkWithPrimitiveMultiDimensionalArrays() {
     data class MultiDimensionalPrimitiveArrays(
         val longs: Array<LongArray>?,
         val booleans: Array<BooleanArray>?,
@@ -297,7 +307,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithBoxedMultiDimensionalArrays() {
+  @Test
+  fun shouldWorkWithBoxedMultiDimensionalArrays() {
     data class MultiDimensionalBoxedArrays(
         val longs: Array<Array<Long>>?,
         val booleans: Array<Array<Boolean>>?,
@@ -325,7 +336,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithSerializable() {
+  @Test
+  fun shouldWorkWithSerializable() {
     data class User(
         val firstName: String,
         val lastName: String
@@ -372,7 +384,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithSparseArrays() {
+  @Test
+  fun shouldWorkWithSparseArrays() {
     data class User(
         val firstName: String,
         val lastName: String
@@ -424,7 +437,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithLists() {
+  @Test
+  fun shouldWorkWithLists() {
     data class User(
         val firstName: String,
         val lastName: String
@@ -464,7 +478,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithListSubclasses() {
+  @Test
+  fun shouldWorkWithListSubclasses() {
     data class Lists(
         val base: List<String>,
         val array: ArrayList<String>,
@@ -480,7 +495,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithComplexListsAndArrays() {
+  @Test
+  fun shouldWorkWithComplexListsAndArrays() {
     data class ComplexArraysAndLists(
         val one: List<List<List<Long>>>,
         val two: List<Array<List<Boolean>>>,
@@ -500,7 +516,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithSets() {
+  @Test
+  fun shouldWorkWithSets() {
     data class User(
         val firstName: String,
         val lastName: String
@@ -558,7 +575,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithSetSubclasses() {
+  @Test
+  fun shouldWorkWithSetSubclasses() {
     data class Sets(
         val base: Set<String>,
         val hash: HashSet<String>,
@@ -578,7 +596,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithMaps() {
+  @Test
+  fun shouldWorkWithMaps() {
     data class User(
         val firstName: String,
         val lastName: String
@@ -648,7 +667,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithMapSubclasses() {
+  @Test
+  fun shouldWorkWithMapSubclasses() {
     data class Maps(
         val base: Map<String, String>,
         val hash: HashMap<String, String>,
@@ -668,7 +688,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithPrivateProperties() {
+  @Test
+  fun shouldWorkWithPrivateProperties() {
     data class Numbers(
         private val one: String,
         private val two: String,
@@ -690,7 +711,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithLibraryProjects() {
+  @Test
+  fun shouldWorkWithLibraryProjects() {
     SmugglerAssertions.verify<Chat> {
       Chat(
           title = generator.nextString(),
@@ -710,7 +732,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithDates() {
+  @Test
+  fun shouldWorkWithDates() {
     data class Sample(
         val start: Date,
         val end: Date
@@ -724,7 +747,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithGlobalAdapters() {
+  @Test
+  fun shouldWorkWithGlobalAdapters() {
     data class Global(
         val integer: BigInteger,
         val calendar: Calendar,
@@ -742,7 +766,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithLocalAdapters() {
+  @Test
+  fun shouldWorkWithLocalAdapters() {
     data class Timestamp(val millis: Long)
     data class Date(val millis: Long)
 
@@ -780,7 +805,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithPolymorphicCollections() {
+  @Test
+  fun shouldWorkWithPolymorphicCollections() {
     data class Foo(override val value: String) : Wrapper
     data class Bar(override val value: String) : Wrapper
 
@@ -796,7 +822,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithObjects() {
+  @Test
+  fun shouldWorkWithObjects() {
     data class Objects(
         val one: LoginCommand,
         val two: LogoutCommand,
@@ -863,7 +890,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithSealedClasses() {
+  @Test
+  fun shouldWorkWithSealedClasses() {
     SmugglerAssertions.verify<Result.Success> {
       Result.Success(value = generator.nextString())
     }
@@ -881,7 +909,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldWorkWithManualCreator() {
+  @Test
+  fun shouldWorkWithManualCreator() {
     data class Container(
         val single: Manual,
         val array: Array<Manual>,
@@ -903,7 +932,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldOptimizeRequiredFields() {
+  @Test
+  fun shouldOptimizeRequiredFields() {
     data class Foo(
         val field: Int
     ) : AutoParcelable
@@ -926,7 +956,8 @@ class SmugglerTest {
     }
   }
 
-  @Test fun shouldOptimizeRequiredTypeArguments() {
+  @Test
+  fun shouldOptimizeRequiredTypeArguments() {
     data class Required(
         val list: List<Int>,
         val nested: List<List<Int>>
