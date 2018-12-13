@@ -979,6 +979,23 @@ class SmugglerTest {
     }
   }
 
+  @Test
+  fun shouldUseCorrectClassLoaderForStaticParcelableClasses() {
+    data class State(
+        val map: Map<String, Parcelable>
+    ) : AutoParcelable
+
+    data class Inner(
+        val value: Int
+    ) : AutoParcelable
+
+    SmugglerAssertions.verify<State> {
+      State(
+          map = generator.nextMap({ generator.nextString() }, { Inner(value = generator.nextInt()) })
+      )
+    }
+  }
+
   private class Manual(val value: Int) : Parcelable {
     override fun writeToParcel(parcel: Parcel, flags: Int) {
       parcel.writeInt(value)
