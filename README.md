@@ -47,9 +47,9 @@ buildscript {
   }
 
   dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.21"
     classpath "com.android.tools.build:gradle:3.0.1"
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.21"
-    classpath "com.joom.smuggler:smuggler-plugin:0.13.1"
+    classpath "com.joom.smuggler:smuggler-plugin:1.0.0"
   }
 }
 
