@@ -768,39 +768,16 @@ class SmugglerTest {
 
   @Test
   fun shouldWorkWithLocalAdapters() {
-    data class Timestamp(val millis: Long)
-    data class Date(val millis: Long)
-
-    class TimestampTypeAdapter : TypeAdapter<Timestamp> {
-      override fun fromParcel(parcel: Parcel): Timestamp {
-        return Timestamp(parcel.readLong())
-      }
-
-      override fun toParcel(value: Timestamp, parcel: Parcel, flags: Int) {
-        parcel.writeLong(value.millis)
-      }
-    }
-
-    class DateTypeAdapter : TypeAdapter<Date> {
-      override fun fromParcel(parcel: Parcel): Date {
-        return Date(parcel.readLong())
-      }
-
-      override fun toParcel(value: Date, parcel: Parcel, flags: Int) {
-        parcel.writeLong(value.millis)
-      }
-    }
-
     @LocalAdapter(TimestampTypeAdapter::class, DateTypeAdapter::class)
     data class Local(
-        val timestamp: Timestamp,
-        val date: Date
+        val timestamp: TestTimestamp,
+        val date: TestDate
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Local>() {
       Local(
-          timestamp = Timestamp(generator.nextLong()),
-          date = Date(generator.nextLong())
+          timestamp = TestTimestamp(generator.nextLong()),
+          date = TestDate(generator.nextLong())
       )
     }
   }
@@ -1068,6 +1045,29 @@ class SmugglerTest {
     companion object {
       const val EXTRA_PAYLOAD = "payload"
       const val EXTRA_MESSAGE = "message"
+    }
+  }
+
+  data class TestTimestamp(val millis: Long)
+  data class TestDate(val millis: Long)
+
+  class TimestampTypeAdapter : TypeAdapter<TestTimestamp> {
+    override fun fromParcel(parcel: Parcel): TestTimestamp {
+      return TestTimestamp(parcel.readLong())
+    }
+
+    override fun toParcel(value: TestTimestamp, parcel: Parcel, flags: Int) {
+      parcel.writeLong(value.millis)
+    }
+  }
+
+  class DateTypeAdapter : TypeAdapter<TestDate> {
+    override fun fromParcel(parcel: Parcel): TestDate {
+      return TestDate(parcel.readLong())
+    }
+
+    override fun toParcel(value: TestDate, parcel: Parcel, flags: Int) {
+      parcel.writeLong(value.millis)
     }
   }
 
