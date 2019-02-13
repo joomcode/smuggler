@@ -31,7 +31,7 @@ def VERSION = POM_VERSION_NAME
 ext {
   generatedDir = new File(projectDir, "generated")
   generatedJavaSourcesDir = new File(generatedDir, "main/java")
-  buildClassFile = new File(generatedJavaSourcesDir, "io/mironov/smuggler/plugin/BuildConfig.java")
+  buildClassFile = new File(generatedJavaSourcesDir, "com/joom/smuggler/plugin/BuildConfig.java")
 }
 
 sourceSets {
@@ -51,7 +51,7 @@ task generateBuildClass {
   doLast {
     buildClassFile.parentFile.mkdirs()
     buildClassFile.text = "" +
-        "package io.mironov.smuggler.plugin;\n" +
+        "package com.joom.smuggler.plugin;\n" +
         "\n" +
         "public class BuildConfig {\n" +
         "  public static final String VERSION = \"$VERSION\";\n" +

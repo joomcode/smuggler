@@ -49,7 +49,7 @@ buildscript {
   dependencies {
     classpath "com.android.tools.build:gradle:3.0.1"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.21"
-    classpath "io.mironov.smuggler:smuggler-plugin:0.13.1"
+    classpath "com.joom.smuggler:smuggler-plugin:0.13.1"
   }
 }
 
@@ -59,7 +59,7 @@ repositories {
 }
 
 apply plugin: "com.android.application"
-apply plugin: "io.mironov.smuggler"
+apply plugin: "com.joom.smuggler"
 ```
 Some **important** notes:
 - Smuggler plugin must be applied **after** android plugin.
@@ -128,7 +128,7 @@ Some **important** notes:
 - Only data classes and kotlin objects are supported
 - Data classes with type parameters aren't supported at the moment
 - Lists, Maps and Arrays with bounded type parameters aren't supported at the moment
-- The library doesn't work nicely with JVM tests at the moment [#12](https://github.com/nsk-mironov/smuggler/issues/12)
+- The library doesn't work nicely with JVM tests at the moment [#12](https://github.com/joomcode/smuggler/issues/12)
 
 # What does "Smuggler" mean?
 A smuggler was an individual who dealt with the secret exchanged shipment of goods to block restrictions or tax fees. The items shipped were often considered contraband, and highly illegal. Notable smugglers included Han Solo, Chewbacca, and Lando Calrissian. © [http://starwars.wikia.com](http://starwars.wikia.com/wiki/Smuggler)
