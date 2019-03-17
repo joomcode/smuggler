@@ -24,6 +24,10 @@ class SmugglerTransform(
     val options = createOptions(invocation)
     val compiler = SmugglerCompiler()
 
+    if (!invocation.isIncremental) {
+      invocation.outputProvider.deleteAll()
+    }
+
     for (file in options.project) {
       file.copyRecursively(options.output, true)
     }
@@ -35,16 +39,16 @@ class SmugglerTransform(
     return EnumSet.of(Scope.PROJECT)
   }
 
-  override fun getInputTypes(): Set<QualifiedContent.ContentType> {
-    return EnumSet.of(DefaultContentType.CLASSES)
-  }
-
   override fun getReferencedScopes(): MutableSet<Scope> {
     return EnumSet.of(
         Scope.TESTED_CODE,
         Scope.SUB_PROJECTS,
         Scope.EXTERNAL_LIBRARIES
     )
+  }
+
+  override fun getInputTypes(): Set<QualifiedContent.ContentType> {
+    return EnumSet.of(DefaultContentType.CLASSES)
   }
 
   override fun getParameterInputs(): Map<String, Any> {
