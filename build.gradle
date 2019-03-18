@@ -42,7 +42,7 @@ ext {
   bintrayVersion = "1.4"
 
   asmVersion = "5.2"
-  gripVersion = "0.5.1-beta"
+  gripVersion = "0.7.0-beta"
 
   slf4jVersion = "1.7.13"
   junitVersion = "4.12"

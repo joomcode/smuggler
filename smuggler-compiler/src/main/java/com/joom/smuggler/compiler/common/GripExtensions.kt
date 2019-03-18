@@ -102,7 +102,7 @@ internal fun ClassMirror.getDeclaredMethod(name: String): MethodMirror? {
 
 internal fun ClassMirror.getDeclaredMethod(name: String, returns: Type, vararg args: Type): MethodMirror? {
   return methods.singleOrNull {
-    it.name == name && it.type.returnType == returns && Arrays.equals(it.type.toAsmType().argumentTypes, args)
+    it.name == name && it.type.returnType.toAsmType() == returns && Arrays.equals(it.type.toAsmType().argumentTypes, args)
   }
 }
 

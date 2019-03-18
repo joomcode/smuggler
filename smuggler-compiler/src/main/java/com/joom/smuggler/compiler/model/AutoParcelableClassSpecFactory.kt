@@ -45,7 +45,7 @@ internal object AutoParcelableClassSpecFactory {
       throw InvalidAutoParcelableException(mirror.type, "AutoParcelable enums are not supported at the moment")
     }
 
-    if (!mirror.signature.typeParameters.isEmpty()) {
+    if (!mirror.signature.typeVariables.isEmpty()) {
       throw InvalidAutoParcelableException(mirror.type, "Generic classes are not supported at the moment")
     }
 

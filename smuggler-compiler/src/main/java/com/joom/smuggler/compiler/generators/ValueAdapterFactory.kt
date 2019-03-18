@@ -95,7 +95,7 @@ internal class ValueAdapterFactory private constructor(
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes must be not abstract")
       }
 
-      if (!spec.signature.typeParameters.isEmpty()) {
+      if (!spec.signature.typeVariables.isEmpty()) {
         throw InvalidTypeAdapterException(spec.type, "TypeAdapter classes can''t have any type parameters")
       }
 
