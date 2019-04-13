@@ -2,6 +2,7 @@ package com.joom.smuggler.plugin
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
+import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.TestExtension
@@ -37,7 +38,7 @@ open class SmugglerPlugin : Plugin<Project> {
 
   private fun onPrepareTransforms(project: Project) {
     val extension = project.extensions.getByType(SmugglerExtension::class.java)
-    val transform = SmugglerTransform(project, extension)
+    val transform = SmugglerTransform(findAndroidExtension(project), extension)
 
     if (project.plugins.hasPlugin(LibraryPlugin::class.java)) {
       project.extensions.findByType(LibraryExtension::class.java)!!.registerTransform(transform)
@@ -46,5 +47,21 @@ open class SmugglerPlugin : Plugin<Project> {
     } else if (project.plugins.hasPlugin(AppPlugin::class.java)) {
       project.extensions.findByType(AppExtension::class.java)!!.registerTransform(transform)
     }
+  }
+
+  private fun findAndroidExtension(project: Project): BaseExtension {
+    project.extensions.findByType(AppExtension::class.java)?.let { extension ->
+      return extension
+    }
+
+    project.extensions.findByType(LibraryExtension::class.java)?.let { extension ->
+      return extension
+    }
+
+    project.extensions.findByType(TestExtension::class.java)?.let { extension ->
+      return extension
+    }
+
+    error("'android' or 'android-library' plugin required")
   }
 }

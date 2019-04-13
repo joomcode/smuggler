@@ -5,25 +5,23 @@ import com.android.build.api.transform.QualifiedContent.DefaultContentType
 import com.android.build.api.transform.QualifiedContent.Scope
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformInvocation
-import com.android.build.gradle.AppExtension
-import com.android.build.gradle.LibraryExtension
+import com.android.build.gradle.BaseExtension
 import com.joom.smuggler.compiler.SmugglerCompiler
 import com.joom.smuggler.plugin.utils.TransformSet
 import com.joom.smuggler.plugin.utils.TransformUnit
 import com.joom.smuggler.plugin.utils.copyInputsToOutputs
 import com.joom.smuggler.plugin.utils.getClasspath
 import io.michaelrocks.grip.GripFactory
-import org.gradle.api.Project
 import java.io.File
-import java.util.ArrayList
 import java.util.EnumSet
 
 class SmugglerTransform(
-    private val project: Project,
+    private val android: BaseExtension,
     private val extension: SmugglerExtension
 ) : Transform() {
   override fun transform(invocation: TransformInvocation) {
-    val transformSet = TransformSet.create(invocation, createBootClasspath())
+    val transformSet = TransformSet.create(invocation, android.bootClasspath)
+    val transformClasspath = transformSet.getClasspath()
 
     if (!invocation.isIncremental) {
       invocation.outputProvider.deleteAll()
@@ -31,8 +29,9 @@ class SmugglerTransform(
 
     transformSet.copyInputsToOutputs()
 
-    GripFactory.create(transformSet.getClasspath()).use { grip ->
-      val compiler = SmugglerCompiler(grip)
+    GripFactory.create(transformClasspath).use { grip ->
+      val adapters = computeTypeAdapterSources(invocation)
+      val compiler = SmugglerCompiler(grip, adapters)
 
       for (unit in transformSet.units) {
         compiler.cleanup(unit.output)
@@ -82,18 +81,24 @@ class SmugglerTransform(
     return true
   }
 
-  private fun createBootClasspath(): List<File> {
+  private fun computeTypeAdapterSources(invocation: TransformInvocation): Collection<File> {
     val result = ArrayList<File>()
+    val contents = ArrayList<QualifiedContent>()
 
-    val application = project.extensions.findByType(AppExtension::class.java)
-    val library = project.extensions.findByType(LibraryExtension::class.java)
-
-    if (application != null && application.bootClasspath != null) {
-      result.addAll(application.bootClasspath)
+    for (input in invocation.inputs) {
+      contents.addAll(input.directoryInputs)
+      contents.addAll(input.jarInputs)
     }
 
-    if (library != null && library.bootClasspath != null) {
-      result.addAll(library.bootClasspath)
+    for (input in invocation.referencedInputs) {
+      contents.addAll(input.directoryInputs)
+      contents.addAll(input.jarInputs)
+    }
+
+    for (content in contents) {
+      if (Scope.PROJECT in content.scopes || Scope.SUB_PROJECTS in content.scopes) {
+        result += content.file
+      }
     }
 
     return result

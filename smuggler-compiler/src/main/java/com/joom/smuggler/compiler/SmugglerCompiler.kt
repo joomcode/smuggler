@@ -10,10 +10,11 @@ import io.michaelrocks.grip.from
 import java.io.File
 
 class SmugglerCompiler(
-    private val grip: Grip
+    private val grip: Grip,
+    private val adapters: Collection<File>
 ) {
   private val environment = GenerationEnvironment(grip)
-  private val factory = ValueAdapterFactory.from(grip)
+  private val factory = ValueAdapterFactory.from(grip, adapters)
 
   fun compile(input: File, output: File) {
     val parcelables = grip.select(classes)
