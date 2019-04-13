@@ -30,4 +30,12 @@ class SmugglerCompiler(
       }
     }
   }
+
+  fun cleanup(output: File) {
+    output.walkTopDown().forEach { file ->
+      if (file.isFile && file.endsWith("\$\$AutoCreator.class")) {
+        file.delete()
+      }
+    }
+  }
 }

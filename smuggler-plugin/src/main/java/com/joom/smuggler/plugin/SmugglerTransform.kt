@@ -35,6 +35,10 @@ class SmugglerTransform(
       val compiler = SmugglerCompiler(grip)
 
       for (unit in transformSet.units) {
+        compiler.cleanup(unit.output)
+      }
+
+      for (unit in transformSet.units) {
         if (unit.changes.status != TransformUnit.Status.REMOVED) {
           compiler.compile(unit.input, unit.output)
         }
@@ -43,7 +47,9 @@ class SmugglerTransform(
   }
 
   override fun getScopes(): MutableSet<Scope> {
-    return EnumSet.of(Scope.PROJECT)
+    return EnumSet.of(
+        Scope.PROJECT
+    )
   }
 
   override fun getReferencedScopes(): MutableSet<Scope> {
@@ -55,7 +61,9 @@ class SmugglerTransform(
   }
 
   override fun getInputTypes(): Set<QualifiedContent.ContentType> {
-    return EnumSet.of(DefaultContentType.CLASSES)
+    return EnumSet.of(
+        DefaultContentType.CLASSES
+    )
   }
 
   override fun getParameterInputs(): Map<String, Any> {
