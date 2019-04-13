@@ -17,6 +17,7 @@ import com.joom.smuggler.compiler.model.AutoParcelablePropertySpec
 import com.joom.smuggler.compiler.model.KotlinType
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.classes
+import io.michaelrocks.grip.classpath
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.isAbstract
 import io.michaelrocks.grip.mirrors.isPublic
@@ -25,7 +26,6 @@ import io.michaelrocks.grip.mirrors.signature.GenericType
 import io.michaelrocks.grip.mirrors.toAsmType
 import io.michaelrocks.grip.mirrors.toType
 import org.objectweb.asm.Type
-import java.io.File
 import java.util.Arrays
 import kotlin.reflect.jvm.internal.impl.metadata.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.metadata.deserialization.Flags
@@ -64,9 +64,9 @@ internal class ValueAdapterFactory private constructor(
         Types.ANDROID_BUNDLE to BundleValueAdapter
     )
 
-    fun from(grip: Grip, files: Collection<File>): ValueAdapterFactory {
+    fun from(grip: Grip): ValueAdapterFactory {
       return ValueAdapterFactory(grip, ADAPTERS + grip.select(classes)
-          .from(files)
+          .from(classpath)
           .where(isGlobalTypeAdapter())
           .execute().values
           .associate { createAssistedValueAdapter(it, grip) }
