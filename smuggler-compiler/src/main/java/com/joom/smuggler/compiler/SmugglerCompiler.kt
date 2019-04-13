@@ -11,7 +11,7 @@ import java.util.ArrayList
 import java.util.HashSet
 
 class SmugglerCompiler {
-  fun compile(options: SmugglerOptions): SmugglerOutput {
+  fun compile(options: SmugglerOptions) {
     val inputs = HashSet(options.project + options.subprojects + options.libraries + options.bootclasspath)
     val outputs = ArrayList<File>()
 
@@ -38,7 +38,5 @@ class SmugglerCompiler {
         }
       }
     }
-
-    return SmugglerOutput(outputs)
   }
 }
