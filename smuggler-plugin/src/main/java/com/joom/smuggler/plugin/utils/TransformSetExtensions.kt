@@ -56,13 +56,13 @@ private fun File.copyDirectoryTo(target: File, changes: Changes) {
   }
 
   target.mkdirs()
+
   changes.files.forEach { file ->
-    if (file.isFile) {
-      val status = changes.getFileStatus(file)
-      val relativePath = file.toRelativeString(this)
-      val targetFile = File(target, relativePath)
-      file.applyChangesTo(targetFile, status)
-    }
+    val status = changes.getFileStatus(file)
+    val relativePath = file.toRelativeString(this)
+    val targetFile = File(target, relativePath)
+
+    file.applyChangesTo(targetFile, status)
   }
 }
 
@@ -72,10 +72,26 @@ private fun File.copyJarTo(target: File, changes: Changes) {
 
 private fun File.applyChangesTo(target: File, status: TransformUnit.Status) {
   when (status) {
-    TransformUnit.Status.UNCHANGED -> return
-    TransformUnit.Status.REMOVED -> target.delete()
-    TransformUnit.Status.ADDED -> copyTo(target, true)
-    TransformUnit.Status.CHANGED -> copyTo(target, true)
-    TransformUnit.Status.UNKNOWN -> applyChangesTo(target, if (exists()) TransformUnit.Status.CHANGED else TransformUnit.Status.REMOVED)
+    TransformUnit.Status.UNCHANGED -> {
+      // nothing to do
+    }
+
+    TransformUnit.Status.REMOVED -> {
+      target.deleteRecursively()
+    }
+
+    TransformUnit.Status.ADDED -> {
+      target.deleteRecursively()
+      copyRecursively(target, true)
+    }
+
+    TransformUnit.Status.CHANGED -> {
+      target.deleteRecursively()
+      copyRecursively(target, true)
+    }
+
+    TransformUnit.Status.UNKNOWN -> {
+      applyChangesTo(target, if (exists()) TransformUnit.Status.CHANGED else TransformUnit.Status.REMOVED)
+    }
   }
 }
