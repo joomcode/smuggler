@@ -81,6 +81,10 @@ class SmugglerTransform(
     return true
   }
 
+  override fun isCacheable(): Boolean {
+    return true
+  }
+
   private fun computeTypeAdapterSources(invocation: TransformInvocation): Collection<File> {
     val result = ArrayList<File>()
     val contents = ArrayList<QualifiedContent>()
