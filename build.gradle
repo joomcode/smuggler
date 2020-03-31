@@ -38,11 +38,11 @@ ext {
   supportVersion = "27.0.0"
   supportTestRunnerVersion = "0.4.1"
 
-  kotlinVersion = "1.3.10"
+  kotlinVersion = "1.3.30"
   bintrayVersion = "1.4"
 
   asmVersion = "5.2"
-  gripVersion = "0.5.1-beta"
+  gripVersion = "0.7.0-beta"
 
   slf4jVersion = "1.7.13"
   junitVersion = "4.12"
