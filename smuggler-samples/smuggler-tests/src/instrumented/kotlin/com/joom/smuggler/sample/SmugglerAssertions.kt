@@ -2,7 +2,6 @@ package com.joom.smuggler.sample
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.joom.smuggler.AutoParcelable
 import org.junit.Assert
 
 object SmugglerAssertions {
@@ -30,7 +29,7 @@ object SmugglerAssertions {
   }
 
   fun <P : Parcelable> verify(clazz: Class<P>) {
-    consume(AutoParcelable.creator(clazz))
+    consume(clazz.getDeclaredField("CREATOR"))
   }
 
   fun verify(expected: Any?, actual: Any?) {
