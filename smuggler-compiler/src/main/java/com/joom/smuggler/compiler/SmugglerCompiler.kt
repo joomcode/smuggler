@@ -6,7 +6,7 @@ import com.joom.smuggler.compiler.generators.ValueAdapterFactory
 import com.joom.smuggler.compiler.model.AutoParcelableClassSpecFactory
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.classes
-import io.michaelrocks.grip.from
+import io.michaelrocks.grip.mirrors.ClassMirror
 import java.io.File
 
 class SmugglerCompiler(
@@ -17,12 +17,7 @@ class SmugglerCompiler(
   private val factory = ValueAdapterFactory.from(grip, adapters)
 
   fun compile(input: File, output: File) {
-    val parcelables = grip.select(classes)
-      .from(input)
-      .where(isAutoParcelable())
-      .execute()
-
-    for (parcelable in parcelables.classes) {
+    for (parcelable in findAutoParcelableClasses(listOf(input))) {
       val spec = AutoParcelableClassSpecFactory.from(parcelable)
       val generator = ParcelableContentGenerator(spec, ValueAdapterFactory.from(factory, spec))
 
@@ -30,6 +25,14 @@ class SmugglerCompiler(
         File(output, it.path).writeBytes(it.content)
       }
     }
+  }
+
+  fun findAutoParcelableClasses(sources: Iterable<File>): Iterable<ClassMirror> {
+    return grip.select(classes)
+      .from(sources)
+      .where(isAutoParcelable())
+      .execute()
+      .values
   }
 
   fun cleanup(output: File) {
