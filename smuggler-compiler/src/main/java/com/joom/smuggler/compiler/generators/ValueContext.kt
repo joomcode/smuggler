@@ -6,8 +6,8 @@ import java.util.HashMap
 import java.util.NoSuchElementException
 
 internal class ValueContext(
-    val type: KotlinType,
-    val grip: Grip
+  val type: KotlinType,
+  val grip: Grip
 ) {
   private val names = HashMap<String, Int>()
 

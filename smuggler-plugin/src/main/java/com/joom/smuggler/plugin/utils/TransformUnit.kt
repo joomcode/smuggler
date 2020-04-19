@@ -19,10 +19,10 @@ package com.joom.smuggler.plugin.utils
 import java.io.File
 
 data class TransformUnit(
-    val input: File,
-    val output: File,
-    val format: Format,
-    val changes: Changes
+  val input: File,
+  val output: File,
+  val format: Format,
+  val changes: Changes
 ) {
 
   enum class Format {

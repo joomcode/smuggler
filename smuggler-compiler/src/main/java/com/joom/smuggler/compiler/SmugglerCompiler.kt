@@ -10,17 +10,17 @@ import io.michaelrocks.grip.from
 import java.io.File
 
 class SmugglerCompiler(
-    private val grip: Grip,
-    private val adapters: Collection<File>
+  private val grip: Grip,
+  private val adapters: Collection<File>
 ) {
   private val environment = GenerationEnvironment(grip)
   private val factory = ValueAdapterFactory.from(grip, adapters)
 
   fun compile(input: File, output: File) {
     val parcelables = grip.select(classes)
-        .from(input)
-        .where(isAutoParcelable())
-        .execute()
+      .from(input)
+      .where(isAutoParcelable())
+      .execute()
 
     for (parcelable in parcelables.classes) {
       val spec = AutoParcelableClassSpecFactory.from(parcelable)

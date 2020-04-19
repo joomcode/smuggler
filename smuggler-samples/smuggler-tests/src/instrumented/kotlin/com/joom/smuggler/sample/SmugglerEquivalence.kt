@@ -178,16 +178,16 @@ object SmugglerEquivalence {
 
   fun <P : AutoParcelable> equals(left: P?, right: P?): Boolean = nullableEquals(left, right) { left, right ->
     return left.javaClass.declaredFields
-        .each { it.isAccessible = true }
-        .filter { !Modifier.isStatic(it.modifiers) }
-        .all { equals(it.get(left), it.get(right)) }
+      .each { it.isAccessible = true }
+      .filter { !Modifier.isStatic(it.modifiers) }
+      .all { equals(it.get(left), it.get(right)) }
   }
 
   fun <P : AutoParcelable> hashCode(value: P?): Int = nullableHashCode(value) { value ->
     return value.javaClass.declaredFields
-        .each { it.isAccessible = true }
-        .filter { !Modifier.isStatic(it.modifiers) }
-        .fold(0) { hash, field -> 31 * hash + hashCode(field.get(value)) }
+      .each { it.isAccessible = true }
+      .filter { !Modifier.isStatic(it.modifiers) }
+      .fold(0) { hash, field -> 31 * hash + hashCode(field.get(value)) }
   }
 
   inline fun <T> nullableEquals(left: T?, right: T?, equality: (T, T) -> Boolean): Boolean {

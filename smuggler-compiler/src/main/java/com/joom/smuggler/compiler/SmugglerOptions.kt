@@ -4,11 +4,11 @@ import java.io.File
 import java.util.ArrayList
 
 data class SmugglerOptions(
-    val project: Collection<File>,
-    val subprojects: Collection<File>,
-    val libraries: Collection<File>,
-    val bootclasspath: Collection<File>,
-    val output: File
+  val project: Collection<File>,
+  val subprojects: Collection<File>,
+  val libraries: Collection<File>,
+  val bootclasspath: Collection<File>,
+  val output: File
 ) {
   class Builder(val output: File) {
     private val project = ArrayList<File>()

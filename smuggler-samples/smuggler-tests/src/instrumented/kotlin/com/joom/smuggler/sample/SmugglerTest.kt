@@ -44,28 +44,28 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithPrimitives() {
     data class Primitives(
-        val boolean: Boolean,
-        val byte: Byte,
-        val char: Char,
-        val short: Short,
-        val int: Int,
-        val long: Long,
-        val float: Float,
-        val double: Double,
-        val string: String
+      val boolean: Boolean,
+      val byte: Byte,
+      val char: Char,
+      val short: Short,
+      val int: Int,
+      val long: Long,
+      val float: Float,
+      val double: Double,
+      val string: String
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Primitives> {
       Primitives(
-          boolean = generator.nextBoolean(),
-          byte = generator.nextByte(),
-          char = generator.nextChar(),
-          short = generator.nextShort(),
-          int = generator.nextInt(),
-          long = generator.nextLong(),
-          float = generator.nextFloat(),
-          double = generator.nextDouble(),
-          string = generator.nextString()
+        boolean = generator.nextBoolean(),
+        byte = generator.nextByte(),
+        char = generator.nextChar(),
+        short = generator.nextShort(),
+        int = generator.nextInt(),
+        long = generator.nextLong(),
+        float = generator.nextFloat(),
+        double = generator.nextDouble(),
+        string = generator.nextString()
       )
     }
   }
@@ -73,28 +73,28 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithNestedObjects() {
     data class User(
-        val firstName: String,
-        val lastName: String
+      val firstName: String,
+      val lastName: String
     ) : AutoParcelable
 
     data class Message(
-        val id: Long,
-        val timestamp: Long,
-        val text: String,
-        val sender: User,
-        val seen: Boolean
+      val id: Long,
+      val timestamp: Long,
+      val text: String,
+      val sender: User,
+      val seen: Boolean
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Message> {
       Message(
-          id = generator.nextLong(),
-          timestamp = generator.nextLong(),
-          text = generator.nextString(),
-          seen = generator.nextBoolean(),
-          sender = User(
-              firstName = generator.nextString(),
-              lastName = generator.nextString()
-          )
+        id = generator.nextLong(),
+        timestamp = generator.nextLong(),
+        text = generator.nextString(),
+        seen = generator.nextBoolean(),
+        sender = User(
+          firstName = generator.nextString(),
+          lastName = generator.nextString()
+        )
       )
     }
   }
@@ -102,28 +102,28 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithPrimitiveArrays() {
     data class PrimitiveArrays(
-        val booleans: BooleanArray,
-        val bytes: ByteArray,
-        val chars: CharArray,
-        val ints: IntArray,
-        val longs: LongArray,
-        val floats: FloatArray,
-        val doubles: DoubleArray,
-        val shorts: ShortArray,
-        val strings: Array<String>
+      val booleans: BooleanArray,
+      val bytes: ByteArray,
+      val chars: CharArray,
+      val ints: IntArray,
+      val longs: LongArray,
+      val floats: FloatArray,
+      val doubles: DoubleArray,
+      val shorts: ShortArray,
+      val strings: Array<String>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<PrimitiveArrays> {
       PrimitiveArrays(
-          booleans = generator.nextBooleanArray(),
-          bytes = generator.nextByteArray(),
-          chars = generator.nextCharArray(),
-          ints = generator.nextIntArray(),
-          longs = generator.nextLongArray(),
-          floats = generator.nextFloatArray(),
-          doubles = generator.nextDoubleArray(),
-          shorts = generator.nextShortArray(),
-          strings = generator.nextStringArray()
+        booleans = generator.nextBooleanArray(),
+        bytes = generator.nextByteArray(),
+        chars = generator.nextCharArray(),
+        ints = generator.nextIntArray(),
+        longs = generator.nextLongArray(),
+        floats = generator.nextFloatArray(),
+        doubles = generator.nextDoubleArray(),
+        shorts = generator.nextShortArray(),
+        strings = generator.nextStringArray()
       )
     }
   }
@@ -131,14 +131,14 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithEnums() {
     data class Enums(
-        val magic: Magic,
-        val foo: Foo
+      val magic: Magic,
+      val foo: Foo
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Enums> {
       Enums(
-          magic = generator.nextEnum(Magic::class.java),
-          foo = generator.nextEnum(Foo::class.java)
+        magic = generator.nextEnum(Magic::class.java),
+        foo = generator.nextEnum(Foo::class.java)
       )
     }
   }
@@ -146,32 +146,32 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithOptionalPrimitives() {
     data class Optionals(
-        val boolean: Boolean?,
-        val byte: Byte?,
-        val char: Char?,
-        val short: Short?,
-        val int: Int?,
-        val long: Long?,
-        val float: Float?,
-        val double: Double?,
-        val string: String?,
-        val magic: Magic?,
-        val foo: Foo?
+      val boolean: Boolean?,
+      val byte: Byte?,
+      val char: Char?,
+      val short: Short?,
+      val int: Int?,
+      val long: Long?,
+      val float: Float?,
+      val double: Double?,
+      val string: String?,
+      val magic: Magic?,
+      val foo: Foo?
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Optionals> {
       Optionals(
-          boolean = generator.nextNullableBoolean(),
-          byte = generator.nextNullableByte(),
-          char = generator.nextNullableChar(),
-          short = generator.nextNullableShort(),
-          int = generator.nextNullableInt(),
-          long = generator.nextNullableLong(),
-          float = generator.nextNullableFloat(),
-          double = generator.nextNullableDouble(),
-          string = generator.nextNullableString(),
-          magic = generator.nextNullableEnum(Magic::class.java),
-          foo = generator.nextNullableEnum(Foo::class.java)
+        boolean = generator.nextNullableBoolean(),
+        byte = generator.nextNullableByte(),
+        char = generator.nextNullableChar(),
+        short = generator.nextNullableShort(),
+        int = generator.nextNullableInt(),
+        long = generator.nextNullableLong(),
+        float = generator.nextNullableFloat(),
+        double = generator.nextNullableDouble(),
+        string = generator.nextNullableString(),
+        magic = generator.nextNullableEnum(Magic::class.java),
+        foo = generator.nextNullableEnum(Foo::class.java)
       )
     }
   }
@@ -179,46 +179,46 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithOptionalNestedObjects() {
     data class User(
-        val firstName: String,
-        val lastName: String
+      val firstName: String,
+      val lastName: String
     ) : AutoParcelable
 
     data class Payload(
-        val text: String,
-        val timestamp: Long
+      val text: String,
+      val timestamp: Long
     ) : AutoParcelable
 
     data class Status(
-        val seen: Boolean,
-        val delivered: Boolean
+      val seen: Boolean,
+      val delivered: Boolean
     ) : AutoParcelable
 
     data class Message(
-        val user: User?,
-        val payload: Payload?,
-        val status: Status?
+      val user: User?,
+      val payload: Payload?,
+      val status: Status?
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Message> {
       Message(
-          user = generator.nextNullableValue {
-            User(
-                firstName = generator.nextString(),
-                lastName = generator.nextString()
-            )
-          },
-          payload = generator.nextNullableValue {
-            Payload(
-                text = generator.nextString(),
-                timestamp = generator.nextLong()
-            )
-          },
-          status = generator.nextNullableValue {
-            Status(
-                seen = generator.nextBoolean(),
-                delivered = generator.nextBoolean()
-            )
-          }
+        user = generator.nextNullableValue {
+          User(
+            firstName = generator.nextString(),
+            lastName = generator.nextString()
+          )
+        },
+        payload = generator.nextNullableValue {
+          Payload(
+            text = generator.nextString(),
+            timestamp = generator.nextLong()
+          )
+        },
+        status = generator.nextNullableValue {
+          Status(
+            seen = generator.nextBoolean(),
+            delivered = generator.nextBoolean()
+          )
+        }
       )
     }
   }
@@ -235,8 +235,8 @@ class SmugglerTest {
 
     SmugglerAssertions.verify<WithStaticClassInitializer> {
       WithStaticClassInitializer(
-          payload = generator.nextString(),
-          message = generator.nextString()
+        payload = generator.nextString(),
+        message = generator.nextString()
       )
     }
   }
@@ -244,36 +244,36 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithParcelableArrays() {
     data class User(
-        val firstName: String,
-        val lastName: String
+      val firstName: String,
+      val lastName: String
     ) : AutoParcelable
 
     data class Message(
-        val text: String,
-        val timestamp: Long
+      val text: String,
+      val timestamp: Long
     ) : AutoParcelable
 
     data class Chat(
-        val title: String?,
-        val participants: Array<User>?,
-        val messages: Array<Message>?
+      val title: String?,
+      val participants: Array<User>?,
+      val messages: Array<Message>?
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Chat> {
       Chat(
-          title = generator.nextNullableString(),
-          participants = generator.nextNullableArray {
-            User(
-                firstName = generator.nextString(),
-                lastName = generator.nextString()
-            )
-          },
-          messages = generator.nextNullableArray {
-            Message(
-                text = generator.nextString(),
-                timestamp = generator.nextLong()
-            )
-          }
+        title = generator.nextNullableString(),
+        participants = generator.nextNullableArray {
+          User(
+            firstName = generator.nextString(),
+            lastName = generator.nextString()
+          )
+        },
+        messages = generator.nextNullableArray {
+          Message(
+            text = generator.nextString(),
+            timestamp = generator.nextLong()
+          )
+        }
       )
     }
   }
@@ -281,28 +281,28 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithPrimitiveMultiDimensionalArrays() {
     data class MultiDimensionalPrimitiveArrays(
-        val longs: Array<LongArray>?,
-        val booleans: Array<BooleanArray>?,
-        val bytes: Array<ByteArray>?,
-        val chars: Array<Array<CharArray>>?,
-        val ints: Array<Array<IntArray>>?,
-        val floats: Array<Array<FloatArray>>?,
-        val doubles: Array<DoubleArray>?,
-        val shorts: Array<ShortArray>?,
-        val strings: Array<Array<String>>?
+      val longs: Array<LongArray>?,
+      val booleans: Array<BooleanArray>?,
+      val bytes: Array<ByteArray>?,
+      val chars: Array<Array<CharArray>>?,
+      val ints: Array<Array<IntArray>>?,
+      val floats: Array<Array<FloatArray>>?,
+      val doubles: Array<DoubleArray>?,
+      val shorts: Array<ShortArray>?,
+      val strings: Array<Array<String>>?
     ) : AutoParcelable
 
     SmugglerAssertions.verify<MultiDimensionalPrimitiveArrays> {
       MultiDimensionalPrimitiveArrays(
-          longs = generator.nextNullableArray { generator.nextLongArray() },
-          booleans = generator.nextNullableArray { generator.nextBooleanArray() },
-          bytes = generator.nextNullableArray { generator.nextByteArray() },
-          chars = generator.nextNullableArray { generator.nextArray { generator.nextCharArray() } },
-          ints = generator.nextNullableArray { generator.nextArray { generator.nextIntArray() } },
-          floats = generator.nextNullableArray { generator.nextArray { generator.nextFloatArray() } },
-          doubles = generator.nextNullableArray { generator.nextDoubleArray() },
-          shorts = generator.nextNullableArray { generator.nextShortArray() },
-          strings = generator.nextNullableArray { generator.nextStringArray() }
+        longs = generator.nextNullableArray { generator.nextLongArray() },
+        booleans = generator.nextNullableArray { generator.nextBooleanArray() },
+        bytes = generator.nextNullableArray { generator.nextByteArray() },
+        chars = generator.nextNullableArray { generator.nextArray { generator.nextCharArray() } },
+        ints = generator.nextNullableArray { generator.nextArray { generator.nextIntArray() } },
+        floats = generator.nextNullableArray { generator.nextArray { generator.nextFloatArray() } },
+        doubles = generator.nextNullableArray { generator.nextDoubleArray() },
+        shorts = generator.nextNullableArray { generator.nextShortArray() },
+        strings = generator.nextNullableArray { generator.nextStringArray() }
       )
     }
   }
@@ -310,28 +310,28 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithBoxedMultiDimensionalArrays() {
     data class MultiDimensionalBoxedArrays(
-        val longs: Array<Array<Long>>?,
-        val booleans: Array<Array<Boolean>>?,
-        val bytes: Array<Array<Byte>>?,
-        val chars: Array<Array<Array<Char>>>?,
-        val ints: Array<Array<Array<Int>>>?,
-        val floats: Array<Array<Array<Float>>>?,
-        val doubles: Array<Array<Double>>?,
-        val shorts: Array<Array<Short>>?,
-        val strings: Array<Array<String>>?
+      val longs: Array<Array<Long>>?,
+      val booleans: Array<Array<Boolean>>?,
+      val bytes: Array<Array<Byte>>?,
+      val chars: Array<Array<Array<Char>>>?,
+      val ints: Array<Array<Array<Int>>>?,
+      val floats: Array<Array<Array<Float>>>?,
+      val doubles: Array<Array<Double>>?,
+      val shorts: Array<Array<Short>>?,
+      val strings: Array<Array<String>>?
     ) : AutoParcelable
 
     SmugglerAssertions.verify<MultiDimensionalBoxedArrays> {
       MultiDimensionalBoxedArrays(
-          longs = generator.nextNullableArray { generator.nextArray { generator.nextLong() } },
-          booleans = generator.nextNullableArray { generator.nextArray { generator.nextBoolean() } },
-          bytes = generator.nextNullableArray { generator.nextArray { generator.nextByte() } },
-          chars = generator.nextNullableArray { generator.nextArray { generator.nextArray { generator.nextChar() } } },
-          ints = generator.nextNullableArray { generator.nextArray { generator.nextArray { generator.nextInt() } } },
-          floats = generator.nextNullableArray { generator.nextArray { generator.nextArray { generator.nextFloat() } } },
-          doubles = generator.nextNullableArray { generator.nextArray { generator.nextDouble() } },
-          shorts = generator.nextNullableArray { generator.nextArray { generator.nextShort() } },
-          strings = generator.nextNullableArray { generator.nextStringArray() }
+        longs = generator.nextNullableArray { generator.nextArray { generator.nextLong() } },
+        booleans = generator.nextNullableArray { generator.nextArray { generator.nextBoolean() } },
+        bytes = generator.nextNullableArray { generator.nextArray { generator.nextByte() } },
+        chars = generator.nextNullableArray { generator.nextArray { generator.nextArray { generator.nextChar() } } },
+        ints = generator.nextNullableArray { generator.nextArray { generator.nextArray { generator.nextInt() } } },
+        floats = generator.nextNullableArray { generator.nextArray { generator.nextArray { generator.nextFloat() } } },
+        doubles = generator.nextNullableArray { generator.nextArray { generator.nextDouble() } },
+        shorts = generator.nextNullableArray { generator.nextArray { generator.nextShort() } },
+        strings = generator.nextNullableArray { generator.nextStringArray() }
       )
     }
   }
@@ -339,47 +339,47 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithSerializable() {
     data class User(
-        val firstName: String,
-        val lastName: String
+      val firstName: String,
+      val lastName: String
     ) : Serializable
 
     data class Payload(
-        val message: String,
-        val timestamp: Long
+      val message: String,
+      val timestamp: Long
     ) : Serializable
 
     data class Message(
-        val sender: User,
-        val payload: Payload
+      val sender: User,
+      val payload: Payload
     ) : Serializable
 
     data class Chat(
-        val title: String,
-        val participants: Array<User>,
-        val messages: Array<Message>
+      val title: String,
+      val participants: Array<User>,
+      val messages: Array<Message>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Chat> {
       Chat(
-          title = generator.nextString(),
-          participants = generator.nextArray {
-            User(
-                firstName = generator.nextString(),
-                lastName = generator.nextString()
+        title = generator.nextString(),
+        participants = generator.nextArray {
+          User(
+            firstName = generator.nextString(),
+            lastName = generator.nextString()
+          )
+        },
+        messages = generator.nextArray {
+          Message(
+            sender = User(
+              firstName = generator.nextString(),
+              lastName = generator.nextString()
+            ),
+            payload = Payload(
+              message = generator.nextString(),
+              timestamp = generator.nextLong()
             )
-          },
-          messages = generator.nextArray {
-            Message(
-                sender = User(
-                    firstName = generator.nextString(),
-                    lastName = generator.nextString()
-                ),
-                payload = Payload(
-                    message = generator.nextString(),
-                    timestamp = generator.nextLong()
-                )
-            )
-          }
+          )
+        }
       )
     }
   }
@@ -387,52 +387,52 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithSparseArrays() {
     data class User(
-        val firstName: String,
-        val lastName: String
+      val firstName: String,
+      val lastName: String
     ) : AutoParcelable
 
     data class Message(
-        val message: String,
-        val timestamp: Long
+      val message: String,
+      val timestamp: Long
     ) : AutoParcelable
 
     data class Simple(
-        val booleans: SparseBooleanArray,
-        val strings: SparseArray<String>,
-        val longs: SparseArray<Long>,
-        val doubles: SparseArray<Double>,
-        val floats: SparseArray<Float>
+      val booleans: SparseBooleanArray,
+      val strings: SparseArray<String>,
+      val longs: SparseArray<Long>,
+      val doubles: SparseArray<Double>,
+      val floats: SparseArray<Float>
     ) : AutoParcelable
 
     data class Complex(
-        val users: SparseArray<User>,
-        val messages: SparseArray<Message>
+      val users: SparseArray<User>,
+      val messages: SparseArray<Message>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Simple> {
       Simple(
-          booleans = generator.nextSparseBooleanArray(),
-          strings = generator.nextSparseArray { generator.nextString() },
-          longs = generator.nextSparseArray { generator.nextLong() },
-          doubles = generator.nextSparseArray { generator.nextDouble() },
-          floats = generator.nextSparseArray { generator.nextFloat() }
+        booleans = generator.nextSparseBooleanArray(),
+        strings = generator.nextSparseArray { generator.nextString() },
+        longs = generator.nextSparseArray { generator.nextLong() },
+        doubles = generator.nextSparseArray { generator.nextDouble() },
+        floats = generator.nextSparseArray { generator.nextFloat() }
       )
     }
 
     SmugglerAssertions.verify<Complex> {
       Complex(
-          users = generator.nextSparseArray {
-            User(
-                firstName = generator.nextString(),
-                lastName = generator.nextString()
-            )
-          },
-          messages = generator.nextSparseArray {
-            Message(
-                message = generator.nextString(),
-                timestamp = generator.nextLong()
-            )
-          }
+        users = generator.nextSparseArray {
+          User(
+            firstName = generator.nextString(),
+            lastName = generator.nextString()
+          )
+        },
+        messages = generator.nextSparseArray {
+          Message(
+            message = generator.nextString(),
+            timestamp = generator.nextLong()
+          )
+        }
       )
     }
   }
@@ -440,40 +440,40 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithLists() {
     data class User(
-        val firstName: String,
-        val lastName: String
+      val firstName: String,
+      val lastName: String
     ) : AutoParcelable
 
     data class Message(
-        val message: String,
-        val timestamp: Long
+      val message: String,
+      val timestamp: Long
     ) : AutoParcelable
 
     data class Lists(
-        val users: List<User>,
-        val messages: List<Message>,
-        val booleans: List<Boolean>,
-        val strings: List<String>,
-        val longs: List<Long>
+      val users: List<User>,
+      val messages: List<Message>,
+      val booleans: List<Boolean>,
+      val strings: List<String>,
+      val longs: List<Long>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Lists> {
       Lists(
-          users = generator.nextList {
-            User(
-                firstName = generator.nextString(),
-                lastName = generator.nextString()
-            )
-          },
-          messages = generator.nextList {
-            Message(
-                message = generator.nextString(),
-                timestamp = generator.nextLong()
-            )
-          },
-          booleans = generator.nextList { generator.nextBoolean() },
-          strings = generator.nextList { generator.nextString() },
-          longs = generator.nextList { generator.nextLong() }
+        users = generator.nextList {
+          User(
+            firstName = generator.nextString(),
+            lastName = generator.nextString()
+          )
+        },
+        messages = generator.nextList {
+          Message(
+            message = generator.nextString(),
+            timestamp = generator.nextLong()
+          )
+        },
+        booleans = generator.nextList { generator.nextBoolean() },
+        strings = generator.nextList { generator.nextString() },
+        longs = generator.nextList { generator.nextLong() }
       )
     }
   }
@@ -481,16 +481,16 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithListSubclasses() {
     data class Lists(
-        val base: List<String>,
-        val array: ArrayList<String>,
-        val linked: LinkedList<String>
+      val base: List<String>,
+      val array: ArrayList<String>,
+      val linked: LinkedList<String>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Lists> {
       Lists(
-          base = generator.nextList { generator.nextString() },
-          array = generator.nextList({ ArrayList<String>() }, { generator.nextString() }),
-          linked = generator.nextList({ LinkedList<String>() }, { generator.nextString() })
+        base = generator.nextList { generator.nextString() },
+        array = generator.nextList({ ArrayList<String>() }, { generator.nextString() }),
+        linked = generator.nextList({ LinkedList<String>() }, { generator.nextString() })
       )
     }
   }
@@ -498,20 +498,20 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithComplexListsAndArrays() {
     data class ComplexArraysAndLists(
-        val one: List<List<List<Long>>>,
-        val two: List<Array<List<Boolean>>>,
-        val three: List<Array<Array<Boolean>>>,
-        val four: Array<List<Array<Boolean>>>,
-        val five: Collection<Collection<String>>
+      val one: List<List<List<Long>>>,
+      val two: List<Array<List<Boolean>>>,
+      val three: List<Array<Array<Boolean>>>,
+      val four: Array<List<Array<Boolean>>>,
+      val five: Collection<Collection<String>>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<ComplexArraysAndLists> {
       ComplexArraysAndLists(
-          one = generator.nextList { generator.nextList { generator.nextList { generator.nextLong() } } },
-          two = generator.nextList { generator.nextArray { generator.nextList { generator.nextBoolean() } } },
-          three = generator.nextList { generator.nextArray { generator.nextArray { generator.nextBoolean() } } },
-          four = generator.nextArray { generator.nextList { generator.nextArray { generator.nextBoolean() } } },
-          five = generator.nextList { generator.nextList { generator.nextString() } }
+        one = generator.nextList { generator.nextList { generator.nextList { generator.nextLong() } } },
+        two = generator.nextList { generator.nextArray { generator.nextList { generator.nextBoolean() } } },
+        three = generator.nextList { generator.nextArray { generator.nextArray { generator.nextBoolean() } } },
+        four = generator.nextArray { generator.nextList { generator.nextArray { generator.nextBoolean() } } },
+        five = generator.nextList { generator.nextList { generator.nextString() } }
       )
     }
   }
@@ -519,58 +519,58 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithSets() {
     data class User(
-        val firstName: String,
-        val lastName: String
+      val firstName: String,
+      val lastName: String
     ) : AutoParcelable
 
     data class Message(
-        val message: String,
-        val timestamp: Long
+      val message: String,
+      val timestamp: Long
     ) : AutoParcelable
 
     data class Simple(
-        val users: Set<User>,
-        val messages: Set<Message>,
-        val booleans: Set<Boolean>,
-        val strings: Set<String>,
-        val longs: Set<Long>
+      val users: Set<User>,
+      val messages: Set<Message>,
+      val booleans: Set<Boolean>,
+      val strings: Set<String>,
+      val longs: Set<Long>
     ) : AutoParcelable
 
     data class Complex(
-        val one: Set<Set<Long>>,
-        val two: Set<Array<Boolean>>,
-        val three: Set<List<Boolean>>,
-        val four: Array<Set<Boolean>>,
-        val five: List<Set<Boolean>>
+      val one: Set<Set<Long>>,
+      val two: Set<Array<Boolean>>,
+      val three: Set<List<Boolean>>,
+      val four: Array<Set<Boolean>>,
+      val five: List<Set<Boolean>>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Simple> {
       Simple(
-          users = generator.nextSet {
-            User(
-                firstName = generator.nextString(),
-                lastName = generator.nextString()
-            )
-          },
-          messages = generator.nextSet {
-            Message(
-                message = generator.nextString(),
-                timestamp = generator.nextLong()
-            )
-          },
-          booleans = generator.nextSet { generator.nextBoolean() },
-          strings = generator.nextSet { generator.nextString() },
-          longs = generator.nextSet { generator.nextLong() }
+        users = generator.nextSet {
+          User(
+            firstName = generator.nextString(),
+            lastName = generator.nextString()
+          )
+        },
+        messages = generator.nextSet {
+          Message(
+            message = generator.nextString(),
+            timestamp = generator.nextLong()
+          )
+        },
+        booleans = generator.nextSet { generator.nextBoolean() },
+        strings = generator.nextSet { generator.nextString() },
+        longs = generator.nextSet { generator.nextLong() }
       )
     }
 
     SmugglerAssertions.verify<Complex> {
       Complex(
-          one = generator.nextSet { generator.nextSet { generator.nextLong() } },
-          two = generator.nextSet { generator.nextArray { generator.nextBoolean() } },
-          three = generator.nextSet { generator.nextList { generator.nextBoolean() } },
-          four = generator.nextArray { generator.nextSet { generator.nextBoolean() } },
-          five = generator.nextList { generator.nextSet { generator.nextBoolean() } }
+        one = generator.nextSet { generator.nextSet { generator.nextLong() } },
+        two = generator.nextSet { generator.nextArray { generator.nextBoolean() } },
+        three = generator.nextSet { generator.nextList { generator.nextBoolean() } },
+        four = generator.nextArray { generator.nextSet { generator.nextBoolean() } },
+        five = generator.nextList { generator.nextSet { generator.nextBoolean() } }
       )
     }
   }
@@ -578,20 +578,20 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithSetSubclasses() {
     data class Sets(
-        val base: Set<String>,
-        val hash: HashSet<String>,
-        val linked: LinkedHashSet<String>,
-        val sorted: SortedSet<String>,
-        val tree: TreeSet<String>
+      val base: Set<String>,
+      val hash: HashSet<String>,
+      val linked: LinkedHashSet<String>,
+      val sorted: SortedSet<String>,
+      val tree: TreeSet<String>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Sets> {
       Sets(
-          base = generator.nextSet({ LinkedHashSet<String>() }, { generator.nextString() }),
-          hash = generator.nextSet({ HashSet<String>() }, { generator.nextString() }),
-          linked = generator.nextSet({ LinkedHashSet<String>() }, { generator.nextString() }),
-          sorted = generator.nextSet({ TreeSet<String>() }, { generator.nextString() }),
-          tree = generator.nextSet({ TreeSet<String>() }, { generator.nextString() })
+        base = generator.nextSet({ LinkedHashSet<String>() }, { generator.nextString() }),
+        hash = generator.nextSet({ HashSet<String>() }, { generator.nextString() }),
+        linked = generator.nextSet({ LinkedHashSet<String>() }, { generator.nextString() }),
+        sorted = generator.nextSet({ TreeSet<String>() }, { generator.nextString() }),
+        tree = generator.nextSet({ TreeSet<String>() }, { generator.nextString() })
       )
     }
   }
@@ -599,70 +599,70 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithMaps() {
     data class User(
-        val firstName: String,
-        val lastName: String
+      val firstName: String,
+      val lastName: String
     ) : AutoParcelable
 
     data class Message(
-        val message: String,
-        val timestamp: Long
+      val message: String,
+      val timestamp: Long
     ) : AutoParcelable
 
     data class Maps(
-        val one: Map<String, String>,
-        val two: Map<String, Array<String>>,
-        val three: Map<Int, Boolean>,
-        val four: Map<Int, User>,
-        val five: Map<Int, Array<Message>>,
-        val six: Map<Long, List<Message>>,
-        val seven: Map<List<Message>, List<User>>
+      val one: Map<String, String>,
+      val two: Map<String, Array<String>>,
+      val three: Map<Int, Boolean>,
+      val four: Map<Int, User>,
+      val five: Map<Int, Array<Message>>,
+      val six: Map<Long, List<Message>>,
+      val seven: Map<List<Message>, List<User>>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Maps> {
       Maps(
-          one = generator.nextMap({ generator.nextString() }, { generator.nextString() }),
-          two = generator.nextMap({ generator.nextString() }, { generator.nextArray { generator.nextString() } }),
-          three = generator.nextMap({ generator.nextInt() }, { generator.nextBoolean() }),
-          four = generator.nextMap({ generator.nextInt() }, {
-            User(
-                firstName = generator.nextString(),
-                lastName = generator.nextString()
+        one = generator.nextMap({ generator.nextString() }, { generator.nextString() }),
+        two = generator.nextMap({ generator.nextString() }, { generator.nextArray { generator.nextString() } }),
+        three = generator.nextMap({ generator.nextInt() }, { generator.nextBoolean() }),
+        four = generator.nextMap({ generator.nextInt() }, {
+          User(
+            firstName = generator.nextString(),
+            lastName = generator.nextString()
+          )
+        }),
+        five = generator.nextMap({ generator.nextInt() }, {
+          generator.nextArray {
+            Message(
+              message = generator.nextString(),
+              timestamp = generator.nextLong()
             )
-          }),
-          five = generator.nextMap({ generator.nextInt() }, {
-            generator.nextArray {
-              Message(
-                  message = generator.nextString(),
-                  timestamp = generator.nextLong()
-              )
-            }
-          }),
-          six = generator.nextMap({ generator.nextLong() }, {
+          }
+        }),
+        six = generator.nextMap({ generator.nextLong() }, {
+          generator.nextList {
+            Message(
+              message = generator.nextString(),
+              timestamp = generator.nextLong()
+            )
+          }
+        }),
+        seven = generator.nextMap(
+          key = {
             generator.nextList {
               Message(
-                  message = generator.nextString(),
-                  timestamp = generator.nextLong()
+                message = generator.nextString(),
+                timestamp = generator.nextLong()
               )
             }
-          }),
-          seven = generator.nextMap(
-              key = {
-                generator.nextList {
-                  Message(
-                      message = generator.nextString(),
-                      timestamp = generator.nextLong()
-                  )
-                }
-              },
-              value = {
-                generator.nextList {
-                  User(
-                      firstName = generator.nextString(),
-                      lastName = generator.nextString()
-                  )
-                }
-              }
-          )
+          },
+          value = {
+            generator.nextList {
+              User(
+                firstName = generator.nextString(),
+                lastName = generator.nextString()
+              )
+            }
+          }
+        )
       )
     }
   }
@@ -670,20 +670,20 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithMapSubclasses() {
     data class Maps(
-        val base: Map<String, String>,
-        val hash: HashMap<String, String>,
-        val linked: LinkedHashMap<String, String>,
-        val sorted: SortedMap<String, String>,
-        val tree: TreeMap<String, String>
+      val base: Map<String, String>,
+      val hash: HashMap<String, String>,
+      val linked: LinkedHashMap<String, String>,
+      val sorted: SortedMap<String, String>,
+      val tree: TreeMap<String, String>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Maps> {
       Maps(
-          base = generator.nextMap({ LinkedHashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
-          hash = generator.nextMap({ HashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
-          linked = generator.nextMap({ LinkedHashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
-          sorted = generator.nextMap({ TreeMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
-          tree = generator.nextMap({ TreeMap<String, String>() }, { generator.nextString() }, { generator.nextString() })
+        base = generator.nextMap({ LinkedHashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
+        hash = generator.nextMap({ HashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
+        linked = generator.nextMap({ LinkedHashMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
+        sorted = generator.nextMap({ TreeMap<String, String>() }, { generator.nextString() }, { generator.nextString() }),
+        tree = generator.nextMap({ TreeMap<String, String>() }, { generator.nextString() }, { generator.nextString() })
       )
     }
   }
@@ -691,22 +691,22 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithPrivateProperties() {
     data class Numbers(
-        private val one: String,
-        private val two: String,
-        private val three: String,
-        val four: String,
-        val five: String,
-        val six: String
+      private val one: String,
+      private val two: String,
+      private val three: String,
+      val four: String,
+      val five: String,
+      val six: String
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Numbers> {
       Numbers(
-          one = generator.nextString(),
-          two = generator.nextString(),
-          three = generator.nextString(),
-          four = generator.nextString(),
-          five = generator.nextString(),
-          six = generator.nextString()
+        one = generator.nextString(),
+        two = generator.nextString(),
+        three = generator.nextString(),
+        four = generator.nextString(),
+        five = generator.nextString(),
+        six = generator.nextString()
       )
     }
   }
@@ -715,19 +715,19 @@ class SmugglerTest {
   fun shouldWorkWithLibraryProjects() {
     SmugglerAssertions.verify<Chat> {
       Chat(
-          title = generator.nextString(),
-          participants = generator.nextList {
-            User(
-                firstName = generator.nextString(),
-                lastName = generator.nextString()
-            )
-          },
-          messages = generator.nextList {
-            Message(
-                text = generator.nextString(),
-                seen = generator.nextBoolean()
-            )
-          }
+        title = generator.nextString(),
+        participants = generator.nextList {
+          User(
+            firstName = generator.nextString(),
+            lastName = generator.nextString()
+          )
+        },
+        messages = generator.nextList {
+          Message(
+            text = generator.nextString(),
+            seen = generator.nextBoolean()
+          )
+        }
       )
     }
   }
@@ -735,14 +735,14 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithDates() {
     data class Sample(
-        val start: Date,
-        val end: Date
+      val start: Date,
+      val end: Date
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Sample>() {
       Sample(
-          start = Date(generator.nextLong()),
-          end = Date(generator.nextLong())
+        start = Date(generator.nextLong()),
+        end = Date(generator.nextLong())
       )
     }
   }
@@ -750,18 +750,18 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithGlobalAdapters() {
     data class Global(
-        val integer: BigInteger,
-        val calendar: Calendar,
-        val integers: List<BigInteger>,
-        val calendars: List<Calendar>
+      val integer: BigInteger,
+      val calendar: Calendar,
+      val integers: List<BigInteger>,
+      val calendars: List<Calendar>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Global> {
       Global(
-          integer = BigInteger(generator.nextInt().toString()),
-          calendar = Calendar.getInstance().apply { timeInMillis = generator.nextLong() },
-          integers = generator.nextList { BigInteger(generator.nextInt().toString()) },
-          calendars = generator.nextList { Calendar.getInstance().apply { timeInMillis = generator.nextLong() } }
+        integer = BigInteger(generator.nextInt().toString()),
+        calendar = Calendar.getInstance().apply { timeInMillis = generator.nextLong() },
+        integers = generator.nextList { BigInteger(generator.nextInt().toString()) },
+        calendars = generator.nextList { Calendar.getInstance().apply { timeInMillis = generator.nextLong() } }
       )
     }
   }
@@ -770,14 +770,14 @@ class SmugglerTest {
   fun shouldWorkWithLocalAdapters() {
     @LocalAdapter(TimestampTypeAdapter::class, DateTypeAdapter::class)
     data class Local(
-        val timestamp: TestTimestamp,
-        val date: TestDate
+      val timestamp: TestTimestamp,
+      val date: TestDate
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Local>() {
       Local(
-          timestamp = TestTimestamp(generator.nextLong()),
-          date = TestDate(generator.nextLong())
+        timestamp = TestTimestamp(generator.nextLong()),
+        date = TestDate(generator.nextLong())
       )
     }
   }
@@ -788,13 +788,13 @@ class SmugglerTest {
     data class Bar(override val value: String) : Wrapper
 
     data class Collection(
-        val values: List<Wrapper>
+      val values: List<Wrapper>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Collection> {
       Collection(listOf(
-          Foo(generator.nextString()),
-          Bar(generator.nextString())
+        Foo(generator.nextString()),
+        Bar(generator.nextString())
       ))
     }
   }
@@ -802,48 +802,48 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithObjects() {
     data class Objects(
-        val one: LoginCommand,
-        val two: LogoutCommand,
-        val three: MenuCommand
+      val one: LoginCommand,
+      val two: LogoutCommand,
+      val three: MenuCommand
     ) : AutoParcelable
 
     data class Lists(
-        val one: List<LoginCommand>,
-        val two: List<LogoutCommand>,
-        val three: List<MenuCommand>,
-        val four: List<Command>
+      val one: List<LoginCommand>,
+      val two: List<LogoutCommand>,
+      val three: List<MenuCommand>,
+      val four: List<Command>
     ) : AutoParcelable
 
     data class Sets(
-        val one: Set<LoginCommand>,
-        val two: Set<LogoutCommand>,
-        val three: Set<MenuCommand>,
-        val four: Set<Command>
+      val one: Set<LoginCommand>,
+      val two: Set<LogoutCommand>,
+      val three: Set<MenuCommand>,
+      val four: Set<Command>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Objects> {
       Objects(
-          one = LoginCommand,
-          two = LogoutCommand,
-          three = MenuCommand
+        one = LoginCommand,
+        two = LogoutCommand,
+        three = MenuCommand
       )
     }
 
     SmugglerAssertions.verify<Lists> {
       Lists(
-          one = generator.nextList { LoginCommand },
-          two = generator.nextList { LogoutCommand },
-          three = generator.nextList { MenuCommand },
-          four = generator.nextList { generator.nextElement(arrayOf(LoginCommand, LogoutCommand, ProductCommand(generator.nextString()), CategoryCommand(generator.nextString()))) }
+        one = generator.nextList { LoginCommand },
+        two = generator.nextList { LogoutCommand },
+        three = generator.nextList { MenuCommand },
+        four = generator.nextList { generator.nextElement(arrayOf(LoginCommand, LogoutCommand, ProductCommand(generator.nextString()), CategoryCommand(generator.nextString()))) }
       )
     }
 
     SmugglerAssertions.verify<Sets> {
       Sets(
-          one = generator.nextSet { LoginCommand },
-          two = generator.nextSet { LogoutCommand },
-          three = generator.nextSet { MenuCommand },
-          four = generator.nextSet { generator.nextElement(arrayOf(LoginCommand, LogoutCommand, ProductCommand(generator.nextString()), CategoryCommand(generator.nextString()))) }
+        one = generator.nextSet { LoginCommand },
+        two = generator.nextSet { LogoutCommand },
+        three = generator.nextSet { MenuCommand },
+        four = generator.nextSet { generator.nextElement(arrayOf(LoginCommand, LogoutCommand, ProductCommand(generator.nextString()), CategoryCommand(generator.nextString()))) }
       )
     }
   }
@@ -851,18 +851,18 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithCharSequence() {
     data class Container(
-        val value: CharSequence,
-        val collection: Collection<CharSequence>,
-        val array: Array<CharSequence>,
-        val list: List<CharSequence>
+      val value: CharSequence,
+      val collection: Collection<CharSequence>,
+      val array: Array<CharSequence>,
+      val list: List<CharSequence>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Container> {
       Container(
-          value = generator.nextString(),
-          collection = generator.nextList { generator.nextString() },
-          array = generator.nextArray { generator.nextString() },
-          list = generator.nextList { generator.nextString() }
+        value = generator.nextString(),
+        collection = generator.nextList { generator.nextString() },
+        array = generator.nextArray { generator.nextString() },
+        list = generator.nextList { generator.nextString() }
       )
     }
   }
@@ -889,10 +889,10 @@ class SmugglerTest {
   @Test
   fun shouldWorkWithManualCreator() {
     data class Container(
-        val single: Manual,
-        val array: Array<Manual>,
-        val list: List<Manual>,
-        val set: Set<Manual>
+      val single: Manual,
+      val array: Array<Manual>,
+      val list: List<Manual>,
+      val set: Set<Manual>
     ) : AutoParcelable
 
     SmugglerAssertions.verify<Manual> {
@@ -901,10 +901,10 @@ class SmugglerTest {
 
     SmugglerAssertions.verify<Container> {
       Container(
-          single = Manual(generator.nextInt()),
-          array = generator.nextArray { Manual(generator.nextInt()) },
-          list = generator.nextList { Manual(generator.nextInt()) },
-          set = generator.nextSet { Manual(generator.nextInt()) }
+        single = Manual(generator.nextInt()),
+        array = generator.nextArray { Manual(generator.nextInt()) },
+        list = generator.nextList { Manual(generator.nextInt()) },
+        set = generator.nextSet { Manual(generator.nextInt()) }
       )
     }
   }
@@ -912,15 +912,15 @@ class SmugglerTest {
   @Test
   fun shouldOptimizeRequiredFields() {
     data class Foo(
-        val field: Int
+      val field: Int
     ) : AutoParcelable
 
     data class Required(
-        val field: Foo
+      val field: Foo
     ) : AutoParcelable
 
     data class Optional(
-        val field: Foo?
+      val field: Foo?
     ) : AutoParcelable
 
     SmugglerAssertions.verify {
@@ -936,13 +936,13 @@ class SmugglerTest {
   @Test
   fun shouldOptimizeRequiredTypeArguments() {
     data class Required(
-        val list: List<Int>,
-        val nested: List<List<Int>>
+      val list: List<Int>,
+      val nested: List<List<Int>>
     ) : AutoParcelable
 
     data class Optional(
-        val list: List<Int?>,
-        val nested: List<List<Int?>?>
+      val list: List<Int?>,
+      val nested: List<List<Int?>?>
     ) : AutoParcelable
 
     SmugglerAssertions.verify {
@@ -959,16 +959,16 @@ class SmugglerTest {
   @Test
   fun shouldUseCorrectClassLoaderForStaticParcelableClasses() {
     data class State(
-        val map: Map<String, Parcelable>
+      val map: Map<String, Parcelable>
     ) : AutoParcelable
 
     data class Inner(
-        val value: Int
+      val value: Int
     ) : AutoParcelable
 
     SmugglerAssertions.verify<State> {
       State(
-          map = generator.nextMap({ generator.nextString() }, { Inner(value = generator.nextInt()) })
+        map = generator.nextMap({ generator.nextString() }, { Inner(value = generator.nextInt()) })
       )
     }
   }
@@ -1039,8 +1039,8 @@ class SmugglerTest {
   }
 
   private data class WithStaticClassInitializer(
-      val payload: String,
-      val message: String
+    val payload: String,
+    val message: String
   ) : AutoParcelable {
     companion object {
       const val EXTRA_PAYLOAD = "payload"

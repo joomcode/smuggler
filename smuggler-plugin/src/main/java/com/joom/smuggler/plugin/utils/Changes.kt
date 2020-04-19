@@ -28,8 +28,8 @@ interface Changes {
   fun getFileStatus(file: File): TransformUnit.Status
 
   class ForDirectory(
-      private val changes: Map<File, Status>,
-      private val incremental: Boolean
+    private val changes: Map<File, Status>,
+    private val incremental: Boolean
   ) : Changes {
 
     override val status get() = if (incremental) TransformUnit.Status.UNKNOWN else TransformUnit.Status.CHANGED
@@ -43,8 +43,8 @@ interface Changes {
   }
 
   class ForJar(
-      private val jarStatus: Status,
-      private val incremental: Boolean
+    private val jarStatus: Status,
+    private val incremental: Boolean
   ) : Changes {
 
     override val status get() = if (incremental) jarStatus.toTransformUnitStatus() else TransformUnit.Status.CHANGED

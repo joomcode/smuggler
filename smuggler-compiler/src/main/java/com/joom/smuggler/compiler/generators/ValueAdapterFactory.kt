@@ -33,43 +33,43 @@ import kotlin.reflect.jvm.internal.impl.metadata.jvm.deserialization.JvmProtoBuf
 import io.michaelrocks.grip.mirrors.Type as GripType
 
 internal class ValueAdapterFactory private constructor(
-    private val grip: Grip,
-    private val adapters: Map<Type, ValueAdapter>
+  private val grip: Grip,
+  private val adapters: Map<Type, ValueAdapter>
 ) {
   companion object {
     private val ADAPTERS = hashMapOf(
-        Types.BOOLEAN to BooleanValueAdapter,
-        Types.BYTE to ByteValueAdapter,
-        Types.CHAR to CharValueAdapter,
-        Types.DOUBLE to DoubleValueAdapter,
-        Types.FLOAT to FloatValueAdapter,
-        Types.INT to IntValueAdapter,
-        Types.LONG to LongValueAdapter,
-        Types.SHORT to ShortValueAdapter,
+      Types.BOOLEAN to BooleanValueAdapter,
+      Types.BYTE to ByteValueAdapter,
+      Types.CHAR to CharValueAdapter,
+      Types.DOUBLE to DoubleValueAdapter,
+      Types.FLOAT to FloatValueAdapter,
+      Types.INT to IntValueAdapter,
+      Types.LONG to LongValueAdapter,
+      Types.SHORT to ShortValueAdapter,
 
-        Types.BOXED_BOOLEAN to BoxedBooleanValueAdapter,
-        Types.BOXED_BYTE to BoxedByteValueAdapter,
-        Types.BOXED_CHAR to BoxedCharValueAdapter,
-        Types.BOXED_DOUBLE to BoxedDoubleValueAdapter,
-        Types.BOXED_FLOAT to BoxedFloatValueAdapter,
-        Types.BOXED_INT to BoxedIntValueAdapter,
-        Types.BOXED_LONG to BoxedLongValueAdapter,
-        Types.BOXED_SHORT to BoxedShortValueAdapter,
+      Types.BOXED_BOOLEAN to BoxedBooleanValueAdapter,
+      Types.BOXED_BYTE to BoxedByteValueAdapter,
+      Types.BOXED_CHAR to BoxedCharValueAdapter,
+      Types.BOXED_DOUBLE to BoxedDoubleValueAdapter,
+      Types.BOXED_FLOAT to BoxedFloatValueAdapter,
+      Types.BOXED_INT to BoxedIntValueAdapter,
+      Types.BOXED_LONG to BoxedLongValueAdapter,
+      Types.BOXED_SHORT to BoxedShortValueAdapter,
 
-        Types.STRING to StringValueAdapter,
-        Types.DATE to DateValueAdapter,
-        Types.CHAR_SEQUENCE to CharSequenceValueAdapter,
+      Types.STRING to StringValueAdapter,
+      Types.DATE to DateValueAdapter,
+      Types.CHAR_SEQUENCE to CharSequenceValueAdapter,
 
-        Types.ANDROID_SPARSE_BOOLEAN_ARRAY to SparseBooleanArrayValueAdapter,
-        Types.ANDROID_BUNDLE to BundleValueAdapter
+      Types.ANDROID_SPARSE_BOOLEAN_ARRAY to SparseBooleanArrayValueAdapter,
+      Types.ANDROID_BUNDLE to BundleValueAdapter
     )
 
     fun from(grip: Grip, sources: Collection<File>): ValueAdapterFactory {
       return ValueAdapterFactory(grip, ADAPTERS + grip.select(classes)
-          .from(sources)
-          .where(isGlobalTypeAdapter())
-          .execute().values
-          .associate { createAssistedValueAdapter(it, grip) }
+        .from(sources)
+        .where(isGlobalTypeAdapter())
+        .execute().values
+        .associate { createAssistedValueAdapter(it, grip) }
       )
     }
 

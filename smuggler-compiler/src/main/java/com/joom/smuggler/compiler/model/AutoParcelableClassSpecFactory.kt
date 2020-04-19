@@ -76,42 +76,42 @@ internal object AutoParcelableClassSpecFactory {
   private fun createKotlinType(generic: GenericType, proto: ProtoBuf.Type?): KotlinType {
     return when (generic) {
       is GenericType.Raw -> createKotlinType(
-          type = generic.type.toAsmType(),
-          proto = proto
+        type = generic.type.toAsmType(),
+        proto = proto
       )
 
       is GenericType.Array -> KotlinType.Array(
-          elementType = createKotlinType(generic.elementType, argument(proto, 0, 1)),
-          nullable = nullable(proto)
+        elementType = createKotlinType(generic.elementType, argument(proto, 0, 1)),
+        nullable = nullable(proto)
       )
 
       is GenericType.Parameterized -> KotlinType.Parameterized(
-          type = generic.type.toAsmType(),
-          nullable = nullable(proto),
-          typeArguments = generic.typeArguments.mapIndexed { index, argument ->
-            createKotlinType(argument, argument(proto, index, generic.typeArguments.size))
-          }
+        type = generic.type.toAsmType(),
+        nullable = nullable(proto),
+        typeArguments = generic.typeArguments.mapIndexed { index, argument ->
+          createKotlinType(argument, argument(proto, index, generic.typeArguments.size))
+        }
       )
 
       is GenericType.Inner -> KotlinType.Inner(
-          type = createKotlinType(generic.type, null),
-          owner = createKotlinType(generic.ownerType, null),
-          nullable = nullable(proto)
+        type = createKotlinType(generic.type, null),
+        owner = createKotlinType(generic.ownerType, null),
+        nullable = nullable(proto)
       )
 
       is GenericType.UpperBounded -> KotlinType.UpperBounded(
-          type = createKotlinType(generic.upperBound, null),
-          nullable = nullable(proto)
+        type = createKotlinType(generic.upperBound, null),
+        nullable = nullable(proto)
       )
 
       is GenericType.LowerBounded -> KotlinType.LowerBounded(
-          type = createKotlinType(generic.lowerBound, null),
-          nullable = nullable(proto)
+        type = createKotlinType(generic.lowerBound, null),
+        nullable = nullable(proto)
       )
 
       is GenericType.TypeVariable -> KotlinType.TypeVariable(
-          name = generic.name,
-          nullable = nullable(proto)
+        name = generic.name,
+        nullable = nullable(proto)
       )
     }
   }

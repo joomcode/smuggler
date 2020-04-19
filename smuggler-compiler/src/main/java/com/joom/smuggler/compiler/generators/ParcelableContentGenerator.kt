@@ -31,8 +31,8 @@ import io.michaelrocks.grip.mirrors.Type as GripType
 
 @Suppress("UNUSED_PARAMETER")
 internal class ParcelableContentGenerator(
-    private val spec: AutoParcelableClassSpec,
-    private val factory: ValueAdapterFactory
+  private val spec: AutoParcelableClassSpec,
+  private val factory: ValueAdapterFactory
 ) : ContentGenerator {
   private companion object {
     private const val ACC_METHOD_DEFAULT = ACC_PUBLIC + ACC_FINAL
@@ -160,30 +160,30 @@ internal class ParcelableContentGenerator(
 
   private fun createMethodSpecForNewArrayMethod(spec: AutoParcelableClassSpec, bridge: Boolean): MethodMirror {
     return MethodMirror.Builder().name("newArray")
-        .type(GripType.Method(Type.getMethodType(Types.getArrayType(if (bridge) Types.OBJECT else spec.clazz.type.toAsmType()), Types.INT)))
-        .access(if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT)
-        .build()
+      .type(GripType.Method(Type.getMethodType(Types.getArrayType(if (bridge) Types.OBJECT else spec.clazz.type.toAsmType()), Types.INT)))
+      .access(if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT)
+      .build()
   }
 
   private fun createMethodSpecForCreateFromParcelMethod(spec: AutoParcelableClassSpec, bridge: Boolean): MethodMirror {
     return MethodMirror.Builder().name("createFromParcel")
-        .type(GripType.Method(Type.getMethodType(if (bridge) Types.OBJECT else spec.clazz.type.toAsmType(), Types.ANDROID_PARCEL)))
-        .access(if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT)
-        .build()
+      .type(GripType.Method(Type.getMethodType(if (bridge) Types.OBJECT else spec.clazz.type.toAsmType(), Types.ANDROID_PARCEL)))
+      .access(if (bridge) ACC_METHOD_BRIDGE else ACC_METHOD_DEFAULT)
+      .build()
   }
 
   private fun createMethodSpecForDescribeContentsMethod(spec: AutoParcelableClassSpec): MethodMirror {
     return MethodMirror.Builder().name("describeContents")
-        .type(GripType.Method(Type.getMethodType(Types.INT)))
-        .access(ACC_METHOD_DEFAULT)
-        .build()
+      .type(GripType.Method(Type.getMethodType(Types.INT)))
+      .access(ACC_METHOD_DEFAULT)
+      .build()
   }
 
   private fun createMethodSpecForWriteToParcelMethod(spec: AutoParcelableClassSpec): MethodMirror {
     return MethodMirror.Builder().name("writeToParcel")
-        .type(GripType.Method(Type.getMethodType(Types.VOID, Types.ANDROID_PARCEL, Types.INT)))
-        .access(ACC_METHOD_DEFAULT)
-        .build()
+      .type(GripType.Method(Type.getMethodType(Types.VOID, Types.ANDROID_PARCEL, Types.INT)))
+      .access(ACC_METHOD_DEFAULT)
+      .build()
   }
 
   private fun shouldExcludeFieldFromParcelableClass(access: Int, name: String, description: String, signature: String?): Boolean {
@@ -206,10 +206,10 @@ internal class ParcelableContentGenerator(
   }
 
   private inner class InitializerBlockInterceptor(
-      private val delegate: MethodVisitor?,
-      private val access: Int,
-      private val method: Method,
-      private val interceptor: GeneratorAdapter.() -> Unit
+    private val delegate: MethodVisitor?,
+    private val access: Int,
+    private val method: Method,
+    private val interceptor: GeneratorAdapter.() -> Unit
   ) : GeneratorAdapter(delegate, access, method) {
     override fun visitCode() {
       super.visitCode()

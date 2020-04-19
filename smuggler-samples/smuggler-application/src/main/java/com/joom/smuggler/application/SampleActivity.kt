@@ -12,19 +12,19 @@ class SampleActivity : Activity() {
 
     if (savedInstanceState == null) {
       fragmentManager.beginTransaction()
-          .add(R.id.container, SampleFragment.newInstance(
-              SampleArguments(
-                  user = User(
-                      firstName = "Darth",
-                      lastName = "Vader"
-                  ),
-                  message = Message(
-                      text = "I am your father",
-                      seen = true
-                  )
-              )
-          ))
-          .commit()
+        .add(R.id.container, SampleFragment.newInstance(
+          SampleArguments(
+            user = User(
+              firstName = "Darth",
+              lastName = "Vader"
+            ),
+            message = Message(
+              text = "I am your father",
+              seen = true
+            )
+          )
+        ))
+        .commit()
     }
   }
 }

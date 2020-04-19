@@ -16,8 +16,8 @@ import java.io.File
 import java.util.EnumSet
 
 class SmugglerTransform(
-    private val android: BaseExtension,
-    private val extension: SmugglerExtension
+  private val android: BaseExtension,
+  private val extension: SmugglerExtension
 ) : Transform() {
   override fun transform(invocation: TransformInvocation) {
     val transformSet = TransformSet.create(invocation, android.bootClasspath)
@@ -47,29 +47,29 @@ class SmugglerTransform(
 
   override fun getScopes(): MutableSet<Scope> {
     return EnumSet.of(
-        Scope.PROJECT
+      Scope.PROJECT
     )
   }
 
   override fun getReferencedScopes(): MutableSet<Scope> {
     return EnumSet.of(
-        Scope.TESTED_CODE,
-        Scope.SUB_PROJECTS,
-        Scope.EXTERNAL_LIBRARIES
+      Scope.TESTED_CODE,
+      Scope.SUB_PROJECTS,
+      Scope.EXTERNAL_LIBRARIES
     )
   }
 
   override fun getInputTypes(): Set<QualifiedContent.ContentType> {
     return EnumSet.of(
-        DefaultContentType.CLASSES
+      DefaultContentType.CLASSES
     )
   }
 
   override fun getParameterInputs(): Map<String, Any> {
     return mapOf(
-        "incremental" to extension.incremental,
-        "version" to BuildConfig.VERSION,
-        "hash" to BuildConfig.GIT_HASH
+      "incremental" to extension.incremental,
+      "version" to BuildConfig.VERSION,
+      "hash" to BuildConfig.GIT_HASH
     )
   }
 

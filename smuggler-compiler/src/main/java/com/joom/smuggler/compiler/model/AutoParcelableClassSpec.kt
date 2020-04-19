@@ -11,8 +11,8 @@ internal sealed class AutoParcelableClassSpec(val clazz: ClassMirror, val proper
 }
 
 internal data class AutoParcelablePropertySpec(
-    val name: String,
-    val type: KotlinType
+  val name: String,
+  val type: KotlinType
 )
 
 internal sealed class KotlinType {

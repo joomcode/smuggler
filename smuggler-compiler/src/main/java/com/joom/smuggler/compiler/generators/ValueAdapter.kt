@@ -76,9 +76,9 @@ internal abstract class OptionalValueAdapter : ValueAdapter {
 }
 
 internal open class SimpleValueAdapter(
-    private val type: Type,
-    private val reader: String,
-    private val writer: String
+  private val type: Type,
+  private val reader: String,
+  private val writer: String
 ) : ValueAdapter {
   override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
@@ -93,11 +93,11 @@ internal open class SimpleValueAdapter(
 }
 
 internal open class SimpleBoxedValueAdapter(
-    private val delegate: ValueAdapter,
-    private val unboxed: Type,
-    private val boxed: Type,
-    private val unboxer: String,
-    private val boxer: String
+  private val delegate: ValueAdapter,
+  private val unboxed: Type,
+  private val boxed: Type,
+  private val unboxer: String,
+  private val boxer: String
 ) : OptionalValueAdapter() {
   override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     delegate.fromParcel(adapter, context.typed(KotlinType.Raw(unboxed, false)))
@@ -364,7 +364,7 @@ internal object MonomorphicParcelableValueAdapter : OptionalValueAdapter() {
 }
 
 internal class ArrayPropertyAdapter(
-    private val element: ValueAdapter
+  private val element: ValueAdapter
 ) : OptionalValueAdapter() {
   override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val index = adapter.newLocal(Types.INT)
@@ -458,7 +458,7 @@ internal class ArrayPropertyAdapter(
 }
 
 internal class SparseArrayValueAdapter(
-    private val element: Type
+  private val element: Type
 ) : ValueAdapter {
   override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     adapter.loadLocal(context.parcel())
@@ -477,9 +477,9 @@ internal class SparseArrayValueAdapter(
 }
 
 internal class CollectionValueAdapter(
-    private val collection: Type,
-    private val implementation: Type,
-    private val delegate: ValueAdapter
+  private val collection: Type,
+  private val implementation: Type,
+  private val delegate: ValueAdapter
 ) : OptionalValueAdapter() {
   override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val parameterizedType = context.type.asParameterizedType()
@@ -565,10 +565,10 @@ internal class CollectionValueAdapter(
 }
 
 internal class MapValueAdapter(
-    private val collection: Type,
-    private val implementation: Type,
-    private val key: ValueAdapter,
-    private val value: ValueAdapter
+  private val collection: Type,
+  private val implementation: Type,
+  private val key: ValueAdapter,
+  private val value: ValueAdapter
 ) : OptionalValueAdapter() {
   override fun fromParcelNotNull(adapter: GeneratorAdapter, context: ValueContext) {
     val parameterizedType = context.type.asParameterizedType()
@@ -676,8 +676,8 @@ internal class MapValueAdapter(
 }
 
 internal class AssistedValueAdapter(
-    private val assistant: Assistant,
-    private val element: Type
+  private val assistant: Assistant,
+  private val element: Type
 ) : OptionalValueAdapter() {
   companion object {
     private val METHOD_TO_PARCEL = Methods.get("toParcel", Types.VOID, Types.OBJECT, Types.ANDROID_PARCEL, Types.INT)
@@ -733,8 +733,8 @@ internal class AutoParcelableObjectValueAdapter(private val spec: AutoParcelable
 }
 
 internal class AutoParcelableClassValueAdapter(
-    private val spec: AutoParcelableClassSpec.Data,
-    private val factory: ValueAdapterFactory
+  private val spec: AutoParcelableClassSpec.Data,
+  private val factory: ValueAdapterFactory
 ) : ValueAdapter {
   override fun fromParcel(adapter: GeneratorAdapter, context: ValueContext) {
     spec.properties.forEach {
