@@ -3,6 +3,7 @@ package com.joom.smuggler.plugin
 import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.QualifiedContent.DefaultContentType
 import com.android.build.api.transform.QualifiedContent.Scope
+import com.android.build.api.transform.Status
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.AppExtension
@@ -94,34 +95,36 @@ class SmugglerTransform(
       return
     }
 
-    val referencedContents = ArrayList<QualifiedContent>()
     val referencedFiles = ArrayList<File>()
-    val unprocessed = ArrayList<ClassMirror>()
+    val unprocessedClasses = ArrayList<ClassMirror>()
 
     for (referencedInput in invocation.referencedInputs) {
-      referencedContents.addAll(referencedInput.directoryInputs)
-      referencedContents.addAll(referencedInput.jarInputs)
-    }
+      for (directoryInput in referencedInput.directoryInputs) {
+        if (Scope.SUB_PROJECTS in directoryInput.scopes) {
+          referencedFiles += directoryInput.file
+        }
+      }
 
-    for (referencedContent in referencedContents) {
-      if (Scope.SUB_PROJECTS in referencedContent.scopes) {
-        referencedFiles += referencedContent.file
+      for (jarInput in referencedInput.jarInputs) {
+        if (Scope.SUB_PROJECTS in jarInput.scopes && jarInput.status != Status.REMOVED) {
+          referencedFiles += jarInput.file
+        }
       }
     }
 
     for (mirror in compiler.findAutoParcelableClasses(referencedFiles)) {
       if (mirror.fields.none { it.name == "CREATOR" }) {
-        unprocessed += mirror
+        unprocessedClasses += mirror
       }
     }
 
-    if (unprocessed.isNotEmpty()) {
+    if (unprocessedClasses.isNotEmpty()) {
       throw IllegalStateException(buildString {
-        appendln("Found ${unprocessed.size} unprocessed AutoParcelable classes.")
+        appendln("Found ${unprocessedClasses.size} unprocessed AutoParcelable classes.")
         appendln("Most likely you have a module that transitively depends on Smuggler Runtime, but doesn't apply Smuggler Plugin.")
         appendln("The full list of unprocessed classes:")
 
-        for (mirror in unprocessed) {
+        for (mirror in unprocessedClasses) {
           appendln("  - ${mirror.name}")
         }
       })
