@@ -3,7 +3,6 @@ package com.joom.smuggler.plugin
 import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.QualifiedContent.DefaultContentType
 import com.android.build.api.transform.QualifiedContent.Scope
-import com.android.build.api.transform.Status
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.AppExtension
@@ -33,7 +32,7 @@ class SmugglerTransform(
     transformSet.copyInputsToOutputs()
 
     GripFactory.create(transformClasspath).use { grip ->
-      val adapters = computeTypeAdapterSources(invocation)
+      val adapters = computeClasspathForAdapters(invocation)
       val compiler = SmugglerCompiler(grip, adapters)
 
       for (unit in transformSet.units) {
@@ -95,22 +94,8 @@ class SmugglerTransform(
       return
     }
 
-    val referencedFiles = ArrayList<File>()
+    val referencedFiles = computeClasspathForUnprocessedCandidates(invocation)
     val unprocessedClasses = ArrayList<ClassMirror>()
-
-    for (referencedInput in invocation.referencedInputs) {
-      for (directoryInput in referencedInput.directoryInputs) {
-        if (Scope.SUB_PROJECTS in directoryInput.scopes) {
-          referencedFiles += directoryInput.file
-        }
-      }
-
-      for (jarInput in referencedInput.jarInputs) {
-        if (Scope.SUB_PROJECTS in jarInput.scopes && jarInput.status != Status.REMOVED) {
-          referencedFiles += jarInput.file
-        }
-      }
-    }
 
     for (mirror in compiler.findAutoParcelableClasses(referencedFiles)) {
       if (mirror.fields.none { it.name == "CREATOR" }) {
@@ -131,14 +116,13 @@ class SmugglerTransform(
     }
   }
 
-  private fun computeTypeAdapterSources(invocation: TransformInvocation): Collection<File> {
-    val result = ArrayList<File>()
-    val contents = ArrayList<QualifiedContent>()
+  private fun computeClasspathForUnprocessedCandidates(invocation: TransformInvocation): Collection<File> {
+    val transformSet = TransformSet.create(invocation, emptyList())
+    val classpath = transformSet.getClasspath().toSet()
 
-    for (input in invocation.inputs) {
-      contents.addAll(input.directoryInputs)
-      contents.addAll(input.jarInputs)
-    }
+    val scopes = setOf(Scope.SUB_PROJECTS)
+    val contents = ArrayList<QualifiedContent>()
+    val result = ArrayList<File>()
 
     for (input in invocation.referencedInputs) {
       contents.addAll(input.directoryInputs)
@@ -146,7 +130,34 @@ class SmugglerTransform(
     }
 
     for (content in contents) {
-      if (Scope.PROJECT in content.scopes || Scope.SUB_PROJECTS in content.scopes) {
+      if (scopes.any { it in content.scopes } && content.file in classpath) {
+        result += content.file
+      }
+    }
+
+    return result
+  }
+
+  private fun computeClasspathForAdapters(invocation: TransformInvocation): Collection<File> {
+    val transformSet = TransformSet.create(invocation, emptyList())
+    val classpath = transformSet.getClasspath().toSet()
+
+    val scopes = setOf(Scope.PROJECT, Scope.SUB_PROJECTS)
+    val contents = ArrayList<QualifiedContent>()
+    val result = ArrayList<File>()
+
+    for (input in invocation.referencedInputs) {
+      contents.addAll(input.directoryInputs)
+      contents.addAll(input.jarInputs)
+    }
+
+    for (input in invocation.inputs) {
+      contents.addAll(input.directoryInputs)
+      contents.addAll(input.jarInputs)
+    }
+
+    for (content in contents) {
+      if (scopes.any { it in content.scopes } && content.file in classpath) {
         result += content.file
       }
     }
