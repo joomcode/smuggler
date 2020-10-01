@@ -59,7 +59,8 @@ class SmugglerTransform(
     return EnumSet.of(
       Scope.TESTED_CODE,
       Scope.SUB_PROJECTS,
-      Scope.EXTERNAL_LIBRARIES
+      Scope.EXTERNAL_LIBRARIES,
+      Scope.PROVIDED_ONLY
     )
   }
 
