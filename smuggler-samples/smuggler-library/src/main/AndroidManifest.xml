@@ -1,3 +1,1 @@
-<manifest package="com.joom.smuggler.library">
-  <application/>
-</manifest>
+<manifest package="com.joom.smuggler.library" />

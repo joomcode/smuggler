@@ -1,13 +1,6 @@
-buildscript {
-  dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-    classpath "com.joom.smuggler:smuggler-plugin:$POM_VERSION_NAME"
-  }
-}
-
 apply plugin: "com.android.application"
-apply plugin: "com.joom.smuggler"
 apply plugin: "kotlin-android"
+apply plugin: "com.joom.smuggler"
 
 android {
   compileSdkVersion projectCompileSdkVersion
@@ -33,15 +26,14 @@ android {
       signingConfig signingConfigs.release
     }
   }
+
+  lintOptions {
+    abortOnError false
+  }
 }
 
 dependencies {
   implementation project(":smuggler-samples:smuggler-library")
 
-  implementation "com.android.support:support-v13:$supportVersion"
-  implementation "com.android.support:appcompat-v7:$supportVersion"
-  implementation "com.android.support:design:$supportVersion"
-
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-  implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
 }

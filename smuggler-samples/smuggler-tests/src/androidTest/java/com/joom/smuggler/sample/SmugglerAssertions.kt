@@ -58,7 +58,7 @@ object SmugglerAssertions {
     return acquireParcel {
       it.unmarshall(bytes, 0, bytes.size)
       it.setDataPosition(0)
-      it.readParcelable(loader)
+      it.readParcelable(loader)!!
     }
   }
 

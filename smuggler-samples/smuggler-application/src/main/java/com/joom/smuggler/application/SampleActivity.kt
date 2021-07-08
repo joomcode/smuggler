@@ -1,3 +1,4 @@
+@file:Suppress("deprecation")
 package com.joom.smuggler.application
 
 import android.app.Activity

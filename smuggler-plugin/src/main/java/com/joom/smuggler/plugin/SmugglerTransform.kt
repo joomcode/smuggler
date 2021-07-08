@@ -12,8 +12,6 @@ import com.joom.smuggler.plugin.utils.TransformSet
 import com.joom.smuggler.plugin.utils.TransformUnit
 import com.joom.smuggler.plugin.utils.copyInputsToOutputs
 import com.joom.smuggler.plugin.utils.getClasspath
-import io.michaelrocks.grip.GripFactory
-import io.michaelrocks.grip.mirrors.ClassMirror
 import java.io.File
 import java.util.EnumSet
 
@@ -31,22 +29,20 @@ class SmugglerTransform(
 
     transformSet.copyInputsToOutputs()
 
-    GripFactory.create(transformClasspath).use { grip ->
-      val adapters = computeClasspathForAdapters(invocation)
-      val compiler = SmugglerCompiler(grip, adapters)
+    val adapters = computeClasspathForAdapters(invocation)
+    val compiler = SmugglerCompiler.create(transformClasspath, adapters)
 
-      for (unit in transformSet.units) {
-        compiler.cleanup(unit.output)
-      }
-
-      for (unit in transformSet.units) {
-        if (unit.changes.status != TransformUnit.Status.REMOVED) {
-          compiler.compile(unit.input, unit.output)
-        }
-      }
-
-      verifyNoUnprocessedClasses(invocation, compiler)
+    for (unit in transformSet.units) {
+      compiler.cleanup(unit.output)
     }
+
+    for (unit in transformSet.units) {
+      if (unit.changes.status != TransformUnit.Status.REMOVED) {
+        compiler.compile(unit.input, unit.output)
+      }
+    }
+
+    verifyNoUnprocessedClasses(invocation, compiler)
   }
 
   override fun getScopes(): MutableSet<Scope> {
@@ -96,22 +92,16 @@ class SmugglerTransform(
     }
 
     val referencedFiles = computeClasspathForUnprocessedCandidates(invocation)
-    val unprocessedClasses = ArrayList<ClassMirror>()
-
-    for (mirror in compiler.findAutoParcelableClasses(referencedFiles)) {
-      if (mirror.fields.none { it.name == "CREATOR" }) {
-        unprocessedClasses += mirror
-      }
-    }
+    val unprocessedClasses = compiler.findUnprocessedClasses(referencedFiles)
 
     if (unprocessedClasses.isNotEmpty()) {
       throw IllegalStateException(buildString {
-        appendln("Found ${unprocessedClasses.size} unprocessed AutoParcelable classes.")
-        appendln("Most likely you have a module that transitively depends on Smuggler Runtime, but doesn't apply Smuggler Plugin.")
-        appendln("The full list of unprocessed classes:")
+        appendLine("Found ${unprocessedClasses.size} unprocessed AutoParcelable classes.")
+        appendLine("Most likely you have a module that transitively depends on Smuggler Runtime, but doesn't apply Smuggler Plugin.")
+        appendLine("The full list of unprocessed classes:")
 
-        for (mirror in unprocessedClasses) {
-          appendln("  - ${mirror.name}")
+        for (name in unprocessedClasses) {
+          appendLine("  - $name")
         }
       })
     }

@@ -62,7 +62,7 @@ internal object AutoParcelableClassSpecFactory {
       throw InvalidAutoParcelableException(mirror.type, "AutoParcelable classes must not declare CREATOR field")
     }
 
-    return AutoParcelableClassSpec.Data(mirror, constructor.valueParameterList.mapIndexed { index, parameter ->
+    return AutoParcelableClassSpec.Data(mirror, constructor.valueParameterList.mapIndexed { _, parameter ->
       val name = resolver.getString(parameter.name)
 
       val field = mirror.getDeclaredField(name) ?: run {

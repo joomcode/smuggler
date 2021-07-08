@@ -75,7 +75,7 @@ internal object AnnotationProxy {
     return create(type, value.cast())
   }
 
-  private fun resolveValue(type: Class<*>, value: Any): Any {
+  private fun resolveValue(@Suppress("UNUSED_PARAMETER") type: Class<*>, value: Any): Any {
     return value
   }
 

@@ -1,69 +1,40 @@
-buildscript {
-  dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintrayVersion"
-  }
-}
-
-apply plugin: "com.jfrog.bintray"
-apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
-apply plugin: "maven-publish"
-
-android {
-  compileSdkVersion projectCompileSdkVersion
-  buildToolsVersion projectBuildToolsVersion
-
-  defaultConfig {
-    targetSdkVersion projectTargetSdkVersion
-    minSdkVersion projectMinSdkVersion
-  }
-}
+apply plugin: "java-library"
+apply plugin: "kotlin"
+apply from: "$rootDir/pablo.gradle"
 
 dependencies {
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+
+  compileOnly files(java.nio.file.Paths.get(findSdkLocation(), "platforms", "android-$projectCompileSdkVersion", "android.jar"))
 }
 
-bintray {
-  user = System.getenv("BINTRAY_USERNAME")
-  key = System.getenv("BINTRAY_PASSWORD")
-
-  pkg {
-    repo = BINTRAY_REPO
-    name = BINTRAY_PACKAGE
-  }
+pablo {
+  artifactName = "smuggler-runtime"
 }
 
-publishing {
-  publications {
-    mavenAndroid(MavenPublication) {
-      groupId POM_GROUP
-      artifactId POM_ARTIFACT_ID
-      version POM_VERSION_NAME
-
-      artifact "$buildDir/outputs/aar/smuggler-runtime-release.aar"
-      artifact androidSourcesJar
+private String findSdkLocation() {
+  def localProperties = new File(project.rootProject.rootDir, "local.properties")
+  if (localProperties.exists()) {
+    def properties = new Properties()
+    localProperties.withReader {
+      properties.load(it)
     }
-  }
-}
 
-bintray {
-  user = System.getenv("BINTRAY_USERNAME")
-  key = System.getenv("BINTRAY_PASSWORD")
+    def sdkDir = properties.getProperty("sdk.dir")
+    if (sdkDir != null) {
+      return sdkDir
+    }
 
-  pkg {
-    repo = BINTRAY_REPO
-    name = BINTRAY_PACKAGE
-
-    version {
-      name = POM_VERSION_NAME
+    def androidDir = properties.getProperty("android.dir")
+    if (androidDir != null) {
+      return androidDir
     }
   }
 
-  publications = ['mavenAndroid']
-}
+  def androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_PATH")
+  if (androidHome == null) {
+    throw new org.gradle.api.GradleException("Failed to locate android sdk location")
+  }
 
-task androidSourcesJar(type: Jar) {
-  classifier = 'sources'
-  from android.sourceSets.main.java.source
+  return androidHome
 }

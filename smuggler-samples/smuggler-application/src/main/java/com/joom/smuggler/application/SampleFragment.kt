@@ -1,3 +1,4 @@
+@file:Suppress("deprecation")
 package com.joom.smuggler.application
 
 import android.app.Fragment
@@ -28,6 +29,6 @@ class SampleFragment : Fragment() {
     val text = view.findViewById<TextView>(R.id.text)
     val args = arguments.getParcelable<SampleArguments>("arguments")
 
-    text.text = args.message.text
+    text.text = args?.message?.text ?: "<null>"
   }
 }

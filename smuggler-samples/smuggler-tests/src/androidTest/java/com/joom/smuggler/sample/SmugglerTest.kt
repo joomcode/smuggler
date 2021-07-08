@@ -2,9 +2,9 @@ package com.joom.smuggler.sample
 
 import android.os.Parcel
 import android.os.Parcelable
-import android.support.test.runner.AndroidJUnit4
 import android.util.SparseArray
 import android.util.SparseBooleanArray
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.joom.smuggler.AutoParcelable
 import com.joom.smuggler.GlobalAdapter
 import com.joom.smuggler.LocalAdapter
@@ -739,7 +739,7 @@ class SmugglerTest {
       val end: Date
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<Sample>() {
+    SmugglerAssertions.verify<Sample> {
       Sample(
         start = Date(generator.nextLong()),
         end = Date(generator.nextLong())
@@ -774,7 +774,7 @@ class SmugglerTest {
       val date: TestDate
     ) : AutoParcelable
 
-    SmugglerAssertions.verify<Local>() {
+    SmugglerAssertions.verify<Local> {
       Local(
         timestamp = TestTimestamp(generator.nextLong()),
         date = TestDate(generator.nextLong())

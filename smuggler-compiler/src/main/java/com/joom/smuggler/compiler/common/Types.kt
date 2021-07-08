@@ -107,7 +107,7 @@ internal object Types {
     val element = type.elementType
     val dimensions = type.dimensions
 
-    return 0.until(dimensions - 1).fold(element) { value, index ->
+    return 0.until(dimensions - 1).fold(element) { value, _ ->
       getArrayType(value)
     }
   }

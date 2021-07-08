@@ -1,49 +1,49 @@
-buildscript {
-  ext.androidToolsVersion = "3.0.1"
-
-  repositories {
-    mavenLocal()
-    jcenter()
-    google()
-  }
-
-  dependencies {
-    classpath "com.android.tools.build:gradle:$androidToolsVersion"
-  }
-}
-
 allprojects {
+  version = '1.1.4'
+  group = 'com.joom.smuggler'
+
+  ext {
+    javaVersion = JavaVersion.VERSION_1_8
+    kotlinVersion = "1.5.20"
+    pabloVersion = "1.3.1"
+
+    projectCompileSdkVersion = 30
+    projectBuildToolsVersion = "30.0.3"
+
+    projectMinSdkVersion = 15
+    projectTargetSdkVersion = 30
+
+    androidToolsVersion = "4.2.1"
+    androidxAnnotationVersion = "1.2.0"
+    androidxTestRulesVersion = "1.4.0"
+    androidxTestRunnerVersion = "1.4.0"
+    androidxTestExtJunitVersion = "1.1.3"
+
+    asmVersion = "9.1"
+    gripVersion = "0.7.1-beta"
+  }
+
   buildscript {
     repositories {
       mavenLocal()
-      jcenter()
       google()
+      mavenCentral()
+    }
+
+    dependencies {
+      classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+      classpath "com.android.tools.build:gradle:$androidToolsVersion"
+      classpath "io.michaelrocks.pablo:pablo:$pabloVersion"
+
+      if (!rootProject.properties['bootstrap'].toBoolean()) {
+        classpath "com.joom.smuggler:smuggler-plugin:$version"
+      }
     }
   }
 
   repositories {
     mavenLocal()
-    jcenter()
     google()
+    mavenCentral()
   }
-}
-
-ext {
-  projectCompileSdkVersion = 28
-  projectBuildToolsVersion = "28.0.3"
-
-  projectMinSdkVersion = 15
-  projectTargetSdkVersion = 28
-
-  supportVersion = "27.0.0"
-  supportTestRunnerVersion = "0.4.1"
-
-  kotlinVersion = "1.3.30"
-  bintrayVersion = "1.4"
-
-  asmVersion = "5.2"
-  gripVersion = "0.7.0-beta"
-
-  slf4jVersion = "1.7.13"
-  junitVersion = "4.12"
 }

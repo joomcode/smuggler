@@ -1,13 +1,6 @@
-buildscript {
-  dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-    classpath "com.joom.smuggler:smuggler-plugin:$POM_VERSION_NAME"
-  }
-}
-
 apply plugin: "com.android.application"
-apply plugin: "com.joom.smuggler"
 apply plugin: "kotlin-android"
+apply plugin: "com.joom.smuggler"
 
 android {
   compileSdkVersion projectCompileSdkVersion
@@ -17,20 +10,16 @@ android {
     targetSdkVersion projectTargetSdkVersion
     minSdkVersion projectMinSdkVersion
 
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-  }
-
-  sourceSets {
-    androidTest.java.srcDirs += 'src/instrumented/kotlin'
+    testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
   }
 }
 
 dependencies {
   implementation project(":smuggler-samples:smuggler-library")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-  implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
 
-  androidTestImplementation "com.android.support.test:runner:$supportTestRunnerVersion"
-  androidTestImplementation "com.android.support.test:rules:$supportTestRunnerVersion"
+  androidTestImplementation "androidx.test:rules:$androidxTestRulesVersion"
+  androidTestImplementation "androidx.test:runner:$androidxTestRunnerVersion"
+  androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"
 }
