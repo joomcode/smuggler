@@ -43,7 +43,6 @@ data class CategoryCommand(val id: String) : Command
 buildscript {
   repositories {
     mavenCentral()
-    jcenter()
   }
 
   dependencies {
@@ -55,7 +54,6 @@ buildscript {
 
 repositories {
   mavenCentral()
-  jcenter()
 }
 
 apply plugin: "com.android.application"
