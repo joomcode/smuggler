@@ -24,7 +24,7 @@ import org.objectweb.asm.Opcodes.ACC_PUBLIC
 import org.objectweb.asm.Opcodes.ACC_STATIC
 import org.objectweb.asm.Opcodes.ACC_SUPER
 import org.objectweb.asm.Opcodes.ACC_SYNTHETIC
-import org.objectweb.asm.Opcodes.ASM5
+import org.objectweb.asm.Opcodes.ASM9
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.Method
 import io.michaelrocks.grip.mirrors.Type as GripType
@@ -90,7 +90,7 @@ internal class ParcelableContentGenerator(
 
   private fun onCreatePatchedClassGeneratedContent(spec: AutoParcelableClassSpec, environment: GenerationEnvironment): GeneratedContent {
     return GeneratedContent.from(spec.clazz.type.toAsmType(), emptyMap(), environment.newClass {
-      ClassReader(environment.grip.fileRegistry.readClass(spec.clazz.type)).accept(object : ClassVisitor(ASM5, this) {
+      ClassReader(environment.grip.fileRegistry.readClass(spec.clazz.type)).accept(object : ClassVisitor(ASM9, this) {
         override fun visit(version: Int, access: Int, name: String, signature: String?, parent: String?, exceptions: Array<out String>?) {
           super.visit(version, access, name, signature, parent, exceptions)
           visitField(ACC_PUBLIC + ACC_STATIC + ACC_FINAL, "CREATOR", Types.ANDROID_CREATOR, creatorFieldSignatureFrom(spec))
