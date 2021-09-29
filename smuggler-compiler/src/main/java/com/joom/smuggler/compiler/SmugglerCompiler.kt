@@ -8,13 +8,13 @@ import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.GripFactory
 import io.michaelrocks.grip.classes
 import io.michaelrocks.grip.mirrors.ClassMirror
+import java.io.Closeable
 import java.io.File
 
 class SmugglerCompiler private constructor(
   private val grip: Grip,
   private val adapters: Collection<File>
-) {
-
+) : Closeable {
   private val environment = GenerationEnvironment(grip)
   private val factory = ValueAdapterFactory.from(grip, adapters)
 
@@ -53,6 +53,10 @@ class SmugglerCompiler private constructor(
       .where(isAutoParcelable())
       .execute()
       .values
+  }
+
+  override fun close() {
+    grip.close()
   }
 
   companion object {

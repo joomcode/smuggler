@@ -32,17 +32,19 @@ class SmugglerTransform(
     val adapters = computeClasspathForAdapters(invocation)
     val compiler = SmugglerCompiler.create(transformClasspath, adapters)
 
-    for (unit in transformSet.units) {
-      compiler.cleanup(unit.output)
-    }
-
-    for (unit in transformSet.units) {
-      if (unit.changes.status != TransformUnit.Status.REMOVED) {
-        compiler.compile(unit.input, unit.output)
+    compiler.use {
+      for (unit in transformSet.units) {
+        compiler.cleanup(unit.output)
       }
-    }
 
-    verifyNoUnprocessedClasses(invocation, compiler)
+      for (unit in transformSet.units) {
+        if (unit.changes.status != TransformUnit.Status.REMOVED) {
+          compiler.compile(unit.input, unit.output)
+        }
+      }
+
+      verifyNoUnprocessedClasses(invocation, compiler)
+    }
   }
 
   override fun getScopes(): MutableSet<Scope> {
