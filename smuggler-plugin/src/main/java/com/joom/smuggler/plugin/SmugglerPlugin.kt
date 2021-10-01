@@ -1,12 +1,9 @@
 package com.joom.smuggler.plugin
 
 import com.android.build.gradle.AppExtension
-import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.TestExtension
-import com.android.build.gradle.TestPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.util.GradleVersion
@@ -15,6 +12,7 @@ open class SmugglerPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     val version = GradleVersion.current()
     val minimalVersion = GradleVersion.version("6.8.0")
+
     if (version < minimalVersion) {
       throw IllegalStateException("Android gradle plugin $version isn't supported anymore. The minimal supported version is $minimalVersion")
     }
@@ -36,14 +34,24 @@ open class SmugglerPlugin : Plugin<Project> {
 
   private fun onPrepareTransforms(project: Project) {
     val extension = project.extensions.getByType(SmugglerExtension::class.java)
-    val transform = SmugglerTransform(findAndroidExtension(project), extension)
+    val android = findAndroidExtension(project)
 
-    if (project.plugins.hasPlugin(LibraryPlugin::class.java)) {
-      project.extensions.findByType(LibraryExtension::class.java)!!.registerTransform(transform)
-    } else if (project.plugins.hasPlugin(TestPlugin::class.java)) {
-      project.extensions.findByType(TestExtension::class.java)!!.registerTransform(transform)
-    } else if (project.plugins.hasPlugin(AppPlugin::class.java)) {
-      project.extensions.findByType(AppExtension::class.java)!!.registerTransform(transform)
+    when (computeMode(project)) {
+      SmugglerMode.NOOP -> {
+        // nothing to do here
+      }
+
+      SmugglerMode.CURRENT_PROJECT_ONLY -> {
+        val configuration = SmugglerConfigurationFactory.createConfigurationForCurrentProject()
+        val transform = SmugglerTransform(android, extension, configuration)
+        android.registerTransform(transform)
+      }
+
+      SmugglerMode.CURRENT_PROJECT_WITH_SUBPROJECTS -> {
+        val configuration = SmugglerConfigurationFactory.createConfigurationForCurrentProjectAndSubprojects()
+        val transform = SmugglerTransform(android, extension, configuration)
+        android.registerTransform(transform)
+      }
     }
   }
 
@@ -61,5 +69,31 @@ open class SmugglerPlugin : Plugin<Project> {
     }
 
     error("'android' or 'android-library' plugin required")
+  }
+
+  private fun computeMode(project: Project): SmugglerMode {
+    val mode = project.properties["smuggler.plugin.mode"]?.toString()
+
+    if (mode != null) {
+      return computeMode(mode)
+    }
+
+    return SmugglerMode.CURRENT_PROJECT_ONLY
+  }
+
+  private fun computeMode(mode: String?): SmugglerMode {
+    val values = SmugglerMode.values()
+
+    values.firstOrNull { it.value == mode }?.let {
+      return it
+    }
+
+    error("Mode should be one of \"${values.joinToString("|") { it.value }}\", but \"$mode\" was specified.")
+  }
+
+  private enum class SmugglerMode(val value: String) {
+    CURRENT_PROJECT_ONLY("currentProjectOnly"),
+    CURRENT_PROJECT_WITH_SUBPROJECTS("currentProjectWithSubprojects"),
+    NOOP("noop")
   }
 }
