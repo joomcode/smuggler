@@ -37,7 +37,7 @@ open class SmugglerPlugin : Plugin<Project> {
     val android = findAndroidExtension(project)
 
     when (computeMode(project)) {
-      SmugglerMode.NOOP -> {
+      SmugglerMode.NO_OP -> {
         // nothing to do here
       }
 
@@ -94,6 +94,6 @@ open class SmugglerPlugin : Plugin<Project> {
   private enum class SmugglerMode(val value: String) {
     CURRENT_PROJECT_ONLY("currentProjectOnly"),
     CURRENT_PROJECT_WITH_SUBPROJECTS("currentProjectWithSubprojects"),
-    NOOP("noop")
+    NO_OP("noOp")
   }
 }
