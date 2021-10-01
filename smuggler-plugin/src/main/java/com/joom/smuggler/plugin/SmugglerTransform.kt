@@ -27,7 +27,6 @@ class SmugglerTransform(
     SmugglerCompiler.create(transformSet.getClasspath(), adapters).use { compiler ->
       computeTransformUnitGroups(transformSet)
         .filter { it.containsModifiedUnits() }
-        .parallelStream()
         .forEach { transformGroup ->
           if (invocation.isIncremental) {
             compiler.cleanup(transformGroup.output)
