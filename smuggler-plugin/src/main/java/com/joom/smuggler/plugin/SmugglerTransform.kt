@@ -17,47 +17,40 @@ import java.util.EnumSet
 
 class SmugglerTransform(
   private val android: BaseExtension,
-  private val extension: SmugglerExtension
+  private val extension: SmugglerExtension,
+  private val configuration: SmugglerConfiguration
 ) : Transform() {
   override fun transform(invocation: TransformInvocation) {
-    val transformSet = TransformSet.create(invocation, android.bootClasspath)
-    val transformClasspath = transformSet.getClasspath()
+    val transformSet = computePreparedTransformSet(invocation)
+    val adapters = computeClasspathForAdapters(transformSet, invocation)
 
-    if (!invocation.isIncremental) {
-      invocation.outputProvider.deleteAll()
-    }
+    SmugglerCompiler.create(transformSet.getClasspath(), adapters).use { compiler ->
+      computeTransformUnitGroups(transformSet)
+        .filter { it.containsModifiedUnits() }
+        .forEach { transformGroup ->
+          if (invocation.isIncremental) {
+            compiler.cleanup(transformGroup.output)
+          }
 
-    transformSet.copyInputsToOutputs()
+          transformGroup.units.forEach { transformUnit ->
+            if (transformUnit.changes.status != TransformUnit.Status.REMOVED) {
+              compiler.compile(transformUnit.input, transformUnit.output)
+            }
+          }
+        }
 
-    val adapters = computeClasspathForAdapters(invocation)
-    val compiler = SmugglerCompiler.create(transformClasspath, adapters)
-
-    for (unit in transformSet.units) {
-      compiler.cleanup(unit.output)
-    }
-
-    for (unit in transformSet.units) {
-      if (unit.changes.status != TransformUnit.Status.REMOVED) {
-        compiler.compile(unit.input, unit.output)
+      if (configuration.verifyNoUnprocessedClasses) {
+        verifyNoUnprocessedClasses(invocation, compiler)
       }
     }
-
-    verifyNoUnprocessedClasses(invocation, compiler)
   }
 
   override fun getScopes(): MutableSet<Scope> {
-    return EnumSet.of(
-      Scope.PROJECT
-    )
+    return configuration.scopes.toMutableSet()
   }
 
   override fun getReferencedScopes(): MutableSet<Scope> {
-    return EnumSet.of(
-      Scope.TESTED_CODE,
-      Scope.SUB_PROJECTS,
-      Scope.EXTERNAL_LIBRARIES,
-      Scope.PROVIDED_ONLY
-    )
+    return configuration.referencedScopes.toMutableSet()
   }
 
   override fun getInputTypes(): Set<QualifiedContent.ContentType> {
@@ -129,20 +122,22 @@ class SmugglerTransform(
     return result
   }
 
-  private fun computeClasspathForAdapters(invocation: TransformInvocation): Collection<File> {
-    val transformSet = TransformSet.create(invocation, emptyList())
+  private fun computeClasspathForAdapters(
+    transformSet: TransformSet,
+    transformInvocation: TransformInvocation
+  ): Collection<File> {
     val classpath = transformSet.getClasspath().toSet()
 
     val scopes = setOf(Scope.PROJECT, Scope.SUB_PROJECTS)
     val contents = ArrayList<QualifiedContent>()
     val result = ArrayList<File>()
 
-    for (input in invocation.referencedInputs) {
+    for (input in transformInvocation.referencedInputs) {
       contents.addAll(input.directoryInputs)
       contents.addAll(input.jarInputs)
     }
 
-    for (input in invocation.inputs) {
+    for (input in transformInvocation.inputs) {
       contents.addAll(input.directoryInputs)
       contents.addAll(input.jarInputs)
     }
@@ -155,4 +150,38 @@ class SmugglerTransform(
 
     return result
   }
+
+  private fun computePreparedTransformSet(transformInvocation: TransformInvocation): TransformSet {
+    val transformSet = TransformSet.create(transformInvocation, android.bootClasspath)
+
+    if (!transformInvocation.isIncremental) {
+      transformInvocation.outputProvider.deleteAll()
+    }
+
+    transformSet.copyInputsToOutputs()
+    return transformSet
+  }
+
+  private fun computeTransformUnitGroups(transformSet: TransformSet): List<TransformUnitGroup> {
+    return transformSet.units
+      .groupBy { it.output }
+      .map { TransformUnitGroup(it.key, it.value) }
+  }
+
+  private fun TransformUnitGroup.containsModifiedUnits(): Boolean {
+    return units.any { unit ->
+      when (unit.changes.status) {
+        TransformUnit.Status.UNKNOWN -> true
+        TransformUnit.Status.ADDED -> true
+        TransformUnit.Status.CHANGED -> true
+        TransformUnit.Status.REMOVED -> true
+        TransformUnit.Status.UNCHANGED -> false
+      }
+    }
+  }
+
+  private data class TransformUnitGroup(
+    val output: File,
+    val units: List<TransformUnit>
+  )
 }
