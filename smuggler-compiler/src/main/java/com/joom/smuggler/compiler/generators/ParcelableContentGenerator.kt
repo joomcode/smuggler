@@ -1,5 +1,7 @@
 package com.joom.smuggler.compiler.generators
 
+import com.joom.grip.mirrors.MethodMirror
+import com.joom.grip.mirrors.toAsmType
 import com.joom.smuggler.compiler.ContentGenerator
 import com.joom.smuggler.compiler.GeneratedContent
 import com.joom.smuggler.compiler.GenerationEnvironment
@@ -12,8 +14,6 @@ import com.joom.smuggler.compiler.common.given
 import com.joom.smuggler.compiler.common.isStatic
 import com.joom.smuggler.compiler.model.AutoParcelableClassSpec
 import com.joom.smuggler.compiler.model.KotlinType
-import io.michaelrocks.grip.mirrors.MethodMirror
-import io.michaelrocks.grip.mirrors.toAsmType
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
@@ -27,7 +27,7 @@ import org.objectweb.asm.Opcodes.ACC_SYNTHETIC
 import org.objectweb.asm.Opcodes.ASM9
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.Method
-import io.michaelrocks.grip.mirrors.Type as GripType
+import com.joom.grip.mirrors.Type as GripType
 
 @Suppress("UNUSED_PARAMETER")
 internal class ParcelableContentGenerator(

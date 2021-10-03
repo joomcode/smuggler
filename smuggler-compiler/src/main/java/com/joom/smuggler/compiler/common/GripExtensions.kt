@@ -1,22 +1,22 @@
 package com.joom.smuggler.compiler.common
 
+import com.joom.grip.Grip
+import com.joom.grip.and
+import com.joom.grip.annotatedWith
+import com.joom.grip.isAbstract
+import com.joom.grip.isInterface
+import com.joom.grip.mirrors.ClassMirror
+import com.joom.grip.mirrors.FieldMirror
+import com.joom.grip.mirrors.MethodMirror
+import com.joom.grip.mirrors.isStatic
+import com.joom.grip.mirrors.isStaticInitializer
+import com.joom.grip.mirrors.toAsmType
+import com.joom.grip.not
 import com.joom.smuggler.compiler.SmugglerException
 import com.joom.smuggler.compiler.annotations.AnnotationProxy
-import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.and
-import io.michaelrocks.grip.annotatedWith
-import io.michaelrocks.grip.isAbstract
-import io.michaelrocks.grip.isInterface
-import io.michaelrocks.grip.mirrors.ClassMirror
-import io.michaelrocks.grip.mirrors.FieldMirror
-import io.michaelrocks.grip.mirrors.MethodMirror
-import io.michaelrocks.grip.mirrors.isStatic
-import io.michaelrocks.grip.mirrors.isStaticInitializer
-import io.michaelrocks.grip.mirrors.toAsmType
-import io.michaelrocks.grip.not
 import org.objectweb.asm.Type
 import java.util.Arrays
-import io.michaelrocks.grip.mirrors.Type as GripType
+import com.joom.grip.mirrors.Type as GripType
 
 internal fun Grip.isSubclassOf(type: Type, parent: Type): Boolean {
   if (type.sort == Type.METHOD) {

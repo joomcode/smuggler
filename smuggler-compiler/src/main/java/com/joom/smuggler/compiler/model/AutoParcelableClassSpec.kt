@@ -1,8 +1,8 @@
 package com.joom.smuggler.compiler.model
 
+import com.joom.grip.mirrors.ClassMirror
 import com.joom.smuggler.compiler.common.Types
 import com.joom.smuggler.compiler.common.cast
-import io.michaelrocks.grip.mirrors.ClassMirror
 import org.objectweb.asm.Type
 
 internal sealed class AutoParcelableClassSpec(val clazz: ClassMirror, val properties: List<AutoParcelablePropertySpec>) {

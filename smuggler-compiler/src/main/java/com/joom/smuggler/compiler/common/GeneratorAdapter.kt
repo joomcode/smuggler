@@ -1,9 +1,9 @@
 package com.joom.smuggler.compiler.common
 
-import io.michaelrocks.grip.mirrors.ClassMirror
-import io.michaelrocks.grip.mirrors.FieldMirror
-import io.michaelrocks.grip.mirrors.MethodMirror
-import io.michaelrocks.grip.mirrors.toAsmType
+import com.joom.grip.mirrors.ClassMirror
+import com.joom.grip.mirrors.FieldMirror
+import com.joom.grip.mirrors.MethodMirror
+import com.joom.grip.mirrors.toAsmType
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes

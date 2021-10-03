@@ -1,13 +1,13 @@
 package com.joom.smuggler.compiler
 
+import com.joom.grip.Grip
+import com.joom.grip.GripFactory
+import com.joom.grip.classes
+import com.joom.grip.mirrors.ClassMirror
 import com.joom.smuggler.compiler.common.isAutoParcelable
 import com.joom.smuggler.compiler.generators.ParcelableContentGenerator
 import com.joom.smuggler.compiler.generators.ValueAdapterFactory
 import com.joom.smuggler.compiler.model.AutoParcelableClassSpecFactory
-import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.GripFactory
-import io.michaelrocks.grip.classes
-import io.michaelrocks.grip.mirrors.ClassMirror
 import java.io.Closeable
 import java.io.File
 import java.nio.file.FileSystems
@@ -147,7 +147,7 @@ class SmugglerCompiler private constructor(
 
   companion object {
     fun create(transformClasspath: Collection<File>, adapters: Collection<File>): SmugglerCompiler {
-      val grip = GripFactory.create(transformClasspath)
+      val grip = GripFactory.INSTANCE.create(transformClasspath)
       return SmugglerCompiler(grip, adapters)
     }
   }

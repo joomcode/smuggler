@@ -11,7 +11,7 @@ dependencies {
 
   relocate "org.ow2.asm:asm:$asmVersion"
   relocate "org.ow2.asm:asm-commons:$asmVersion"
-  relocate "io.michaelrocks:grip:$gripVersion"
+  relocate "com.joom.grip:grip:$gripVersion"
 }
 
 pablo {
@@ -19,7 +19,7 @@ pablo {
 
   shadow {
     relocate "com.joom.smuggler"
-    relocate "io.michaelrocks.grip", "com.joom.smuggler.grip"
+    relocate "com.joom.grip", "com.joom.smuggler.grip"
     relocate "org.objectweb.asm", "com.joom.smuggler.asm"
   }
 }

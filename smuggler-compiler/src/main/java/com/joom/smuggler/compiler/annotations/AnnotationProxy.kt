@@ -1,12 +1,10 @@
 package com.joom.smuggler.compiler.annotations
 
+import com.joom.grip.mirrors.AnnotationMirror
 import com.joom.smuggler.compiler.common.cast
-import io.michaelrocks.grip.mirrors.AnnotationMirror
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
-import java.util.ArrayList
-import java.util.HashMap
 
 internal object AnnotationProxy {
   fun <A> create(clazz: Class<A>, spec: AnnotationMirror): A {

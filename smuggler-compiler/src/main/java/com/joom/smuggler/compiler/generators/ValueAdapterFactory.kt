@@ -1,5 +1,14 @@
 package com.joom.smuggler.compiler.generators
 
+import com.joom.grip.Grip
+import com.joom.grip.classes
+import com.joom.grip.mirrors.ClassMirror
+import com.joom.grip.mirrors.isAbstract
+import com.joom.grip.mirrors.isPublic
+import com.joom.grip.mirrors.isSynthetic
+import com.joom.grip.mirrors.signature.GenericType
+import com.joom.grip.mirrors.toAsmType
+import com.joom.grip.mirrors.toType
 import com.joom.smuggler.compiler.InvalidAutoParcelableException
 import com.joom.smuggler.compiler.InvalidTypeAdapterException
 import com.joom.smuggler.compiler.annotations.LocalAdapter
@@ -15,22 +24,13 @@ import com.joom.smuggler.compiler.common.isSubclassOf
 import com.joom.smuggler.compiler.model.AutoParcelableClassSpec
 import com.joom.smuggler.compiler.model.AutoParcelablePropertySpec
 import com.joom.smuggler.compiler.model.KotlinType
-import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.classes
-import io.michaelrocks.grip.mirrors.ClassMirror
-import io.michaelrocks.grip.mirrors.isAbstract
-import io.michaelrocks.grip.mirrors.isPublic
-import io.michaelrocks.grip.mirrors.isSynthetic
-import io.michaelrocks.grip.mirrors.signature.GenericType
-import io.michaelrocks.grip.mirrors.toAsmType
-import io.michaelrocks.grip.mirrors.toType
 import org.objectweb.asm.Type
 import java.io.File
 import java.util.Arrays
 import kotlin.reflect.jvm.internal.impl.metadata.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.metadata.deserialization.Flags
 import kotlin.reflect.jvm.internal.impl.metadata.jvm.deserialization.JvmProtoBufUtil
-import io.michaelrocks.grip.mirrors.Type as GripType
+import com.joom.grip.mirrors.Type as GripType
 
 internal class ValueAdapterFactory private constructor(
   private val grip: Grip,

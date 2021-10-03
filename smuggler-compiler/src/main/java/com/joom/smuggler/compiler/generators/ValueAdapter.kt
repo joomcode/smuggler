@@ -1,5 +1,7 @@
 package com.joom.smuggler.compiler.generators
 
+import com.joom.grip.Grip
+import com.joom.grip.mirrors.toAsmType
 import com.joom.smuggler.compiler.SmugglerException
 import com.joom.smuggler.compiler.common.GeneratorAdapter
 import com.joom.smuggler.compiler.common.Methods
@@ -12,11 +14,9 @@ import com.joom.smuggler.compiler.common.isStatic
 import com.joom.smuggler.compiler.common.isSubclass
 import com.joom.smuggler.compiler.model.AutoParcelableClassSpec
 import com.joom.smuggler.compiler.model.KotlinType
-import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.mirrors.toAsmType
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
-import io.michaelrocks.grip.mirrors.Type as GripType
+import com.joom.grip.mirrors.Type as GripType
 
 internal interface ValueAdapter {
   fun fromParcel(adapter: GeneratorAdapter, context: ValueContext)

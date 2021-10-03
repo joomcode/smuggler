@@ -1,6 +1,6 @@
 package com.joom.smuggler.compiler
 
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.mirrors.Type
 import java.text.MessageFormat
 
 open class SmugglerException : RuntimeException {

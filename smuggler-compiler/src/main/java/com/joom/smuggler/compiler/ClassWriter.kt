@@ -1,9 +1,9 @@
 package com.joom.smuggler.compiler
 
+import com.joom.grip.mirrors.MethodMirror
 import com.joom.smuggler.compiler.common.GeneratorAdapter
 import com.joom.smuggler.compiler.common.Methods
 import com.joom.smuggler.compiler.common.Types
-import io.michaelrocks.grip.mirrors.MethodMirror
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.Opcodes.V1_6

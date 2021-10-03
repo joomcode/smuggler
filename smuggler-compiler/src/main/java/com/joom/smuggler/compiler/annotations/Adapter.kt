@@ -1,6 +1,6 @@
 package com.joom.smuggler.compiler.annotations
 
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.mirrors.Type
 
 @AnnotationDelegate("com.joom.smuggler.GlobalAdapter")
 internal interface GlobalAdapter

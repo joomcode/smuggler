@@ -1,5 +1,9 @@
 package com.joom.smuggler.compiler.model
 
+import com.joom.grip.mirrors.ClassMirror
+import com.joom.grip.mirrors.isStatic
+import com.joom.grip.mirrors.signature.GenericType
+import com.joom.grip.mirrors.toAsmType
 import com.joom.smuggler.compiler.InvalidAutoParcelableException
 import com.joom.smuggler.compiler.annotations.Metadata
 import com.joom.smuggler.compiler.annotations.data
@@ -8,10 +12,6 @@ import com.joom.smuggler.compiler.common.Types
 import com.joom.smuggler.compiler.common.getAnnotation
 import com.joom.smuggler.compiler.common.getDeclaredField
 import com.joom.smuggler.compiler.common.given
-import io.michaelrocks.grip.mirrors.ClassMirror
-import io.michaelrocks.grip.mirrors.isStatic
-import io.michaelrocks.grip.mirrors.signature.GenericType
-import io.michaelrocks.grip.mirrors.toAsmType
 import org.objectweb.asm.Type
 import kotlin.reflect.jvm.internal.impl.metadata.ProtoBuf
 import kotlin.reflect.jvm.internal.impl.metadata.ProtoBuf.Class
