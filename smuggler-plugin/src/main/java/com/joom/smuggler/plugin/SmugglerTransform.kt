@@ -76,7 +76,7 @@ class SmugglerTransform(
   }
 
   override fun isCacheable(): Boolean {
-    return true
+    return false
   }
 
   private fun verifyNoUnprocessedClasses(invocation: TransformInvocation, compiler: SmugglerCompiler) {
