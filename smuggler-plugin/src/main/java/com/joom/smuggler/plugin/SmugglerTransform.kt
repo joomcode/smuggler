@@ -61,6 +61,7 @@ class SmugglerTransform(
 
   override fun getParameterInputs(): Map<String, Any> {
     return mapOf(
+      "cacheable" to extension.cacheable,
       "incremental" to extension.incremental,
       "version" to BuildConfig.VERSION,
       "hash" to BuildConfig.GIT_HASH
@@ -76,7 +77,7 @@ class SmugglerTransform(
   }
 
   override fun isCacheable(): Boolean {
-    return false
+    return extension.cacheable
   }
 
   private fun verifyNoUnprocessedClasses(invocation: TransformInvocation, compiler: SmugglerCompiler) {
