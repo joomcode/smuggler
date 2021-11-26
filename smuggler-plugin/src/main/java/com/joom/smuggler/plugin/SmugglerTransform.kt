@@ -73,7 +73,7 @@ class SmugglerTransform(
   }
 
   override fun isIncremental(): Boolean {
-    return true
+    return extension.incremental
   }
 
   override fun isCacheable(): Boolean {
