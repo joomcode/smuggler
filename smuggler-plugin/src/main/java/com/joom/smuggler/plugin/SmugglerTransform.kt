@@ -5,8 +5,6 @@ import com.android.build.api.transform.QualifiedContent.DefaultContentType
 import com.android.build.api.transform.QualifiedContent.Scope
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformInvocation
-import com.android.build.gradle.AppExtension
-import com.android.build.gradle.BaseExtension
 import com.joom.smuggler.compiler.SmugglerCompiler
 import com.joom.smuggler.plugin.utils.TransformSet
 import com.joom.smuggler.plugin.utils.TransformUnit
@@ -16,7 +14,6 @@ import java.io.File
 import java.util.EnumSet
 
 class SmugglerTransform(
-  private val android: BaseExtension,
   private val extension: SmugglerExtension,
   private val configuration: SmugglerConfiguration
 ) : Transform() {
@@ -46,11 +43,11 @@ class SmugglerTransform(
   }
 
   override fun getScopes(): MutableSet<Scope> {
-    return configuration.scopes.toMutableSet()
+    return configuration.scopes.toTransformScope().toMutableSet()
   }
 
   override fun getReferencedScopes(): MutableSet<Scope> {
-    return configuration.referencedScopes.toMutableSet()
+    return configuration.referencedScopes.toTransformScope().toMutableSet()
   }
 
   override fun getInputTypes(): Set<QualifiedContent.ContentType> {
@@ -64,7 +61,11 @@ class SmugglerTransform(
       "cacheable" to extension.cacheable,
       "incremental" to extension.incremental,
       "version" to BuildConfig.VERSION,
-      "hash" to BuildConfig.GIT_HASH
+      "hash" to BuildConfig.GIT_HASH,
+      "bootClasspath" to extension.bootClasspath
+        .map { it.absolutePath }
+        .sorted()
+        .joinToString()
     )
   }
 
@@ -81,10 +82,6 @@ class SmugglerTransform(
   }
 
   private fun verifyNoUnprocessedClasses(invocation: TransformInvocation, compiler: SmugglerCompiler) {
-    if (android !is AppExtension) {
-      return
-    }
-
     val referencedFiles = computeClasspathForUnprocessedCandidates(invocation)
     val unprocessedClasses = compiler.findUnprocessedClasses(referencedFiles)
 
@@ -153,7 +150,7 @@ class SmugglerTransform(
   }
 
   private fun computePreparedTransformSet(transformInvocation: TransformInvocation): TransformSet {
-    val transformSet = TransformSet.create(transformInvocation, android.bootClasspath)
+    val transformSet = TransformSet.create(transformInvocation, extension.bootClasspath)
 
     if (!transformInvocation.isIncremental) {
       transformInvocation.outputProvider.deleteAll()

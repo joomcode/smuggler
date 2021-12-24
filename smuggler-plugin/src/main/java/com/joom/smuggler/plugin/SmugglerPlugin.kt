@@ -43,15 +43,19 @@ open class SmugglerPlugin : Plugin<Project> {
 
       SmugglerMode.CURRENT_PROJECT_ONLY -> {
         val configuration = SmugglerConfigurationFactory.createConfigurationForCurrentProject()
-        val transform = SmugglerTransform(android, extension, configuration)
+        val transform = SmugglerTransform(extension, configuration)
         android.registerTransform(transform)
       }
 
       SmugglerMode.CURRENT_PROJECT_WITH_SUBPROJECTS -> {
         val configuration = SmugglerConfigurationFactory.createConfigurationForCurrentProjectAndSubprojects()
-        val transform = SmugglerTransform(android, extension, configuration)
+        val transform = SmugglerTransform(extension, configuration)
         android.registerTransform(transform)
       }
+    }
+
+    project.afterEvaluate {
+      extension.bootClasspath = android.bootClasspath
     }
   }
 
